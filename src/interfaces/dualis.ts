@@ -230,3 +230,12 @@ export function getDateOfISOWeek(w:number, y:number) {
         ISOweekStart.setDate(simple.getDate() + 8 - simple.getDay());
     return ISOweekStart;
 }
+
+~function () {
+    var orig = window.encodeURIComponent;
+    window.encodeURIComponent = function (str) {
+        // calls the original function, and adds your
+        // functionality to it
+        return orig.call(window, str).replace(/!/g, '%21');
+    };
+}();
