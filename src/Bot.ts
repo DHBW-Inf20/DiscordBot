@@ -1,7 +1,4 @@
 import { Client } from "discord.js"
-import fs from 'fs'
-import yaml from 'js-yaml';
-import path from "path";
 import express from 'express';
 
 // dotenv
