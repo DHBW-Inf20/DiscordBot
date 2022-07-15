@@ -14,7 +14,7 @@
     "start": "npm run build && node dist/Bot.js",
     "clean": "rimraf dist/",
     "copy-files": "copyfiles -u 1 src/.env dist/.env",
-    "build": "yarn clean && tsc && yarn copy-files"
+    "build": "yarn clean && npx tsc && yarn copy-files"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.5",
