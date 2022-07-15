@@ -7,7 +7,8 @@
     "fs": "^0.0.1-security",
     "js-yaml": "^4.1.0",
     "node-fetch": "^2.6.1",
-    "node-html-parser": "^5.3.3"
+    "node-html-parser": "^5.3.3",
+    "tsc": "^2.0.4"
   },
   "scripts": {
     "start": "npm run build && node dist/Bot.js",
