@@ -89,7 +89,6 @@ export class StundenplanCanvas {
                 let endTime = new Date(`0 ${lesson.to}:00`);
                 startTime.setHours(startTime.getHours() + 1);
                 endTime.setHours(endTime.getHours() + 1);
-                console.log(startTime, min, max);
                 let startY = map(startTime.getTime(), min.getTime(), max.getTime(), 0, this.bodyHeight!);
                 let endY = map(endTime.getTime(), min.getTime(), max.getTime(), 0, this.bodyHeight!);
                 let startX = this.tileMargin + (this.tileWidth * (i));
@@ -189,7 +188,6 @@ export class StundenplanCanvas {
                 }
             }
         }
-        console.log(min, max);
 
         min.setMinutes(0);
         if(max.getMinutes() > 0){
@@ -198,7 +196,6 @@ export class StundenplanCanvas {
         }
         let otherTime = min;
         let steps = 1;
-        console.log(min, max);
         do {
             otherTime = new Date(otherTime.getTime() + (60 * 30 * 1000));
             steps++;
