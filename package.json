@@ -7,14 +7,13 @@
     "fs": "^0.0.1-security",
     "js-yaml": "^4.1.0",
     "node-fetch": "^2.6.1",
-    "node-html-parser": "^5.3.3",
-    "tsc": "^2.0.4"
+    "node-html-parser": "^5.3.3"
   },
   "scripts": {
     "start": "npm run build && node dist/Bot.js",
     "clean": "rimraf dist/",
     "copy-files": "copyfiles -u 1 src/.env dist/.env",
-    "build": "yarn clean && npx tsc && yarn copy-files"
+    "build": "yarn clean && tsc && yarn copy-files"
   },
   "devDependencies": {
     "@types/js-yaml": "^4.0.5",
