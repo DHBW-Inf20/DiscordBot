@@ -68,6 +68,7 @@ export default class Dualis implements dualis{
         });
         console.log(response.status);
         console.log(response.headers);
+        console.log(await response.text());
         this.sessionCookie = response.headers.get("set-cookie")?.split(";")[0].split("=")[1];
         this.sessionId = response.headers.get("REFRESH")?.slice(84,84+17);
     }
