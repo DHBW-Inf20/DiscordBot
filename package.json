@@ -10,7 +10,7 @@
     "node-html-parser": "^5.3.3"
   },
   "scripts": {
-    "start": "npm run build && node dist/Bot.js",
+    "start": "node dist/Bot.js",
     "clean": "rimraf dist/",
     "copy-files": "copyfiles -u 1 src/.env dist/.env",
     "build": "yarn clean && tsc && yarn copy-files"
