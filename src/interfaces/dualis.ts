@@ -66,6 +66,8 @@ export default class Dualis implements dualis{
             method: "POST",
             body:`usrname=${encodeURIComponent(this.user)}%40hb.dhbw-stuttgart.de&pass=${encodeURIComponent(this.password)}&APPNAME=CampusNet&PRGNAME=LOGINCHECK&ARGUMENTS=clino%2Cusrname%2Cpass%2Cmenuno%2Cmenu_type%2Cbrowser%2Cplatform&clino=000000000000001&menuno=000324&menu_type=classic&browser=&platform=`
         });
+        console.log(`usrname=${encodeURIComponent(this.user)}%40hb.dhbw-stuttgart.de&pass=${encodeURIComponent(this.password)}&APPNAME=CampusNet&PRGNAME=LOGINCHECK&ARGUMENTS=clino%2Cusrname%2Cpass%2Cmenuno%2Cmenu_type%2Cbrowser%2Cplatform&clino=000000000000001&menuno=000324&menu_type=classic&browser=&platform=`);
+        
         console.log(response.status);
         console.log(response.headers);
         console.log(await response.text());
