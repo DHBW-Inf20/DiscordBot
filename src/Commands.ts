@@ -1,4 +1,4 @@
-import { Hello } from "./commands/Hello";
+import { Stundenplan } from "./commands/Stundenplan";
 import { Command } from "./types/command"
 
-export const Commands: Command[] = [Hello];
+export const Commands: Command[] = [Stundenplan];
