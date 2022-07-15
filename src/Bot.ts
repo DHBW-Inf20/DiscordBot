@@ -2,12 +2,14 @@ import { Client } from "discord.js"
 import fs from 'fs'
 import yaml from 'js-yaml';
 import path from "path";
+// dotenv
+import dotenv from 'dotenv';
 import { Config } from "./types/misc";
 import interactionCreate from "./listeners/interactionCreate";
 import ready from "./listeners/ready";
 import Dualis from './interfaces/dualis';
 import { StundenplanCanvas } from './misc/stundenplanCanvas';
-
+dotenv.config({ path: ".env"});
 // Load Config...
 let config = loadConfig();
 if (!config) {
@@ -70,7 +72,16 @@ let spC = new StundenplanCanvas({
     spC.renderCanvas();
     spC.saveImage('./stundenplan.png');
 function loadConfig(): Config | undefined {
-    return yaml.load(fs.readFileSync(path.join(__dirname,'./config.yaml'), 'utf8')) as Config | undefined;
+    return {
+        discord:{
+            token: process.env.DISCORD_TOKEN || "",
+            main_guild: process.env.DISCORD_MAIN_GUILD || ""
+        },
+        dualis:{
+            user: process.env.DUALIS_USER || "",
+            password: process.env.DUALIS_PASSWORD || ""
+        }
+    };
 }
 
 function initListeners(client: Client): void {

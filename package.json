@@ -2,6 +2,7 @@
   "dependencies": {
     "canvas": "^2.9.3",
     "discord.js": "^13.8.1",
+    "dotenv": "^16.0.1",
     "fetch": "^1.1.0",
     "fs": "^0.0.1-security",
     "js-yaml": "^4.1.0",
@@ -11,7 +12,7 @@
   "scripts": {
     "start": "npm run build && node dist/Bot.js",
     "clean": "rimraf dist/",
-    "copy-files": "copyfiles -u 1 src/config.yaml dist/",
+    "copy-files": "copyfiles -u 1 src/.env dist/.env",
     "build": "yarn clean && tsc && yarn copy-files"
   },
   "devDependencies": {
