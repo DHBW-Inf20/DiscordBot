@@ -15,7 +15,7 @@
     "clean": "rimraf dist/",
     "postinstall": "yarn clean && tsc && yarn copy-files",
     "copy-files": "copyfiles -u 1 src/.env dist/.env",
-    "build": "yarn clean && tsc && yarn copy-files"
+    "build": "yarn clean && npx tsc && yarn copy-files"
   },
   "devDependencies": {
     "@types/express": "^4.17.13",
