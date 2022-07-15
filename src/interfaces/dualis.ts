@@ -64,9 +64,9 @@ export default class Dualis implements dualis{
         
         const response = await fetch(this.baseUrl, {
             method: "POST",
-            body:`usrname=${encodeURIComponent(this.user)}%40hb.dhbw-stuttgart.de&pass=${encodeURIComponent(this.password)}&APPNAME=CampusNet&PRGNAME=LOGINCHECK&ARGUMENTS=clino%2Cusrname%2Cpass%2Cmenuno%2Cmenu_type%2Cbrowser%2Cplatform&clino=000000000000001&menuno=000324&menu_type=classic&browser=&platform=`
+            body: `usrname=${encodeURIComponent(this.user).replace(/!/g, '%21') }%40hb.dhbw-stuttgart.de&pass=${encodeURIComponent(this.password).replace(/!/g, '%21') }&APPNAME=CampusNet&PRGNAME=LOGINCHECK&ARGUMENTS=clino%2Cusrname%2Cpass%2Cmenuno%2Cmenu_type%2Cbrowser%2Cplatform&clino=000000000000001&menuno=000324&menu_type=classic&browser=&platform=`
         });
-        console.log(`usrname=${encodeURIComponent(this.user)}&pass=${encodeURIComponent(this.password)}&APPNAME=CampusNet&PRGNAME=LOGINCHECK&ARGUMENTS=clino%2Cusrname%2Cpass%2Cmenuno%2Cmenu_type%2Cbrowser%2Cplatform&clino=000000000000001&menuno=000324&menu_type=classic&browser=&platform=`);
+        console.log(`usrname=${encodeURIComponent(this.user).replace(/!/g, '%21')}&pass=${encodeURIComponent(this.password).replace(/!/g, '%21') }&APPNAME=CampusNet&PRGNAME=LOGINCHECK&ARGUMENTS=clino%2Cusrname%2Cpass%2Cmenuno%2Cmenu_type%2Cbrowser%2Cplatform&clino=000000000000001&menuno=000324&menu_type=classic&browser=&platform=`);
         
         console.log(response.status);
         console.log(response.headers);
@@ -230,12 +230,3 @@ export function getDateOfISOWeek(w:number, y:number) {
         ISOweekStart.setDate(simple.getDate() + 8 - simple.getDay());
     return ISOweekStart;
 }
-
-~function () {
-    var orig = window.encodeURIComponent;
-    window.encodeURIComponent = function (str) {
-        // calls the original function, and adds your
-        // functionality to it
-        return orig.call(window, str).replace(/!/g, '%21');
-    };
-}();
