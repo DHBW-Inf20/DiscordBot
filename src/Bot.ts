@@ -25,7 +25,7 @@ initListeners(client);
 // Logging in
 client.login(config.discord.token);
 
-// let d = new Dualis(config.dualis.user, config.dualis.password);
+export let dualis = new Dualis(config.dualis.user, config.dualis.password);
 
 let spC = new StundenplanCanvas({
     freitag: [

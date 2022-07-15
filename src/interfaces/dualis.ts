@@ -9,6 +9,7 @@ interface dualis {
     baseUrl: "https://dualis.dhbw.de/scripts/mgrqispi.dll";
     sessionCookie?: string;
     sessionId?: string;
+    lastN?:number;
 
     isSessionValid: () => Promise<boolean>;
     login: () => Promise<void>;
@@ -22,6 +23,7 @@ export default class Dualis implements dualis{
     sessionCookie?: string | undefined;
     sessionId?: string | undefined;
     baseUrl: "https://dualis.dhbw.de/scripts/mgrqispi.dll" = "https://dualis.dhbw.de/scripts/mgrqispi.dll";
+    lastN?:number;
     constructor(user: string, password: string) {
         this.user = user;
         this.password = password;
@@ -114,11 +116,15 @@ export default class Dualis implements dualis{
             mittwoch: Schedule[];
             donnerstag: Schedule[];
             freitag: Schedule[];
-    }}> = async (n:number = 0) => {
+    }}> = async (n?:number) => {
         if(!this.sessionCookie || !this.sessionId || !(await this.isSessionValid())){
             await this.login();
         }
-
+        n = n || this.lastN;
+        if(!n){
+            this.lastN = n = 0;
+        }
+        this.lastN = n;
         // Get current time
         let [year, week] = getWeekNumber(new Date());
         week+=n;

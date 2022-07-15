@@ -51,6 +51,10 @@ export class StundenplanCanvas {
         this.drawSchedule();
     }
 
+    getBuffer() {
+        return this.cvs.toBuffer('image/png');
+    }
+
     drawSchedule() {
         let days = ["montag", "dienstag", "mittwoch", "donnerstag", "freitag"] as Array<keyof ScheduleWeek>;
         let {min,max,steps} = this.getTimeRange();
@@ -75,7 +79,6 @@ export class StundenplanCanvas {
             
             }
         }
-        console.log(minN);
         for (let i = 0; i<days.length; i++) {
             let day = days[i];
             if (this.sched[day] === undefined) {
@@ -84,6 +87,9 @@ export class StundenplanCanvas {
             for (let lesson of this.sched[day]!) {
                 let startTime = new Date(`0 ${lesson.from}:00`);
                 let endTime = new Date(`0 ${lesson.to}:00`);
+                startTime.setHours(startTime.getHours() + 1);
+                endTime.setHours(endTime.getHours() + 1);
+                console.log(startTime, min, max);
                 let startY = map(startTime.getTime(), min.getTime(), max.getTime(), 0, this.bodyHeight!);
                 let endY = map(endTime.getTime(), min.getTime(), max.getTime(), 0, this.bodyHeight!);
                 let startX = this.tileMargin + (this.tileWidth * (i));
@@ -114,7 +120,7 @@ export class StundenplanCanvas {
                 textWidth = textDimensions.width;
                 x = startX + this.tilePadding;
                 y = startY + this.tilePadding + textHeight + oldTextHeight * 1.5 + textHeight * 1.5;
-                this.context.fillText(`${lesson.to}-${lesson.from}`, x, y);
+                this.context.fillText(`${lesson.from}-${lesson.to}`, x, y);
                 
 
             }
@@ -131,21 +137,26 @@ export class StundenplanCanvas {
 
         this.bodyHeight = this.height - (this.headerOffset || 0);
         const timelineCellHeight = this.bodyHeight / steps;
+        this.context.strokeStyle = this.linecolor;
+        this.context.beginPath();
         this.context.moveTo(this.timelineWidth, 0);
         this.context.lineTo(this.timelineWidth, this.height);
-        let startTime = min;
+        this.context.stroke();
+        this.context.closePath();
         for(let i = 0; i < steps; i++){
             // Draw lines
             this.context.strokeStyle = this.linecolor;
+            this.context.beginPath();
             this.context.moveTo(0, i * timelineCellHeight);
             this.context.lineTo(this.width, i * timelineCellHeight);
             this.context.stroke();
+            this.context.closePath();
 
             // Draw time
             this.context.fillStyle = this.foreground;
             this.context.font = '30px Consolas';
 
-            let textDimensions = this.context.measureText(`${shortTime(startTime)}`);
+            let textDimensions = this.context.measureText(`${shortTime(min)}`);
 
             let textHeight = (textDimensions.actualBoundingBoxAscent - textDimensions.actualBoundingBoxDescent);
             let textWidth = textDimensions.width;
@@ -155,7 +166,6 @@ export class StundenplanCanvas {
 
             min = new Date(min.getTime() + (30 * 60 * 1000));
         }
-
         this.context.translate(0, -(this.headerOffset || 0));
 
     }
@@ -167,18 +177,28 @@ export class StundenplanCanvas {
         let days = Object.keys(this.sched) as Array<keyof ScheduleWeek>;
         for (let day of days) {
             for (let lesson of this.sched[day]!) {
-                if ((new Date(`0 ${lesson.from}:00`)).getTime() < min.getTime()) {
-                    min = new Date(`0 ${lesson.from}:00`);
+                let minTemp = new Date(`0 ${lesson.from}:00`);
+                minTemp.setHours(minTemp.getHours() + 1)
+                let maxTemp = new Date(`0 ${lesson.to}:00`);
+                maxTemp.setHours(maxTemp.getHours() + 1)
+                if (minTemp.getTime() < min.getTime()) {
+                    min = minTemp;
                 }
-                if ((new Date(`0 ${lesson.to}:00`)).getTime() > max.getTime()) {
-                    max = new Date(`0 ${lesson.to}:00`);
+                if (maxTemp.getTime() > max.getTime()) {
+                    max = maxTemp;
                 }
             }
         }
+        console.log(min, max);
+
         min.setMinutes(0);
+        if(max.getMinutes() > 0){
+            max.setHours(max.getHours() + 1);
+            max.setMinutes(0);
+        }
         let otherTime = min;
         let steps = 1;
-
+        console.log(min, max);
         do {
             otherTime = new Date(otherTime.getTime() + (60 * 30 * 1000));
             steps++;
@@ -231,11 +251,15 @@ function shortDate(date: Date): string {
 }
 
 function shortTime(date:Date): string{
-    return `${("0"+date.getHours()).slice(-2)}:${("0" + date.getMinutes()).slice(-2)}`;
+    return `${("0"+(date.getHours()-1)).slice(-2)}:${("0" + date.getMinutes()).slice(-2)}`;
 }
 
 export function map(n:number, start1:number, stop1:number, start2:number, stop2:number):number{
-    return (n - start1) / (stop1 - start1) * (stop2 - start2) + start2;
+    return ((n - start1) / (stop1 - start1)) * (stop2 - start2) + start2;
+}
+
+function daySeconds(d:Date){
+    return (d.getSeconds() + (d.getMinutes() * 60) + (d.getHours() * 60 * 60));
 }
 
  function roundRect(
