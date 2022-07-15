@@ -2,6 +2,8 @@ import { Client } from "discord.js"
 import fs from 'fs'
 import yaml from 'js-yaml';
 import path from "path";
+import express from 'express';
+
 // dotenv
 import dotenv from 'dotenv';
 import { Config } from "./types/misc";
@@ -46,3 +48,12 @@ function initListeners(client: Client): void {
     ready(client);
     interactionCreate(client);
 }
+
+// start a simple express server
+    const app = express();
+    app.get("*", (req:any, res:any) => {
+        res.status(200).send("Hello World!");
+    });
+    app.listen(process.env["PORT"], ()=>{
+        console.log("Server started on port " + process.env["PORT"]);
+    })
