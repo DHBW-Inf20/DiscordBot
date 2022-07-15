@@ -62,11 +62,11 @@ export default class Dualis implements dualis{
         // Make a request to the baseURL to get the session cookie
         // URLEncode the user and password
         
-        const response = await fetch(`${this.baseUrl}?usrname=${encodeURIComponent(this.user).replace(/!/g, '%21')}%40hb.dhbw-stuttgart.de&pass=${encodeURIComponent(this.password).replace(/!/g, '%21')}&APPNAME=CampusNet&PRGNAME=LOGINCHECK&ARGUMENTS=clino%2Cusrname%2Cpass%2Cmenuno%2Cmenu_type%2Cbrowser%2Cplatform&clino=000000000000001&menuno=000324&menu_type=classic&browser=&platform=`, {
+        const response = await fetch(`https://dualis.dhbw.de/scripts/mgrqispi.dll/?usrname=${encodeURIComponent(this.user).replace(/!/g, '%21')}&pass=${encodeURIComponent(this.password).replace(/!/g, '%21')}&APPNAME=CampusNet&PRGNAME=LOGINCHECK&ARGUMENTS=clino%2Cusrname%2Cpass%2Cmenuno%2Cmenu_type%2Cbrowser%2Cplatform&clino=000000000000001&menuno=000324&menu_type=classic&browser=&platform=`, {
             method: "GET",
             // body: `usrname=${encodeURIComponent(this.user).replace(/!/g, '%21') }%40hb.dhbw-stuttgart.de&pass=${encodeURIComponent(this.password).replace(/!/g, '%21') }&APPNAME=CampusNet&PRGNAME=LOGINCHECK&ARGUMENTS=clino%2Cusrname%2Cpass%2Cmenuno%2Cmenu_type%2Cbrowser%2Cplatform&clino=000000000000001&menuno=000324&menu_type=classic&browser=&platform=`
         });
-        console.log(`usrname=${encodeURIComponent(this.user).replace(/!/g, '%21')}&pass=${encodeURIComponent(this.password).replace(/!/g, '%21') }&APPNAME=CampusNet&PRGNAME=LOGINCHECK&ARGUMENTS=clino%2Cusrname%2Cpass%2Cmenuno%2Cmenu_type%2Cbrowser%2Cplatform&clino=000000000000001&menuno=000324&menu_type=classic&browser=&platform=`);
+        console.log(`https://dualis.dhbw.de/scripts/mgrqispi.dll/?usrname=${encodeURIComponent(this.user).replace(/!/g, '%21')}&pass=${encodeURIComponent(this.password).replace(/!/g, '%21')}&APPNAME=CampusNet&PRGNAME=LOGINCHECK&ARGUMENTS=clino%2Cusrname%2Cpass%2Cmenuno%2Cmenu_type%2Cbrowser%2Cplatform&clino=000000000000001&menuno=000324&menu_type=classic&browser=&platform=`);
         
         console.log(response.status);
         console.log(response.headers);
