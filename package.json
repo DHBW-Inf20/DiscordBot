@@ -13,7 +13,7 @@
   "scripts": {
     "start": "node dist/Bot.js",
     "clean": "rimraf dist/",
-    "postinstall": "yarn clean && yarn add typescript && tsc && yarn copy-files",
+    "postinstall": "yarn add typescript && tsc && yarn copy-files",
     "copy-files": "copyfiles -u 1 src/.env dist/.env",
     "build": "yarn clean && npx tsc && yarn copy-files"
   },
