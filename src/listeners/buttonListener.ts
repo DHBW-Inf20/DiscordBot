@@ -13,6 +13,9 @@ export default async function buttonListener(client: Client, interaction: Button
             timeDelta = timeDelta || 1;
             nextPrevSched((dualisInterface.lastN || 0) + timeDelta, interaction);
             break;
+        case "today":
+            nextPrevKantine( 0, interaction);
+            break;
         case "previousDay":
             timeDelta = -1;
         case "nextDay":
