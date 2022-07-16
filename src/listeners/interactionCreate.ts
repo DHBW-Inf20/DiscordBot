@@ -3,6 +3,7 @@ import { BaseCommandInteraction, ButtonInteraction, Client, Interaction, Message
 import { dualis } from "../Bot";
 import { randomUUID } from "crypto";
 import { StundenplanCanvas } from "../misc/stundenplanCanvas";
+import { nextPrevSched } from '../commands/Stundenplan';
 
 export default (client: Client): void => {
     client.on("interactionCreate", async (interaction: Interaction) => {
@@ -25,93 +26,15 @@ const handleSlashCommand = async (client: Client, interaction: BaseCommandIntera
 };
 
 const handleButtonClick = async (client: Client, interaction: ButtonInteraction): Promise<void> => {
-
+    let weekDelta = undefined;
     switch(interaction.customId){
         case "previousWeek":
-            const row = new MessageActionRow().addComponents([
-                new MessageButton().setCustomId('previousWeek').setLabel('<< Vorherige Woche').setStyle('SECONDARY'),
-                new MessageButton().setCustomId('nextWeek').setLabel('Nächste Woche >>').setStyle('SECONDARY')
-            ])
-            interaction.deferReply();
-            dualis.getSchedule((dualis.lastN || 0) - 1).catch(async err => {
-                console.error(err);
-                await interaction.editReply({
-                    content: "Fehler beim Abrufen des Stundenplans",
-                    components: [row],
-
-                });
-            }).then(async schedule => {
-                if (schedule === undefined) {
-                    await interaction.editReply({
-                        content: "Fehler beim Abrufen des Stundenplans",
-                        components: [row]
-                    });
-                    return;
-                } else if (Object.keys(schedule.schedule).length === 0) {
-                    // If the schedule is empty, display a gif instead (no schedule this week)
-                    await interaction.editReply({
-                        content: "https://tenor.com/view/free-dave-chappelle-celebrate-finally-freedom-gif-4581850",
-                        components: [row]
-                    });
-                    return;
-                }
-                let spC = new StundenplanCanvas(schedule.schedule, schedule.meta.kw, schedule.meta.year);
-                spC.renderCanvas();
-                let attachment = new MessageAttachment(spC.getBuffer(), "stundenplan.png");
-                // create uuid
-                attachment.id = randomUUID();
-                await interaction.editReply({
-                    files: [attachment],
-                    components: [row]
-                });
-            }).catch(async err => {
-                console.error(err);
-                await interaction.editReply({
-                    content: "Fehler beim Erstellen des Stundenplans",
-                    components: [row]
-
-                });
-            });
-            break;
+           weekDelta = -1;
         case "nextWeek":
-            dualis.getSchedule((dualis.lastN || 0) + 1).catch(async err => {
-                console.error(err);
-                await interaction.editReply({
-                    content: "Fehler beim Abrufen des Stundenplans",
-                    components: [row],
-
-                });
-            }).then(async schedule => {
-                if (schedule === undefined) {
-                    await interaction.editReply({
-                        content: "Fehler beim Abrufen des Stundenplans",
-                        components: [row]
-                    });
-                    return;
-                } else if (Object.keys(schedule.schedule).length === 0) {
-                    // If the schedule is empty, display a gif instead (no schedule this week)
-                    await interaction.editReply({
-                        content: "https://tenor.com/view/free-dave-chappelle-celebrate-finally-freedom-gif-4581850",
-                        components: [row]
-                    });
-                    return;
-                }
-                let spC = new StundenplanCanvas(schedule.schedule, schedule.meta.kw, schedule.meta.year);
-                spC.renderCanvas();
-                let attachment = new MessageAttachment(spC.getBuffer(), "stundenplan.png");
-                // create uuid
-                attachment.id = randomUUID();
-                await interaction.editReply({
-                    files: [attachment],
-                    components: [row]
-                });
-            }).catch(async err => {
-                console.error(err);
-                await interaction.editReply({
-                    content: "Fehler beim Erstellen des Stundenplans",
-                    components: [row]
-                });
-            });
+            interaction.deferReply();
+            weekDelta = weekDelta || 1;
+            nextPrevSched((dualis.lastN || 0) + weekDelta, interaction);
             break;
     }
 }
+
