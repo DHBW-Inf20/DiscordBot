@@ -8,17 +8,18 @@ import ready from "./listeners/ready";
 import Dualis from './interfaces/dualis';
 import { StundenplanCanvas } from './misc/stundenplanCanvas';
 import { Kantine } from './interfaces/kantine';
+import ZitatHandler from "./misc/zitatHandler";
 dotenv.config({ path: ".env"});
 // Load Config...
 
-let config = loadConfig();
+export const config = loadConfig();
 if (!config) {
     console.error("Failed to load config");
     process.exit(1);
 }
-
 export const kantinenInterface = new Kantine(12);
-
+export const dualisInterface = new Dualis(config.dualis.user, config.dualis.password);
+export const zitateMap = {} as { [id: string]: ZitatHandler };
 console.log("Bot is starting...");
 export const client = new Client({
     intents: []
@@ -29,12 +30,13 @@ initListeners(client);
 // Logging in
 client.login(config.discord.token);
 
-export const dualisInterface = new Dualis(config.dualis.user, config.dualis.password);
+
 function loadConfig(): Config | undefined {
     return {
         discord:{
             token: process.env.DISCORD_TOKEN || "",
-            main_guild: process.env.DISCORD_MAIN_GUILD || ""
+            main_guild: process.env.DISCORD_MAIN_GUILD || "",
+            zitate_channel: process.env.DISCORD_ZITATE_CHANNEL || "",
         },
         dualis:{
             user: process.env.DUALIS_USER || "",
