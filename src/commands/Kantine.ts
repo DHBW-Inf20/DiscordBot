@@ -7,6 +7,7 @@ import { Menu } from "types/dualis";
 
 const constantButtonRow = new MessageActionRow().addComponents([
     new MessageButton().setCustomId('previousDay').setEmoji("⏮️").setStyle('SECONDARY'),
+    new MessageButton().setCustomId('today').setEmoji("📆").setStyle('SECONDARY'),
     new MessageButton().setCustomId('nextDay').setEmoji("⏭️").setStyle('SECONDARY')
 ])
 
