@@ -18,3 +18,9 @@ export type ScheduleWeek =  {
     donnerstag?: Schedule[];
     freitag?: Schedule[];
 }
+
+export interface Menu{
+    meals: {[name: string]: string}; // name = name of the dish, value = price
+    previews: {[name: string]: string}; // name = name of the dish, value = link to preview
+    date: Date;
+}
