@@ -13,6 +13,7 @@ Um den Bot nutzen zu können, müssen folgende Umgebungsvariablen gesetzt sein:
 
 ```.env
 DISCORD_TOKEN=<DISCORD_API_TOKEN>
+DISCORD_ZITATE_CHANNEL=<CHANNEL_ID indem Zitate gespeichert werden>
 DUALIS_USER=<Dualis Username xxxxx@hb.dhbw-stuttgart.de>
 DUALIS_PASSWORD=<Dualis Password>
 ```
@@ -20,17 +21,13 @@ DUALIS_PASSWORD=<Dualis Password>
 # Installation
 
 ```
-  npm run build
-  npm start
+  npm install
 ```
-
-# Deployment
-
-Mithilfe von [heroku](https://dashboard.heroku.com/) kann die App ganz einfach deployt werden.
-Dazu, einfach dieses Repository forken, eine neue heroku App erstellen, GitHub-Deployment auswählen und das richtige Repository auswählen.
 
 # Features
 
 ## Implementiert:
 
 * Stundenplan anzeige (/stundenplan)
+* Speiseplan des Studierendenwerk Stuttgarts anzeigen
+* Zitate per Kontext-Menü speichern
