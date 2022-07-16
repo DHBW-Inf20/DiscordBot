@@ -1,11 +1,11 @@
-import { dualis } from "../Bot";
+import { dualisInterface } from "../Bot";
 import { BaseCommandInteraction, ButtonInteraction, Client, Message, MessageActionRow, MessageAttachment, MessageButton } from "discord.js";
 import { Command } from "../types/command";
 import { StundenplanCanvas } from '../misc/stundenplanCanvas';
 import { randomUUID } from "crypto";
 
 // Globally used constants by this command-Family
-const row = new MessageActionRow().addComponents([
+const constantButtonRow = new MessageActionRow().addComponents([
     new MessageButton().setCustomId('previousWeek').setLabel('<< Vorherige Woche').setStyle('SECONDARY'),
     new MessageButton().setCustomId('nextWeek').setLabel('Nächste Woche >>').setStyle('SECONDARY')
 ])
@@ -33,24 +33,24 @@ export const Stundenplan: Command = {
 
 
 export function nextPrevSched(weekN: number, interaction: ButtonInteraction | BaseCommandInteraction) {
-    dualis.getSchedule(weekN).catch(async (err) => {
+    dualisInterface.getSchedule(weekN).catch(async (err) => {
         console.error(err);
         await interaction.editReply({
             content: "Fehler beim Abrufen des Stundenplans",
-            components: [row],
+            components: [constantButtonRow],
         });
     }).then(async (schedule) => {
         if (schedule === undefined) {
             await interaction.editReply({
                 content: "Fehler beim Abrufen des Stundenplans",
-                components: [row]
+                components: [constantButtonRow]
             });
             return;
         } else if (Object.keys(schedule.schedule).length === 0) {
             // If the schedule is empty, display a gif instead (no schedule this week)
             await interaction.editReply({
                 content: "https://tenor.com/view/free-dave-chappelle-celebrate-finally-freedom-gif-4581850",
-                components: [row]
+                components: [constantButtonRow]
             });
             return;
         }
@@ -61,13 +61,13 @@ export function nextPrevSched(weekN: number, interaction: ButtonInteraction | Ba
         attachment.id = randomUUID();
         await interaction.editReply({
             files: [attachment],
-            components: [row]
+            components: [constantButtonRow]
         });
     }).catch(async (err) => {
         console.error(err);
         await interaction.editReply({
             content: "Fehler beim Erstellen des Stundenplans",
-            components: [row]
+            components: [constantButtonRow]
         });
     });
 }

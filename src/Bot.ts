@@ -7,16 +7,20 @@ import interactionCreate from "./listeners/interactionCreate";
 import ready from "./listeners/ready";
 import Dualis from './interfaces/dualis';
 import { StundenplanCanvas } from './misc/stundenplanCanvas';
+import { Kantine } from './interfaces/kantine';
 dotenv.config({ path: ".env"});
 // Load Config...
+
 let config = loadConfig();
 if (!config) {
     console.error("Failed to load config");
     process.exit(1);
 }
 
+export const kantinenInterface = new Kantine(12);
+
 console.log("Bot is starting...");
-const client = new Client({
+export const client = new Client({
     intents: []
 });
 // Initializing Listeners...
@@ -25,7 +29,7 @@ initListeners(client);
 // Logging in
 client.login(config.discord.token);
 
-export let dualis = new Dualis(config.dualis.user, config.dualis.password);
+export const dualisInterface = new Dualis(config.dualis.user, config.dualis.password);
 function loadConfig(): Config | undefined {
     return {
         discord:{
