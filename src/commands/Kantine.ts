@@ -7,7 +7,6 @@ export const Kantine: Command = {
     type: "CHAT_INPUT",
     run: async (client: Client, interaction: BaseCommandInteraction) => {
         const content = "Hello there!";
-        console.log(content);
         await interaction.followUp({
             ephemeral: true,
             content

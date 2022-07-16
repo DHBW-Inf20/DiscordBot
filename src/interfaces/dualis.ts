@@ -30,7 +30,7 @@ export default class Dualis implements dualis{
     }
 
     isSessionValid: () => Promise<boolean> = async () => {
-        console.log(this.sessionCookie, this.sessionId);
+        ""
         const response = await fetch(`${this.baseUrl}?APPNAME=CampusNet&PRGNAME=MLSSTART&ARGUMENTS=${this.sessionId},-N000019,`,{
             method: "GET",
             headers:{
@@ -50,7 +50,7 @@ export default class Dualis implements dualis{
             valid = true;
         }
         finally{
-            console.log(valid);
+            ""
             return valid;
         }
         
@@ -65,8 +65,8 @@ export default class Dualis implements dualis{
             body: `usrname=${this.user}&pass=${this.password}&APPNAME=CampusNet&PRGNAME=LOGINCHECK&ARGUMENTS=clino%2Cusrname%2Cpass%2Cmenuno%2Cmenu_type%2Cbrowser%2Cplatform&clino=000000000000001&menuno=000324&menu_type=classic&browser=&platform=`
         });
         
-        console.log(response.status);
-        console.log(response.headers);
+        ""
+        ""
         this.sessionCookie = response.headers.get("set-cookie")?.split(";")[0].split("=")[1];
         this.sessionId = response.headers.get("REFRESH")?.slice(84,84+17);
     }
@@ -90,7 +90,7 @@ export default class Dualis implements dualis{
         let semester = parsed.getElementById("semester").getElementsByTagName("option").filter(option =>{
             return option.getAttribute("selected") === "selected";
         })[0].rawText;
-        console.log(semester);
+        ""
         let table = parsed.getElementsByTagName("table")[0];
         let rows = table.getElementsByTagName("tr");
         let grades: Grade[] = [];
@@ -137,8 +137,8 @@ export default class Dualis implements dualis{
         }   
         let startDate = getDateOfISOWeek(week, year);
         const dateString = `${("0" + startDate.getDate()).slice(-2)}/${("0" + (startDate.getMonth() + 1)).slice(-2)}/${startDate.getFullYear()}`;
-        console.log(`${this.baseUrl}/scripts/mgrqispi.dll?APPNAME=CampusNet&PRGNAME=SCHEDULER&ARGUMENTS=${this.sessionId},-N000028,-A${dateString},-A,-N1,-N000000000000000,-N1`);
-        console.log(week, year);
+        ""
+        ""
         let response = await fetch(`${this.baseUrl}/scripts/mgrqispi.dll?APPNAME=CampusNet&PRGNAME=SCHEDULER&ARGUMENTS=${this.sessionId},-N000028,-A${dateString},-A,-N1,-N0,-N0`, {
             method: "GET",
             headers: {
@@ -172,7 +172,7 @@ export default class Dualis implements dualis{
             if (schedule[weekday] === undefined) schedule[weekday] = [];
             schedule[weekday].push(sched);
         });
-        console.log(schedule);
+        ""
         return {
             meta: {
                 kw: week,

@@ -13,17 +13,13 @@
   },
   "scripts": {
     "start": "node dist/Bot.js",
-    "clean": "rimraf dist/",
-    "postinstall": "tsc && yarn copy-files",
-    "copy-files": "copyfiles -u 1 src/.env dist/.env",
-    "build": "yarn clean && npx tsc && yarn copy-files"
+    "postinstall": "npm run build",
+    "build": "tsc"
   },
   "devDependencies": {
     "@types/express": "^4.17.13",
     "@types/js-yaml": "^4.0.5",
     "@types/node": "^18.0.4",
-    "copyfiles": "^2.4.1",
-    "rimraf": "^3.0.2",
     "ts-node": "^10.9.1"
   }
 }

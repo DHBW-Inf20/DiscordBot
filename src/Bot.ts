@@ -14,7 +14,6 @@ if (!config) {
     console.error("Failed to load config");
     process.exit(1);
 }
-console.log("Config loaded",config);
 
 console.log("Bot is starting...");
 const client = new Client({
