@@ -53,7 +53,7 @@ export default class ZitatHandler implements zitatHandler{
             let lessonName = currentLesson?.moduleName;
 
             if(lessonName){
-                msg.edit(`${this.content} - ${name} (Währned der ${lessonName} Vorlesung)`);
+                msg.edit(`${this.content} - ${name} (Während der ${lessonName} Vorlesung)`);
             }else{
                 msg.edit(`${this.content} - ${name}`);
             }
