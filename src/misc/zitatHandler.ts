@@ -45,6 +45,8 @@ export default class ZitatHandler implements zitatHandler{
             let weekday = new Date().getDay();
             let day = (["sonntag","montag","dienstag","mittwoch","donnerstag","freitag","samstag"] as Array<keyof ScheduleWeek>)[weekday];
             let daySched = schedule?.schedule[day];
+            let d = new Date();
+            d.setTime(d.getTime() + 2 * 60 * 60 * 1000);
             let currentLesson = daySched?.find((lesson) => {
                 return +(lesson.from.split(":")[0]) <= new Date().getHours() && +(lesson.to.split(":")[0]) >= new Date().getHours();
             });
