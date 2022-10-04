@@ -28,46 +28,32 @@ export default class ZitatHandler implements zitatHandler{
         name = name || this.user;
         let zitateChannel = await client.channels.fetch(config!.discord.zitate_channel) as TextChannel;
 
-        dualisInterface.getSchedule().catch(async (err) => {
-            console.error("Fehler beim Studneplan aufrufen in der Zitaterstellung " + err );
-            const msg = await zitateChannel.send(`${this.content} - ${name}`);
-            const embed = new MessageEmbed()
+        const msg = await zitateChannel.send(`${this.content} - ${name}`);
+        let embed = new MessageEmbed()
             .setTitle("Neues Zitat")
             .setURL(msg.url)
             .setDescription(`${this.content} - ${name}`)
             .setTimestamp()
-            .setFooter({ text: "Gespeichert von: " +interaction.user.username, iconURL: interaction.user.avatarURL()!});
-    
-            interaction.reply({ embeds: [embed] });
+            .setFooter({ text: "Gespeichert von: " + interaction.user.username, iconURL: interaction.user.avatarURL()! });
+
+        const embedReply = await interaction.reply({ embeds: [embed] });
+
+        dualisInterface.getSchedule().catch(async (err) => {
+        console.error(err);
         }).then(async (schedule) => {
             // Get current weekday
             let weekday = new Date().getDay();
             let day = (["sonntag","montag","dienstag","mittwoch","donnerstag","freitag","samstag"] as Array<keyof ScheduleWeek>)[weekday];
             let daySched = schedule?.schedule[day];
             let currentLesson = daySched?.find((lesson) => {
-                return new Date(lesson.from).getHours() <= new Date().getHours() && new Date(lesson.to).getHours() >= new Date().getHours();
+                return +(lesson.from.split(":")[0]) <= new Date().getHours() && +(lesson.to.split(":")[0]) >= new Date().getHours();
             });
             let lessonName = currentLesson?.moduleName;
 
             if(lessonName){
-                const msg = await zitateChannel.send(`${this.content} - ${name} (Währned der ${lessonName} Vorlesung`);
-                const embed = new MessageEmbed()
-                    .setTitle("Neues Zitat")
-                    .setURL(msg.url)
-                    .setDescription(`${this.content} - ${name}`)
-                    .setTimestamp()
-                    .setFooter({ text: "Gespeichert von: " + interaction.user.username, iconURL: interaction.user.avatarURL()! });
-    
-                interaction.reply({ embeds: [embed] });
+                msg.edit(`${this.content} - ${name} (Währned der ${lessonName} Vorlesung)`);
             }else{
-                const msg = await zitateChannel.send(`${this.content} - ${name}`);
-                const embed = new MessageEmbed()
-                .setTitle("Neues Zitat")
-                .setURL(msg.url)
-                .setDescription(`${this.content} - ${name}`)
-                .setTimestamp()
-                .setFooter({ text: "Gespeichert von: " + interaction.user.username, iconURL: interaction.user.avatarURL()! });
-                interaction.reply({ embeds: [embed] });
+                msg.edit(`${this.content} - ${name}`);
             }
             
         });
