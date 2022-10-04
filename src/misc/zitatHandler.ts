@@ -28,7 +28,7 @@ export default class ZitatHandler implements zitatHandler{
         name = name || this.user;
         let zitateChannel = await client.channels.fetch(config!.discord.zitate_channel) as TextChannel;
 
-            dualisInterface.getSchedule().catch(async (err) => {
+        dualisInterface.getSchedule().catch(async (err) => {
             console.error("Fehler beim Studneplan aufrufen in der Zitaterstellung " + err );
             const msg = await zitateChannel.send(`${this.content} - ${name}`);
             const embed = new MessageEmbed()
@@ -52,11 +52,11 @@ export default class ZitatHandler implements zitatHandler{
             if(lessonName){
                 const msg = await zitateChannel.send(`${this.content} - ${name} (Währned der ${lessonName} Vorlesung`);
                 const embed = new MessageEmbed()
-                .setTitle("Neues Zitat")
-                .setURL(msg.url)
-                .setDescription(`${this.content} - ${name}`)
-                .setTimestamp()
-                .setFooter({ text: "Gespeichert von: " +interaction.user.username, iconURL: interaction.user.avatarURL()!});
+                    .setTitle("Neues Zitat")
+                    .setURL(msg.url)
+                    .setDescription(`${this.content} - ${name}`)
+                    .setTimestamp()
+                    .setFooter({ text: "Gespeichert von: " + interaction.user.username, iconURL: interaction.user.avatarURL()! });
     
                 interaction.reply({ embeds: [embed] });
             }else{
