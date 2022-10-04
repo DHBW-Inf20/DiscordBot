@@ -17,7 +17,9 @@ if (!config) {
     console.error("Failed to load config");
     process.exit(1);
 }
-console.log(new Date().toLocaleString() + " - Starting Bot...");
+let d = new Date();
+d.setTime(d.getTime() + 2 * 60 * 60 * 1000);
+console.log(d.toLocaleString() + " - Starting Bot...");
 export const kantinenInterface = new Kantine(12);
 export const dualisInterface = new Dualis(config.dualis.user, config.dualis.password);
 export const zitateMap = {} as { [id: string]: ZitatHandler };

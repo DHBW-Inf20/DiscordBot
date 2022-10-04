@@ -48,7 +48,7 @@ export default class ZitatHandler implements zitatHandler{
             let d = new Date();
             d.setTime(d.getTime() + 2 * 60 * 60 * 1000);
             let currentLesson = daySched?.find((lesson) => {
-                return +(lesson.from.split(":")[0]) <= new Date().getHours() && +(lesson.to.split(":")[0]) >= new Date().getHours();
+                return +(lesson.from.split(":")[0]) <= d.getHours() && +(lesson.to.split(":")[0]) >= d.getHours();
             });
             let lessonName = currentLesson?.moduleName;
 
