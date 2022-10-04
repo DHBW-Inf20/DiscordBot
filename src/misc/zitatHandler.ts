@@ -40,7 +40,7 @@ export default class ZitatHandler implements zitatHandler{
 
         dualisInterface.getSchedule().catch(async (err) => {
         console.error(err);
-        }).then(async (schedule) => {
+        }).then(async (schedule) => {   
             // Get current weekday
             let weekday = new Date().getDay();
             let day = (["sonntag","montag","dienstag","mittwoch","donnerstag","freitag","samstag"] as Array<keyof ScheduleWeek>)[weekday];
