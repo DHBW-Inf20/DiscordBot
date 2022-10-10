@@ -19,7 +19,11 @@ export const Zitat: ContextMenuCommand = {
             .setCustomId('zitatModal_'+interaction.options.get("message")?.message?.id)
             .setTitle('Neues Zitat erstellen');
         
-        const zitat = new ZitatHandler(interaction);
+        const guildID = interaction.guildId;
+        const channelID = interaction.channelId;
+        const messageID = interaction.options.get("message")?.message?.id;
+        const contextLink = `https://discord.com/channels/${guildID}/${channelID}/${messageID}`;
+        const zitat = new ZitatHandler(interaction, contextLink);
         zitateMap[interaction.options.get("message")!.message!.id] = zitat;
         // Add components to modal
         // Create the text input components

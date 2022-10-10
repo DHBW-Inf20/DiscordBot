@@ -9,6 +9,7 @@ interface zitatHandler {
     content: string; // Content of the message
     user: string; // User of the message
     id: string; // ID of the message
+    contextLink: string; // Link to the message
 }
 
 export default class ZitatHandler implements zitatHandler{
@@ -16,9 +17,11 @@ export default class ZitatHandler implements zitatHandler{
     content: string;
     user: string;
     id: string;
+    contextLink: string;
 
-    constructor(interaction: ContextMenuInteraction){
+    constructor(interaction: ContextMenuInteraction, contextLink: string){
         this.interaction = interaction;
+        this.contextLink = contextLink;
         this.content = interaction.options.get("message")!.message!.content;
         this.user = interaction.options.get("message")!.message!.author.username;
         this.id = interaction.options.get("message")!.message!.id;
@@ -28,7 +31,7 @@ export default class ZitatHandler implements zitatHandler{
         name = name || this.user;
         let zitateChannel = await client.channels.fetch(config!.discord.zitate_channel) as TextChannel;
 
-        const msg = await zitateChannel.send(`${this.content} - ${name}`);
+        const msg = await zitateChannel.send(`${this.content} - ${name} ${this.contextLink}`);
         let embed = new MessageEmbed()
             .setTitle("Neues Zitat")
             .setURL(msg.url)
@@ -53,9 +56,9 @@ export default class ZitatHandler implements zitatHandler{
             let lessonName = currentLesson?.moduleName;
 
             if(lessonName){
-                msg.edit(`${this.content} - ${name} (Während der ${lessonName} Vorlesung)`);
+                msg.edit(`${this.content} - ${name} (Während der ${lessonName} Vorlesung) ${this.contextLink}`);
             }else{
-                msg.edit(`${this.content} - ${name}`);
+                msg.edit(`${this.content} - ${name} ${this.contextLink}`);
             }
             
         });
