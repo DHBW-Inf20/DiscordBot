@@ -8,10 +8,18 @@ import sqlite3 from 'sqlite3';
 export const Neske: Command = {
     name: "neske",
     description: "Erhöt einen Counter der trackt wie hoft neske schon \"In Anführungszeichen\" gesagt hat",
-
+    options: [
+        {
+            name: "n",
+            description: "Zahl um mehr oder weniger hinzuzufügen",
+            type: "INTEGER",
+            required: false
+        }
+    ],
     run: async (client: Client, interaction: BaseCommandInteraction) => {
         // Open the file neske.txt
         await interaction.deferReply();
+        let n:number = interaction.options.get("n")?.value as number || 1;
         let counter = 0;
         // Get the saved counter in the sqlite database and add 1
         const db = new sqlite3.Database('./neske.db');
@@ -21,7 +29,7 @@ export const Neske: Command = {
             }
             console.log(counter, row);
             if (row) {
-                counter = row.counter + 1;
+                counter = row.counter + n;
             }
             // Save the new counter in the sqlite database
             db.run('UPDATE neske SET counter = ?', counter, async (err) => {
