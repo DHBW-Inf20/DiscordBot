@@ -1,4 +1,5 @@
 import { Client } from "discord.js"
+import sqlite3 from 'sqlite3';
 
 // dotenv
 import dotenv from 'dotenv';
@@ -9,7 +10,7 @@ import Dualis from './interfaces/dualis';
 import { StundenplanCanvas } from './misc/stundenplanCanvas';
 import { Kantine } from './interfaces/kantine';
 import ZitatHandler from "./misc/zitatHandler";
-dotenv.config({ path: ".env"});
+dotenv.config({ path: ".env" });
 // Load Config...
 
 export const config = loadConfig();
@@ -29,19 +30,19 @@ export const client = new Client({
 });
 // Initializing Listeners...
 initListeners(client);
-
+setupNeskeDb();
 // Logging in
 client.login(config.discord.token);
 
 
 function loadConfig(): Config | undefined {
     return {
-        discord:{
+        discord: {
             token: process.env.DISCORD_TOKEN || "",
             main_guild: process.env.DISCORD_MAIN_GUILD || "",
             zitate_channel: process.env.DISCORD_ZITATE_CHANNEL || "",
         },
-        dualis:{
+        dualis: { 
             user: process.env.DUALIS_USER || "",
             password: process.env.DUALIS_PASSWORD || ""
         }
@@ -51,4 +52,25 @@ function loadConfig(): Config | undefined {
 function initListeners(client: Client): void {
     ready(client);
     interactionCreate(client);
+}
+
+function setupNeskeDb(): void {
+    let db = new sqlite3.Database('./neske.db', (err) => {
+        if (err) {
+            return console.error(err.message);
+        }
+        console.log('Connected to the in-memory SQlite database.');
+    });
+    db.run("CREATE TABLE IF NOT EXISTS neske (counter INTEGER)", (err) => {
+        if (err) {
+            return console.error(err.message);
+        }
+    }
+    );
+    db.run("INSERT INTO neske (counter) VALUES (0)", (err) => {
+        if (err) {
+            return console.error(err.message);
+        }
+    });
+    db.close();
 }
