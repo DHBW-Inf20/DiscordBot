@@ -56,20 +56,37 @@ function initListeners(client: Client): void {
 
 function setupNeskeDb(): void {
     let db = new sqlite3.Database('./neske.db', (err) => {
-        if (err) {
-            return console.error(err.message);
+        if (err) {+
+            console.error(err.message);
+            return;
         }
         console.log('Connected to the in-memory SQlite database.');
     });
-    db.run("CREATE TABLE IF NOT EXISTS neske (counter INTEGER)", (err) => {
+
+    
+    db.run("CREATE TABLE IF NOT EXISTS neskecounter (name TEXT, count INTEGER)", (err) => {
         if (err) {
             return console.error(err.message);
         }
     }
     );
-    db.run("INSERT INTO neske (counter) VALUES (0)", (err) => {
+    // check if there is already a counter in the database
+    db.get('SELECT * FROM neskecounter', (err, row) => {
         if (err) {
-            return console.error(err.message);
+            console.log(err);
+        }
+        // if there is no counter in the database, create one
+        if (!row) {
+            db.run('INSERT INTO neskecounter (name, count) VALUES (\'zeichen\', 0)',  (err) => {
+                if (err) {
+                    console.log(err);
+                }
+            });
+            db.run('INSERT INTO neskecounter(name, count) VALUES (\'sach\', 0)',  (err) => {
+                if (err) {
+                    console.log(err);
+                }
+            });
         }
     });
     db.close();
