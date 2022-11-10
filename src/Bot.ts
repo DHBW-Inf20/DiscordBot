@@ -35,7 +35,6 @@ setupNeskeDb();
 console.log(config.discord.token);
 client.login(config.discord.token);
 
-
 function loadConfig(): Config | undefined {
     return {
         discord: {
