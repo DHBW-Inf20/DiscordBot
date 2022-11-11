@@ -23,7 +23,7 @@ if (!config) {
 }
 
 // use PKCS#1 padding (RSA_PKCS1_PADDING)
-//console.log(k.encryptPrivate('Hello RSA!', 'base64'));
+// console.log(k.encryptPrivate('Hello RSA!', 'base64'));
 
 Intranet.setInstance(config.intranet.user, config.intranet.password);
 
