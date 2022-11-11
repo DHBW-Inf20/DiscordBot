@@ -10,7 +10,6 @@ interface emailVerification {
 }
 
 class EmailVerification implements emailVerification {
-
     transporter:any;
     template:any;
     constructor(user: string, password:string) {

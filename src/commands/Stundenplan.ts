@@ -1,8 +1,8 @@
-import { dualisInterface } from "../Bot";
 import { BaseCommandInteraction, ButtonInteraction, Client, Message, MessageActionRow, MessageAttachment, MessageButton } from "discord.js";
 import { Command } from "../types/command";
 import { StundenplanCanvas } from '../misc/stundenplanCanvas';
 import { randomUUID } from "crypto";
+import { Intranet } from './../interfaces/horbintranet';
 
 // Globally used constants by this command-Family
 const constantButtonRow = new MessageActionRow().addComponents([
@@ -33,7 +33,7 @@ export const Stundenplan: Command = {
 
 
 export function nextPrevSched(weekN: number, interaction: ButtonInteraction | BaseCommandInteraction) {
-    dualisInterface.getSchedule(weekN).catch(async (err) => {
+    Intranet.getInstance().getStundenplan("HOR-TINF2020",weekN).catch(async (err) => {
         console.error(err);
         await interaction.editReply({
             content: "Fehler beim Abrufen des Stundenplans",

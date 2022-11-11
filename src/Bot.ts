@@ -11,7 +11,7 @@ import ready from "./listeners/ready";
 import Dualis from './interfaces/dualis';
 import { Kantine } from './interfaces/kantine';
 import ZitatHandler from "./misc/zitatHandler";
-import { Intranet } from './misc/horbintranet';
+import { Intranet } from './interfaces/horbintranet';
 dotenv.config({ path: ".env" });
 // Load Config...
 
@@ -26,8 +26,7 @@ if (!config) {
 //console.log(k.encryptPrivate('Hello RSA!', 'base64'));
 
 Intranet.setInstance(config.intranet.user, config.intranet.password);
-
-
+Intranet.getInstance().getStundenplan("HOR-TINF2020");
 let d = new Date();
 d.setTime(d.getTime() + 2 * 60 * 60 * 1000);
 console.log(d.toLocaleString() + " - Starting Bot...");
@@ -40,7 +39,6 @@ export const client = new Client({
 });
 // Initializing Listeners...
 initListeners(client);
-setupNeskeDb();
 // Logging in
 console.log(config.discord.token);
 client.login(config.discord.token);
@@ -71,42 +69,4 @@ function loadConfig(): Config | undefined {
 function initListeners(client: Client): void {
     ready(client);
     interactionCreate(client);
-}
-
-function setupNeskeDb(): void {
-    let db = new sqlite3.Database('./neske.db', (err) => {
-        if (err) {+
-            console.error(err.message);
-            return;
-        }
-        console.log('Connected to the in-memory SQlite database.');
-    });
-
-    
-    db.run("CREATE TABLE IF NOT EXISTS neskecounter (name TEXT, count INTEGER)", (err) => {
-        if (err) {
-            return console.error(err.message);
-        }
-    }
-    );
-    // check if there is already a counter in the database
-    db.get('SELECT * FROM neskecounter', (err, row) => {
-        if (err) {
-            console.log(err);
-        }
-        // if there is no counter in the database, create one
-        if (!row) {
-            db.run('INSERT INTO neskecounter (name, count) VALUES (\'zeichen\', 0)',  (err) => {
-                if (err) {
-                    console.log(err);
-                }
-            });
-            db.run('INSERT INTO neskecounter(name, count) VALUES (\'sach\', 0)',  (err) => {
-                if (err) {
-                    console.log(err);
-                }
-            });
-        }
-    });
-    db.close();
 }
