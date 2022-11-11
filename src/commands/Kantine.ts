@@ -138,10 +138,9 @@ export function sendPreview(key: string, interaction: ButtonInteraction) {
 }
 
 export async function nextPrevKantine(day: number, interaction: ButtonInteraction) {
-    console.log(kantinenInterface.lastDay, day);
+    (kantinenInterface.lastDay, day);
     let mealData = await kantinenInterface.getMenu(day);
-    console.log(kantinenInterface.lastDay, day);
-    console.log("Through mealData", mealData)
+    (kantinenInterface.lastDay, day);
     let components = [constantButtonRow];
     if (Object.keys(mealData.meals).length > 0) {
         components.push(createPreviewButtonRow(mealData.previews));

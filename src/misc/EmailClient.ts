@@ -3,16 +3,18 @@ import mailgunTransport from "nodemailer-mailgun-transport";
 import fs from "fs";
 import path from "path";
 import Handlebars from 'handlebars';
+import { verifyMap } from '../Bot';
 
 interface emailVerification {
-    sendVerificationEmail(email: string): void;
+    sendVerificationEmail(email: string, code: string, dcuser:string): void;
     verifyEmail(email: string, code: string): Promise<boolean>;
 }
 
 class EmailVerification implements emailVerification {
-    transporter:any;
-    template:any;
-    constructor(user: string, password:string) {
+    transporter: any;
+    template: any;
+    pendingVerifications: Map<string, string> = new Map();
+    constructor(user: string, password: string) {
         const emailTs = fs.readFileSync(path.join(__dirname, "../assets/emailTemplate.hbs"), "utf-8");
         this.template = Handlebars.compile(emailTs);
         this.transporter = createTransport({
@@ -23,40 +25,50 @@ class EmailVerification implements emailVerification {
                 user: user,
                 pass: password
             }
-        }); 
+        });
     }
 
-    sendVerificationEmail(email: string){
+    sendVerificationEmail(email: string, code: string, dcuser: string) {
         const emailOptions = {
             from: "noreply@dhbot.de",
             to: email,
             subject: "Email Verifizierung",
-            html: this.template({code: "123456"})
+            html: this.template({ code, user: email.split("@")[0], dcuser})
         }
 
-        this.transporter.sendMail(emailOptions, (err:any, info:any) => {
+        this.transporter.sendMail(emailOptions, (err: any, info: any) => {
             if (err) {
                 console.log(err);
             } else {
-                console.log(info);
+                this.pendingVerifications.set(email, code);
             }
         });
     }
     verifyEmail(email: string, code: string): Promise<boolean> {
-        throw new Error("Method not implemented.");
+        return new Promise((resolve, reject) => {
+            
+            // delete the entry
+            if (this.pendingVerifications.get(email) === code) {
+                this.pendingVerifications.delete(email);
+                resolve(true);
+            } else {
+                resolve(false);
+            }
+
+        });
     }
 
-    
+
 
 }
 
 let verifier: EmailVerification;
 const Verifier = {
-    setInstance: (email:string, password:string) => {
+    setInstance: (email: string, password: string) => {
         verifier = new EmailVerification(email, password);
     },
     getInstance: () => {
-        if(!verifier) throw new Error("Instance not set");
+        if (!verifier) throw new Error("Instance not set");
         return verifier;
     }
 }

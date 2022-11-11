@@ -3,6 +3,7 @@ export interface Config {
         token: string;
         main_guild: string;
         zitate_channel: string;
+        verification_channel: string;
     },
     dualis: {
         user: string;
@@ -15,5 +16,14 @@ export interface Config {
     intranet: {
         user: string;
         password: string;
+    },
+    support: {
+        userid: string;
+    },
+    db: {
+        host: string;
+        user: string;
+        password: string;
+        database: string;
     }
 }

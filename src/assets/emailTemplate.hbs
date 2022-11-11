@@ -1,19 +1,60 @@
 <head>
     <style>
-        body{
-            font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+        body {
+            font-family: sans-serif;
             font-size: 14px;
             line-height: 1.42857143;
-            color: rgb(119, 7, 7);    
             background-color: rgb(255, 255, 255);
+            margin: 0;
+            padding: 0;
+        }
+
+        #wrapper {
+            color: #262626;
+            padding: 1rem;
+        }
+
+        #code {
+            color: #8b96FF;
+            font-weight: bold;
+            font-size: larger;
+        }
+
+        #wrapper h1 {
+            color: #303030;
+            margin-top: 0;
+        }
+
+        #footer {
+            font-size: xx-small;
+        }
+
+        #footer a {
+            color: #8b96FF;
         }
     </style>
 </head>
+
 <body>
 
-<h1>Email Verifizierung</h1>
-<p>Danke das du den DiscordBot verwendest.</p>
+    <div id="wrapper">
 
-<p>Verifizierungscode: {{code}}</p>
 
+        <h1>Hey {{user}},</h1>
+        <p>anscheinend hat jemand versucht deinen Hochschulaccount mit einem Discord-Bot (TINFHorbot) zu verbinden. Wenn
+            du das warst, kopiere den unten stehenden Verifizierungscode und füge ihn in Discord ein. Wenn du das nicht
+            warst, kannst du diese E-Mail ignorieren</p>
+
+        <p>
+            <span><b>Discord-Name:</b> {{dcuser}}</span><br />
+        </p>
+
+        <p>Verifizierungscode: <span id="code">{{code}}</span></p>
+        <hr>
+        <div id="footer">
+            <p>Bei Fragen und Anregungen: <a
+                    href="https://github.com/DHBW-Inf20/DiscordBot">https://github.com/DHBW-Inf20/DiscordBot</a> | <a
+                    href="mailto://i20029@hb.dhbw-stuttgart.de">i20029@hb.dhbw-stuttgart.de</a></p>
+        </div>
+    </div>
 </body>

@@ -3,6 +3,7 @@ import { Command } from "../types/command";
 import { StundenplanCanvas } from '../misc/stundenplanCanvas';
 import { randomUUID } from "crypto";
 import { Intranet } from './../interfaces/horbintranet';
+import dba from './../misc/databaseAdapter';
 
 // Globally used constants by this command-Family
 const constantButtonRow = new MessageActionRow().addComponents([
@@ -27,13 +28,21 @@ export const Stundenplan: Command = {
         if(weekParameter === undefined) weekParameter = 0;
 
         await interaction.deferReply();
-        nextPrevSched(weekParameter, interaction);
+        await nextPrevSched(weekParameter, interaction);
     }
 };
 
 
-export function nextPrevSched(weekN: number, interaction: ButtonInteraction | BaseCommandInteraction) {
-    Intranet.getInstance().getStundenplan("HOR-TINF2020",weekN).catch(async (err) => {
+export async function nextPrevSched(weekN: number, interaction: ButtonInteraction | BaseCommandInteraction) {
+
+    // Generate the right kurs-string
+    let dbUser = await dba.getInstance().getUser(interaction.user.id);
+    if(!dbUser) {    
+        await interaction.editReply("Dein Discord-Account ist noch nicht verifiziert und es fehlt eine Kurs-Zuordnung. Bitte verifiziere deinen Account mit dem Befehl `/verify <ixxxx>` und versuche es erneut.");
+        return;
+    }
+    let kurs = "HOR-T"+dbUser.course;
+    Intranet.getInstance().getStundenplan(kurs,weekN).catch(async (err) => {
         console.error(err);
         await interaction.editReply({
             content: "Fehler beim Abrufen des Stundenplans",

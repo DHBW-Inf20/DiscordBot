@@ -57,10 +57,10 @@ class IntranetFacade implements HorbIntranetFacade {
             },
             body: encodedParams.toString()
         };
-        // console.log(options)
+        // (options)
         let typouserresponse = await fetch(url, options);
         console.log(typouserresponse.status, typouserresponse.statusText);
-        // console.log(await typouserresponse.text());
+        // (await typouserresponse.text());
         this.typoid = typouserresponse.headers.get('set-cookie')?.split(';')[0].split('=')[1] || "";
         if(this.typoid === "") throw new Error("Typoid is empty");
         return true;
