@@ -7,5 +7,13 @@ export interface Config {
     dualis: {
         user: string;
         password: string;
+    },
+    email: {
+        user: string;
+        password: string;
+    },
+    intranet: {
+        user: string;
+        password: string;
     }
 }
