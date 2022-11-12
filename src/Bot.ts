@@ -15,6 +15,7 @@ import Verifier from './misc/EmailClient';
 import VerificationHandler from "misc/verificationHandler";
 import dba from './misc/databaseAdapter';
 import messageListener from "./listeners/messageListener";
+import messageReaction from "./listeners/messageReaction";
 dotenv.config({ path: ".env" });
 // Load Config...
 
@@ -41,7 +42,8 @@ export const zitateMap = {} as { [id: string]: ZitatHandler };
 export const verifyMap = {} as { [id: string]: VerificationHandler };
 console.log("Bot is starting...");
 export const client = new Client({
-    intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES]
+    partials: ["MESSAGE", "CHANNEL", "REACTION"],
+    intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.GUILD_MESSAGE_REACTIONS, Intents.FLAGS.DIRECT_MESSAGE_REACTIONS]
 });
 // Initializing Listeners...
 initListeners(client);
@@ -57,6 +59,7 @@ function loadConfig(): Config | undefined {
             main_guild: process.env.DISCORD_MAIN_GUILD || "",
             zitate_channel: process.env.DISCORD_ZITATE_CHANNEL || "",
             verification_channel: process.env.DISCORD_VERIFY_CHANNEL || "",
+            roles_channel: process.env.DISCORD_ROLES_CHANNEL || ""
         },
         dualis: { 
             user: process.env.DUALIS_USER || "",
@@ -86,4 +89,5 @@ function initListeners(client: Client): void {
     ready(client);
     interactionCreate(client);
     messageListener(client);
+    messageReaction(client);
 }

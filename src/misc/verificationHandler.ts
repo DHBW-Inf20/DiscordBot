@@ -1,6 +1,6 @@
 
 import { config } from '../Bot';
-import { Base, CacheType, ModalSubmitInteraction, User } from 'discord.js';
+import { Base, CacheType, GuildMemberRoleManager, ModalSubmitInteraction, User } from 'discord.js';
 import { BaseCommandInteraction } from 'discord.js';
 import Verifier from './EmailClient';
 import dba from './databaseAdapter';
@@ -31,9 +31,16 @@ export default class VerificationHandler implements verificationHandler {
         if (verified) {
 
             let course = `INF20${this.dhuser.substring(1, 3)}`
-            dba.getInstance().addUser(this.dhuser, this.user.id, course);
+            // check if on main guild
+            if (interaction.guildId === config?.discord.main_guild) {
+                let role = interaction.guild?.roles.cache.find(role => role.name === course);
+                if (role) {
+                    interaction.guild?.members.cache.get(this.user.id)?.roles.add(role).catch(console.error);
+                } 
+            }
+                dba.getInstance().addUser(this.dhuser, this.user.id, course);
 
-            await interaction.reply({ ephemeral: true, content: "User erfolgreich verifiziert!" });
+            await interaction.reply({ ephemeral: true, content: `Du bist nun erfolgreich verifiziert! Gehe als nächstes zu <#${config?.discord.roles_channel}> um dir weitere Rollen zuzuweisen` });
         } else {
             await interaction.reply({ ephemeral: true, content: `User konnte nicht verifiziert werden! Überprüfe die Eingabe und wiederhole den Vorgang, falls der Fehler weiterhinbesteht, kannst du dich bei <@${config?.support.userid}> melden` });
         }

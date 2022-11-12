@@ -4,6 +4,7 @@ export interface Config {
         main_guild: string;
         zitate_channel: string;
         verification_channel: string;
+        roles_channel: string;
     },
     dualis: {
         user: string;
