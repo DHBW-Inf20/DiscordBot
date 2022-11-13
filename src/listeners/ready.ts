@@ -13,7 +13,7 @@ export default (client: Client): void => {
         let channel = client.channels.cache.get(config!.discord.verification_channel)! as TextChannel;
         channel.bulkDelete(100);
         channel.send(
-            `\`\`\`Neben der Verifizierung, werdet ihr mit /verify auch eurem Kurs zugewiesen und ihr erhaltet Zugriff auf weitere Commands wie /stundenplan.\nFalls ihr wissen wollt, was im Backend mit eurem Nutzernamen \"passiert\", könnt ihr euch inGitHub den Code genauer ansehen (https://github.com/DHBW-Inf20/DiscordBot/blob/main/src/commands/Verify.ts)\`\`\``);
+            `\`\`\`Neben der Verifizierung, werdet ihr mit /verify auch eurem Kurs zugewiesen und ihr erhaltet Zugriff auf weitere Commands wie /stundenplan.\nFalls ihr wissen wollt, was im Backend mit eurem Nutzernamen \"passiert\", könnt ihr euch in GitHub den Code genauer ansehen (https://github.com/DHBW-Inf20/DiscordBot/blob/main/src/commands/Verify.ts)\`\`\``);
 
         // sendRoleEmbed(client); // Uncomment this line to send the role embed (ik its bad)
 
