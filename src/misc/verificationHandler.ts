@@ -36,15 +36,15 @@ export default class VerificationHandler implements verificationHandler {
                 let role = interaction.guild?.roles.cache.find(role => role.name === course);
                 if (role) {
                     interaction.guild?.members.cache.get(this.user.id)?.roles.add(role).catch(console.error);
-                } 
+                    interaction.guild?.members.cache.get(this.user.id)?.roles.add('1040325078358954124').catch(console.error);
+                }
             }
-                dba.getInstance().addUser(this.dhuser, this.user.id, course);
+            dba.getInstance().addUser(this.dhuser, this.user.id, course);
 
             await interaction.reply({ ephemeral: true, content: `Du bist nun erfolgreich verifiziert! Gehe als nächstes zu <#${config?.discord.roles_channel}> um dir weitere Rollen zuzuweisen` });
         } else {
             await interaction.reply({ ephemeral: true, content: `User konnte nicht verifiziert werden! Überprüfe die Eingabe und wiederhole den Vorgang, falls der Fehler weiterhinbesteht, kannst du dich bei <@${config?.support.userid}> melden` });
         }
-
 
     }
     interaction: BaseCommandInteraction; // Initial Interaction
