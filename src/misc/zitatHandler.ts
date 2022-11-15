@@ -57,32 +57,31 @@ export default class ZitatHandler implements zitatHandler {
             .setTitle(zitatAuthor)
             .setURL(this.contextLink)
 
+        let gifLink = "";
         if (this.content !== "") {
             // look if the text is a gif link, if so, add it as image
             if (/(http|https):\/\/.*gif.*/.test(this.content)) {
-                let contentArr = this.content.split("\n");
-                if (contentArr.length == 1) {
-                    zitatEmbed.setImage(contentArr[0]);
-                } else {
-                    for (let con in contentArr) {
+                let contentArr = this.content.split("\n").map(line => line.split(" "));
+                for (let line of contentArr)
+                    for (let con of line) {
                         if (/(http|https):\/\/.*gif.*/.test(con)) {
-                            zitatEmbed.setImage(con);
-                            break;
+                            gifLink = con;
+                            continue;
+                        } else {
+                            zitatEmbed.setDescription(zitatEmbed.description + " " + con);
                         }
                     }
-                }
+            } else {
+                zitatEmbed.setDescription(this.content)
             }
-        } else {
-            zitatEmbed.setDescription(this.content)
         }
-
 
         if (this.attachment.size > 0) {
             zitatEmbed.setImage(this.attachment.first()?.url || "");
         }
 
 
-        const msg = await zitateChannel.send({ embeds: [zitatEmbed] });
+        const msg = await zitateChannel.send({ embeds: [zitatEmbed], content: gifLink });
         let embed = new MessageEmbed()
             .setTitle("Neues Zitat")
             .setURL(msg.url)
