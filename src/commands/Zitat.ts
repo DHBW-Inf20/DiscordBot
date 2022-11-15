@@ -1,4 +1,4 @@
-import { zitateMap } from '../Bot';
+    import { zitateMap } from '../Bot';
 import { Client, BaseCommandInteraction, ContextMenuInteraction, Modal, MessageActionRow, TextInputComponent, ModalActionRowComponent } from 'discord.js';
 import ZitatHandler from '../misc/zitatHandler';
 import {  ContextMenuCommand } from "../types/command";
@@ -9,7 +9,14 @@ export const Zitat: ContextMenuCommand = {
     run: async (client: Client, interaction: ContextMenuInteraction) => {
         let content = interaction.options.get("message")?.message?.content;
         let user = interaction.options.get("message")?.message?.author.username;
-        // await interaction.deferReply();
+
+        let member = await interaction.guild?.members.fetch(interaction.user.id);
+        if (member === null) {
+            console.error("Member not found");
+            return;
+        }
+
+        user = member?.displayName || user;
 
         if(!interaction.options.get("message")?.message){
             await interaction.followUp({ content: "Es konnte keine Nachricht erkannt werden!" });
