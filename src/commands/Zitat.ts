@@ -16,7 +16,7 @@ export const Zitat: ContextMenuCommand = {
             return;
         }
 
-        user = member?.displayName || user;
+        user = member?.nickname || user;
 
         if(!interaction.options.get("message")?.message){
             await interaction.followUp({ content: "Es konnte keine Nachricht erkannt werden!" });
