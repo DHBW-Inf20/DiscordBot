@@ -57,7 +57,6 @@ export default class ZitatHandler implements zitatHandler {
             .setTitle(zitatAuthor)
             .setURL(this.contextLink)
 
-        console.log(this.attachment, this.content);
         
         if(this.content !== "") {
             zitatEmbed.setDescription(this.content);
