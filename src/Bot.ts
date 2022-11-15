@@ -53,6 +53,7 @@ client.login(config.discord.token);
 
 function loadConfig(): Config | undefined {
     return {
+        dev: process.env.DEV === "true",
         discord: {
             token: process.env.DISCORD_TOKEN || "",
             main_guild: process.env.DISCORD_MAIN_GUILD || "",

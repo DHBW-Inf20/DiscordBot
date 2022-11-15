@@ -7,6 +7,7 @@ export default (client: Client): void => {
             return;
         }
 
+        if(config!.dev) {
         // Register slash-Commands
         await client.application.commands.set(Commands);
         console.log(`${client.user.username} is online`);
@@ -14,8 +15,8 @@ export default (client: Client): void => {
         channel.bulkDelete(100);
         channel.send(
             `\`\`\`Neben der Verifizierung, werdet ihr mit /verify auch eurem Kurs zugewiesen und ihr erhaltet Zugriff auf weitere Commands wie /stundenplan.\nFalls ihr wissen wollt, was im Backend mit eurem Nutzernamen \"passiert\", könnt ihr euch in GitHub den Code genauer ansehen (https://github.com/DHBW-Inf20/DiscordBot/blob/main/src/commands/Verify.ts)\`\`\``);
-
-        // sendRoleEmbed(client); // Uncomment this line to send the role embed (ik its bad)
+        }
+        // sendRoleEmbed(client); // Uncomment this line to send the role embed again
 
     });
 

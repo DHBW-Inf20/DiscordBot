@@ -48,7 +48,7 @@ export default class ZitatHandler implements zitatHandler {
         let zitateChannel = guild.channels!.cache.find(channel => channel.name === "zitate") as TextChannel;
         if (zitateChannel === undefined) {
             console.error("Channel not found");
-            const msg = await interaction.reply({ content: "ein Zitate-channel wurde nicht gefunden, du musst zunächst einen Channel mit dem Namen \"zitate\" auf deinem Discord anlegen", ephemeral: true });
+            await interaction.reply({ content: "ein Zitate-channel wurde nicht gefunden, du musst zunächst einen Channel mit dem Namen \"zitate\" auf deinem Discord anlegen", ephemeral: true });
             return;
         }
 
@@ -57,23 +57,10 @@ export default class ZitatHandler implements zitatHandler {
             .setTitle(zitatAuthor)
             .setURL(this.contextLink)
 
-        let gifLink = "";
-        if (this.content !== "") {
-            // look if the text is a gif link, if so, add it as image
-            if (/(http|https):\/\/.*gif.*/.test(this.content)) {
-                let contentArr = this.content.split("\n").map(line => line.split(" "));
-                for (let line of contentArr)
-                    for (let con of line) {
-                        if (/(http|https):\/\/.*gif.*/.test(con)) {
-                            gifLink = con;
-                            continue;
-                        } else {
-                            zitatEmbed.setDescription(zitatEmbed.description + " " + con);
-                        }
-                    }
-            } else {
-                zitatEmbed.setDescription(this.content)
-            }
+        console.log(this.attachment, this.content);
+        
+        if(this.content !== "") {
+            zitatEmbed.setDescription(this.content);
         }
 
         if (this.attachment.size > 0) {
@@ -81,11 +68,11 @@ export default class ZitatHandler implements zitatHandler {
         }
 
 
-        const msg = await zitateChannel.send({ embeds: [zitatEmbed], content: gifLink });
+        const msg = await zitateChannel.send({ embeds: [zitatEmbed] });
         let embed = new MessageEmbed()
             .setTitle("Neues Zitat")
             .setURL(msg.url)
-            .setDescription(`${this.content} - ${zitatAuthor}`)
+            .setDescription(`${this.content !== "" ? this.content : "[Einbettung]"} - ${zitatAuthor}`)
             .setTimestamp()
             .setFooter({ text: "Gespeichert von: " + zitatSaver, iconURL: interaction.user.avatarURL()! });
 
