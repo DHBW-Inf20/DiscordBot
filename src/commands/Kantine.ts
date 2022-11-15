@@ -3,7 +3,7 @@ import { Command } from "../types/command";
 import { SlashCommandBuilder } from "@discordjs/builders"
 import { client, kantinenInterface } from "../Bot";
 import { kantine } from "interfaces/kantine";
-import { Menu } from "types/dualis";
+import { Menu } from "types/schedule";
 
 const constantButtonRow = new MessageActionRow().addComponents([
     new MessageButton().setCustomId('previousDay').setEmoji("⏮️").setStyle('SECONDARY'),

@@ -1,6 +1,6 @@
-import { client, config, dualisInterface } from '../Bot';
+import { client, config } from '../Bot';
 import { CacheType, ContextMenuInteraction, ModalSubmitInteraction, TextChannel, MessageEmbed } from 'discord.js';
-import { ScheduleWeek } from 'types/dualis';
+import { ScheduleWeek } from 'types/schedule';
 interface zitatHandler {
 
     zitatSenden: (interaction: ModalSubmitInteraction, name?: string) => void;
@@ -29,7 +29,19 @@ export default class ZitatHandler implements zitatHandler{
 
     zitatSenden = async (interaction: ModalSubmitInteraction,name?: string)  => {
         name = name || this.user;
-        let zitateChannel = await client.channels.fetch(config!.discord.zitate_channel) as TextChannel;
+
+        // get channel zitate from the guild
+        const guild = interaction.guild;
+        if(guild === null){
+            console.error("Guild not found");
+            return;
+        }
+        let zitateChannel = guild.channels!.cache.find(channel => channel.name === "zitate") as TextChannel;
+        if(zitateChannel === undefined){
+            console.error("Channel not found");
+            const msg = await interaction.reply({content: "ein Zitate-channel wurde nicht gefunden, du musst zunächst einen Channel mit dem Namen \"zitate\" auf deinem Discord anlegen", ephemeral: true});
+            return;
+        }
 
         const msg = await zitateChannel.send(`${this.content} - ${name} ${this.contextLink}`);
         let embed = new MessageEmbed()
@@ -39,29 +51,7 @@ export default class ZitatHandler implements zitatHandler{
             .setTimestamp()
             .setFooter({ text: "Gespeichert von: " + interaction.user.username, iconURL: interaction.user.avatarURL()! });
 
-        const embedReply = await interaction.reply({ embeds: [embed] });
-
-        dualisInterface.getSchedule().catch(async (err) => {
-        console.error(err);
-        }).then(async (schedule) => {   
-            // Get current weekday
-            let weekday = new Date().getDay();
-            let day = (["sonntag","montag","dienstag","mittwoch","donnerstag","freitag","samstag"] as Array<keyof ScheduleWeek>)[weekday];
-            let daySched = schedule?.schedule[day];
-            let d = new Date();
-            d.setTime(d.getTime() + 2 * 60 * 60 * 1000);
-            let currentLesson = daySched?.find((lesson) => {
-                return +(lesson.from.split(":")[0]) <= d.getHours() && +(lesson.to.split(":")[0]) >= d.getHours();
-            });
-            let lessonName = currentLesson?.moduleName;
-
-            if(lessonName){
-                msg.edit(`${this.content} - ${name} (Während der ${lessonName} Vorlesung) ${this.contextLink}`);
-            }else{
-                msg.edit(`${this.content} - ${name} ${this.contextLink}`);
-            }
-            
-        });
+        await interaction.reply({ embeds: [embed] });
         
     }
 

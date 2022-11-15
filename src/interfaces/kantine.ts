@@ -1,5 +1,5 @@
 import fetch from "node-fetch";
-import { Menu } from "../types/dualis";
+import { Menu } from "../types/schedule";
 import { parse } from 'node-html-parser'
 
 export interface kantine {

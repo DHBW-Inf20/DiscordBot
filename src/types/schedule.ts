@@ -26,6 +26,7 @@ export type ScheduleWeekData = {
     meta:{
         kw: number;
         year: number;
+        spans: number[];
     },
     schedule: ScheduleWeek
 }

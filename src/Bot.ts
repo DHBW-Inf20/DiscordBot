@@ -7,7 +7,6 @@ import dotenv from 'dotenv';
 import { Config } from "./types/misc";
 import interactionCreate from "./listeners/interactionCreate";
 import ready from "./listeners/ready";
-import Dualis from './interfaces/dualis';
 import { Kantine } from './interfaces/kantine';
 import ZitatHandler from "./misc/zitatHandler";
 import { Intranet } from './interfaces/horbintranet';
@@ -33,11 +32,11 @@ Intranet.setInstance(config.intranet.user, config.intranet.password);
 Verifier.setInstance(config.email.user, config.email.password);
 dba.setInstance(config.db.host, config.db.user, config.db.password, config.db.database);
 
+
 let d = new Date();
 d.setTime(d.getTime() + 2 * 60 * 60 * 1000);
 console.log(d.toLocaleString() + " - Starting Bot...");
 export const kantinenInterface = new Kantine(12);
-export const dualisInterface = new Dualis(config.dualis.user, config.dualis.password);
 export const zitateMap = {} as { [id: string]: ZitatHandler };
 export const verifyMap = {} as { [id: string]: VerificationHandler };
 console.log("Bot is starting...");

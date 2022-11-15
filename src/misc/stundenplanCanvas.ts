@@ -1,6 +1,5 @@
 import { createCanvas, Canvas } from 'canvas';
-import { ScheduleWeek, Schedule } from '../types/dualis';
-import { getDateOfISOWeek } from '../interfaces/dualis';
+import { ScheduleWeek, Schedule } from '../types/schedule';
 import fs from 'fs';
 
 
@@ -28,7 +27,7 @@ export class StundenplanCanvas {
         this.sched = sched;
         this.kw = kw;
         this.startDate = getDateOfISOWeek(kw, year);
-        this.endDate = new Date(this.startDate.getTime());
+        this.endDate = new Date(this.startDate.getTime() + 5 * 24 * 60 * 60 * 1000);
         this.width = 1920;
         this.height = 1080;
         this.cvs = createCanvas(this.width, this.height);
@@ -215,8 +214,9 @@ export class StundenplanCanvas {
         this.context.fillText(`Stundenplan`, (this.width / 2) - (header.width / 2), (header.actualBoundingBoxAscent - header.actualBoundingBoxDescent) * 2.5);
 
         this.context.font = '15px Consolas';
-        let subheader = this.context.measureText(`KW ${this.kw} (${shortDate(this.startDate)} - ${shortDate(this.endDate)})`);
-        this.context.fillText(`KW ${this.kw} (${shortDate(this.startDate)} - ${shortDate(this.endDate)})`, (this.width / 2) - (subheader.width / 2), (header.actualBoundingBoxAscent - header.actualBoundingBoxDescent) * 2.5 + (subheader.actualBoundingBoxAscent - subheader.actualBoundingBoxDescent) * 2);
+        let headerText = `KW ${this.kw} (${shortDate(this.startDate)} - ${shortDate(this.endDate)})`
+        let subheader = this.context.measureText(headerText);
+        this.context.fillText(headerText, (this.width / 2) - (subheader.width / 2), (header.actualBoundingBoxAscent - header.actualBoundingBoxDescent) * 2.5 + (subheader.actualBoundingBoxAscent - subheader.actualBoundingBoxDescent) * 2);
 
 
         this.context.font = '25px Consolas';
@@ -291,4 +291,47 @@ function daySeconds(d:Date){
     if (stroke) {
         ctx.stroke();
     }
+}
+
+
+/* For a given date, get the ISO week number
+ *
+ * Based on information at:
+ *
+ *    THIS PAGE (DOMAIN EVEN) DOESN'T EXIST ANYMORE UNFORTUNATELY
+ *    http://www.merlyn.demon.co.uk/weekcalc.htm#WNR
+ *
+ * Algorithm is to find nearest thursday, it's year
+ * is the year of the week number. Then get weeks
+ * between that date and the first day of that year.
+ *
+ * Note that dates in one year can be weeks of previous
+ * or next year, overlap is up to 3 days.
+ *
+ * e.g. 2014/12/29 is Monday in week  1 of 2015
+ *      2012/1/1   is Sunday in week 52 of 2011
+ */
+export function getWeekNumber(d: Date) {
+    // Copy date so don't modify original
+    d = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+    // Set to nearest Thursday: current date + 4 - current day number
+    // Make Sunday's day number 7
+    d.setUTCDate(d.getUTCDate() + 4 - (d.getUTCDay() || 7));
+    // Get first day of year
+    var yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+    // Calculate full weeks to nearest Thursday
+    var weekNo = Math.ceil((((d.getTime() - yearStart.getTime()) / 86400000) + 1) / 7);
+    // Return array of year and week number
+    return [d.getUTCFullYear(), weekNo];
+}
+
+export function getDateOfISOWeek(w: number, y: number) {
+    var simple = new Date(y, 0, 1 + (w - 1) * 7);
+    var dow = simple.getDay();
+    var ISOweekStart = simple;
+    if (dow <= 4)
+        ISOweekStart.setDate(simple.getDate() - simple.getDay() + 1);
+    else
+        ISOweekStart.setDate(simple.getDate() + 8 - simple.getDay());
+    return ISOweekStart;
 }

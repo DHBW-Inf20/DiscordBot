@@ -1,4 +1,4 @@
-import { dualisInterface, kantinenInterface } from "../Bot";
+import { kantinenInterface } from "../Bot";
 import { nextPrevSched } from "../commands/Stundenplan";
 import { Client, ButtonInteraction } from "discord.js";
 import { nextPrevKantine, sendPreview } from '../commands/Kantine';
@@ -11,7 +11,8 @@ export default async function buttonListener(client: Client, interaction: Button
         case "nextWeek":
             interaction.deferReply();
             timeDelta = timeDelta || 1;
-            nextPrevSched((dualisInterface.lastN || 0) + timeDelta, interaction);
+            // FIXME: Fix the whole nex/prev day in the schedule bro
+            // nextPrevSched((dualisInterface.lastN || 0) + timeDelta, interaction);
             break;
         case "today":
             nextPrevKantine( 0, interaction);
