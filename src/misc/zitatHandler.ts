@@ -56,10 +56,26 @@ export default class ZitatHandler implements zitatHandler {
             .setColor(member?.displayColor || "#000000")
             .setTitle(zitatAuthor)
             .setURL(this.contextLink)
-        
+
         if (this.content !== "") {
+            // look if the text is a gif link, if so, add it as image
+            if (/(http|https):\/\/.*gif.*/.test(this.content)) {
+                let contentArr = this.content.split("\n");
+                if (contentArr.length == 1) {
+                    zitatEmbed.setImage(contentArr[0]);
+                } else {
+                    for (let con in contentArr) {
+                        if (/(http|https):\/\/.*gif.*/.test(con)) {
+                            zitatEmbed.setImage(con);
+                            break;
+                        }
+                    }
+                }
+            }
+        } else {
             zitatEmbed.setDescription(this.content)
         }
+
 
         if (this.attachment.size > 0) {
             zitatEmbed.setImage(this.attachment.first()?.url || "");
