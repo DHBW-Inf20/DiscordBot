@@ -1,5 +1,5 @@
 import { client, config } from '../Bot';
-import { CacheType, ContextMenuInteraction, ModalSubmitInteraction, TextChannel, MessageEmbed } from 'discord.js';
+import { CacheType, ContextMenuInteraction, ModalSubmitInteraction, TextChannel, MessageEmbed, User } from 'discord.js';
 import { ScheduleWeek } from 'types/schedule';
 interface zitatHandler {
 
@@ -7,7 +7,7 @@ interface zitatHandler {
 
     interaction: ContextMenuInteraction; // Initial Interaction
     content: string; // Content of the message
-    user: string; // User of the message
+    user: User; // User of the message
     id: string; // ID of the message
     contextLink: string; // Link to the message
 }
@@ -15,7 +15,7 @@ interface zitatHandler {
 export default class ZitatHandler implements zitatHandler{
     interaction: ContextMenuInteraction;
     content: string;
-    user: string;
+    user: User;
     id: string;
     contextLink: string;
 
@@ -23,13 +23,20 @@ export default class ZitatHandler implements zitatHandler{
         this.interaction = interaction;
         this.contextLink = contextLink;
         this.content = interaction.options.get("message")!.message!.content;
-        this.user = interaction.options.get("message")!.message!.author.username;
+        this.user = interaction.options.get("message")!.message!.author as User;
         this.id = interaction.options.get("message")!.message!.id;
     }
 
-    zitatSenden = async (interaction: ModalSubmitInteraction,name?: string)  => {
-        name = name || this.user;
+    zitatSenden = async (interaction: ModalSubmitInteraction,zitatAuthor?: string)  => {
+        zitatAuthor = zitatAuthor || this.user.username;
+        let member = await interaction.guild?.members.fetch(this.user.id);
+        if (member === null) {
+            console.error("Member not found");  
+            return;
+        }
 
+        let zitatSaver = (await interaction.guild?.members.fetch(interaction.user.id))?.nickname || interaction.user.username;
+        zitatAuthor = member?.nickname || member?.user.username || zitatAuthor;
         // get channel zitate from the guild
         const guild = interaction.guild;
         if(guild === null){
@@ -43,13 +50,13 @@ export default class ZitatHandler implements zitatHandler{
             return;
         }
 
-        const msg = await zitateChannel.send(`${this.content} - ${name} ${this.contextLink}`);
+        const msg = await zitateChannel.send(`${this.content} - ${zitatAuthor} ${this.contextLink}`);
         let embed = new MessageEmbed()
             .setTitle("Neues Zitat")
             .setURL(msg.url)
-            .setDescription(`${this.content} - ${name}`)
+            .setDescription(`${this.content} - ${zitatAuthor}`)
             .setTimestamp()
-            .setFooter({ text: "Gespeichert von: " + interaction.user.username, iconURL: interaction.user.avatarURL()! });
+            .setFooter({ text: "Gespeichert von: " + zitatSaver, iconURL: interaction.user.avatarURL()! });
 
         await interaction.reply({ embeds: [embed] });
         
