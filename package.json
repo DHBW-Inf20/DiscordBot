@@ -18,7 +18,7 @@
     "dev": "tsc",
     "postinstall": "npm run build",
     "prestart": "npm run build",
-    "build": "tsc -p ",
+    "build": "tsc",
     "postbuild": "copyfiles -u 1 src/assets/*.* dist/"
   },
   "devDependencies": {
