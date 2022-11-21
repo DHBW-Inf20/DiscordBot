@@ -1,6 +1,6 @@
 
 import { config } from '../Bot';
-import { Base, CacheType, GuildMemberRoleManager, ModalSubmitInteraction, User } from 'discord.js';
+import { ModalSubmitInteraction, User } from 'discord.js';
 import { BaseCommandInteraction } from 'discord.js';
 import Verifier from './EmailClient';
 import dba from './databaseAdapter';

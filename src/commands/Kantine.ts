@@ -1,7 +1,7 @@
 import { ApplicationCommandOptionData, BaseCommandInteraction, Client, MessageActionRow, MessageButton, MessageEmbed, ButtonInteraction, User } from 'discord.js';
 import { Command } from "../types/command";
 import { SlashCommandBuilder } from "@discordjs/builders"
-import { client, kantinenInterface } from "../Bot";
+import { kantinenInterface } from "../Bot";
 import { kantine } from "interfaces/kantine";
 import { Menu } from "types/schedule";
 

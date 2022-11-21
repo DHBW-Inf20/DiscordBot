@@ -1,5 +1,4 @@
 import { kantinenInterface } from "../Bot";
-import { nextPrevSched } from "../commands/Stundenplan";
 import { Client, ButtonInteraction } from "discord.js";
 import { nextPrevKantine, sendPreview } from '../commands/Kantine';
 

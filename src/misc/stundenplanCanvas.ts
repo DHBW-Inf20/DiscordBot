@@ -1,5 +1,5 @@
 import { createCanvas, Canvas } from 'canvas';
-import { ScheduleWeek, Schedule } from '../types/schedule';
+import { ScheduleWeek } from '../types/schedule';
 import fs from 'fs';
 
 

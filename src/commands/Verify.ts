@@ -1,9 +1,15 @@
-import { Client, BaseCommandInteraction, ContextMenuInteraction, Modal, MessageActionRow, TextInputComponent, ModalActionRowComponent, ApplicationCommandOptionData } from 'discord.js';
+import {
+    Client,
+    BaseCommandInteraction,
+    Modal,
+    MessageActionRow,
+    TextInputComponent,
+    ModalActionRowComponent,
+} from 'discord.js';
 import { Command } from '../types/command';
 import { randomUUID } from 'crypto';
 import VerificationHandler from './../misc/verificationHandler';
 import { verifyMap } from './../Bot';
-import { Message } from 'discord.js';
 import Verifier from '../misc/EmailClient';
 import dba from './../misc/databaseAdapter';
 

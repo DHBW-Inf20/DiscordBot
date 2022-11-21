@@ -1,5 +1,12 @@
     import { zitateMap } from '../Bot';
-import { Client, BaseCommandInteraction, ContextMenuInteraction, Modal, MessageActionRow, TextInputComponent, ModalActionRowComponent } from 'discord.js';
+import {
+    Client,
+    ContextMenuInteraction,
+    Modal,
+    MessageActionRow,
+    TextInputComponent,
+    ModalActionRowComponent,
+} from 'discord.js';
 import ZitatHandler from '../misc/zitatHandler';
 import {  ContextMenuCommand } from "../types/command";
 

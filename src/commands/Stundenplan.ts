@@ -1,4 +1,11 @@
-import { BaseCommandInteraction, ButtonInteraction, Client, Message, MessageActionRow, MessageAttachment, MessageButton } from "discord.js";
+import {
+    BaseCommandInteraction,
+    ButtonInteraction,
+    Client,
+    MessageActionRow,
+    MessageAttachment,
+    MessageButton,
+} from "discord.js";
 import { Command } from "../types/command";
 import { StundenplanCanvas } from '../misc/stundenplanCanvas';
 import { randomUUID } from "crypto";

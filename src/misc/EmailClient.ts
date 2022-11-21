@@ -1,9 +1,7 @@
 import { createTransport } from "nodemailer";
-import mailgunTransport from "nodemailer-mailgun-transport";
 import fs from "fs";
 import path from "path";
 import Handlebars from 'handlebars';
-import { verifyMap } from '../Bot';
 
 interface emailVerification {
     sendVerificationEmail(email: string, code: string, dcuser:string): void;

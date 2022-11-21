@@ -1,6 +1,12 @@
-import { client, config } from '../Bot';
-import { CacheType,  ContextMenuInteraction, ModalSubmitInteraction, TextChannel, MessageEmbed, User, MessageAttachment, Collection } from 'discord.js';
-import { ScheduleWeek } from 'types/schedule';
+import {
+    ContextMenuInteraction,
+    ModalSubmitInteraction,
+    TextChannel,
+    MessageEmbed,
+    User,
+    MessageAttachment,
+    Collection,
+} from 'discord.js';
 import { Message } from 'discord.js';
 interface zitatHandler {
 

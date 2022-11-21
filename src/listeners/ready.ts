@@ -1,5 +1,5 @@
 import { config } from "../Bot";
-import { Client, DiscordAPIError, GuildChannel, TextChannel, MessageEmbed } from "discord.js";
+import { Client, TextChannel, MessageEmbed } from "discord.js";
 import { Commands } from "../Commands";
 export default (client: Client): void => {
     client.on("ready", async () => {
