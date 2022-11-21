@@ -85,7 +85,7 @@ export default class ZitatHandler implements zitatHandler {
             const referenceAuthor = referencedMessage.author;
             const referenceMember = await interaction.guild?.members.fetch(referenceAuthor.id);
             const referenceAuthorName = referenceMember?.nickname || referenceAuthor.username;
-                zitatEmbed.addField("Antwort auf:", `[${referencedMessage.content} - ${referenceAuthorName}](${referencedMessage.url})`);
+                zitatEmbed.addFields([{name: `Antwort auf: `, value: `${referencedMessage.content} - ${referenceAuthorName}](${referencedMessage.url})`}]);
             }
         }
 
