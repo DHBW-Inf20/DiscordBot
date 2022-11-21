@@ -1,6 +1,7 @@
 import { client, config } from '../Bot';
-import { CacheType, ContextMenuInteraction, ModalSubmitInteraction, TextChannel, MessageEmbed, User, MessageAttachment, Collection } from 'discord.js';
+import { CacheType,  ContextMenuInteraction, ModalSubmitInteraction, TextChannel, MessageEmbed, User, MessageAttachment, Collection } from 'discord.js';
 import { ScheduleWeek } from 'types/schedule';
+import { Message } from 'discord.js';
 interface zitatHandler {
 
     zitatSenden: (interaction: ModalSubmitInteraction, name?: string) => void;
@@ -19,14 +20,19 @@ export default class ZitatHandler implements zitatHandler {
     user: User;
     id: string;
     contextLink: string;
+    referencedID: string | undefined;
 
     constructor(interaction: ContextMenuInteraction, contextLink: string) {
         this.interaction = interaction;
         this.contextLink = contextLink;
-        this.content = interaction.options.get("message")!.message!.content;
-        this.attachment = interaction.options.get("message")!.message!.attachments as Collection<string, MessageAttachment>;
-        this.user = interaction.options.get("message")!.message!.author as User;
-        this.id = interaction.options.get("message")!.message!.id;
+        const message = interaction.options.get("message")!.message!;
+        this.referencedID = ((message as Message).reference?.messageId);
+        console.log(this.referencedID);
+        this.content = message.content;
+        this.attachment = message.attachments as Collection<string, MessageAttachment>;
+        this.user = message.author as User;
+        this.id = message.id;
+        
     }
 
     zitatSenden = async (interaction: ModalSubmitInteraction, zitatAuthor?: string) => {
@@ -64,6 +70,17 @@ export default class ZitatHandler implements zitatHandler {
 
         if (this.attachment.size > 0) {
             zitatEmbed.setImage(this.attachment.first()?.url || "");
+        }
+
+        // Check if the message has a reference
+        if(this.referencedID) {
+            let referencedMessage = await interaction.channel?.messages.fetch(this.referencedID);
+            if(referencedMessage) {
+            const referenceAuthor = referencedMessage.author;
+            const referenceMember = await interaction.guild?.members.fetch(referenceAuthor.id);
+            const referenceAuthorName = referenceMember?.nickname || referenceAuthor.username;
+                zitatEmbed.addField("Antwort auf:", `[${referencedMessage.content} - ${referenceAuthorName}](${referencedMessage.url})`);
+            }
         }
 
 
