@@ -1,5 +1,5 @@
 import { createCanvas, Canvas } from 'canvas';
-import { ScheduleWeek } from '../types/schedule';
+import { ScheduleWeek, ScheduleWeekData } from '../types/schedule';
 import fs from 'fs';
 
 
@@ -23,10 +23,10 @@ export class StundenplanCanvas {
     timelineWidth: number;
     headerOffset?: number;
     bodyHeight?: number;
-    constructor(sched:ScheduleWeek, kw: number, year: number) {
-        this.sched = sched;
-        this.kw = kw;
-        this.startDate = getDateOfISOWeek(kw, year);
+    constructor(sched: ScheduleWeekData) {
+        this.sched = sched.schedule;
+        this.kw = sched.meta.kw
+        this.startDate = getDateOfISOWeek(this.kw, sched.meta.year);
         this.endDate = new Date(this.startDate.getTime() + 5 * 24 * 60 * 60 * 1000);
         this.width = 1920;
         this.height = 1080;

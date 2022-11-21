@@ -1,17 +1,19 @@
 import { kantinenInterface } from "../Bot";
 import { Client, ButtonInteraction } from "discord.js";
 import { nextPrevKantine, sendPreview } from '../commands/Kantine';
+import stundenPlanMap from "../misc/stundenplanHandler";
 
 export default async function buttonListener(client: Client, interaction: ButtonInteraction){
     let timeDelta = undefined;
+    const interactionId = interaction.message.id;
     switch (interaction.customId) {
         case "previousWeek":
-            timeDelta = -1;
+            if(!interactionId) return;
+            stundenPlanMap.get(interactionId)?.previousWeek(interaction);
+            break;
         case "nextWeek":
-            interaction.deferReply();
-            timeDelta = timeDelta || 1;
-            // FIXME: Fix the whole nex/prev day in the schedule bro
-            // nextPrevSched((dualisInterface.lastN || 0) + timeDelta, interaction);
+            if (!interactionId) return;
+            stundenPlanMap.get(interactionId)?.nextWeek(interaction);
             break;
         case "today":
             nextPrevKantine( 0, interaction);

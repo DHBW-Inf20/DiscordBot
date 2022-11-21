@@ -11,7 +11,7 @@ import { Kantine } from './interfaces/kantine';
 import ZitatHandler from "./misc/zitatHandler";
 import { Intranet } from './interfaces/horbintranet';
 import Verifier from './misc/EmailClient';
-import VerificationHandler from "misc/verificationHandler";
+import VerificationHandler from "./misc/verificationHandler";
 import dba from './misc/databaseAdapter';
 import messageListener from "./listeners/messageListener";
 import messageReaction from "./listeners/messageReaction";

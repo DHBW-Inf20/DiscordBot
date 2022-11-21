@@ -86,20 +86,19 @@ class IntranetFacade implements HorbIntranetFacade {
     /**
      * 
      * @param kurs The course to get the schedule for
-     * @param day offset from today, 0 = today, 1 = tomorrow, -1 = yesterday, etc.
+     * @param week offset from today, 0 = today, 1 = tomorrow, -1 = yesterday, etc.
      * @returns Promise<ScheduleWeekData>
      */
-    async getStundenplan(kurs: string, day: number = 0): Promise<ScheduleWeekData> {
+    async getStundenplan(kurs: string, week: number = 0): Promise<ScheduleWeekData> {
         const loggedIn = await this.logIn().catch(err => console.error("Login in getStundenplan failed:", err));
         if (!loggedIn) {
             throw new Error("Not successfully logged in, Intranet may be down, or bad credentials");
         }
 
         const date = new Date();
-        date.setTime(date.getTime() + (day * 24 * 60 * 60 * 1000));
+        date.setTime(date.getTime() + (week * 7 * 24 * 60 * 60 * 1000));
 
         let url = `https://www.hb.dhbw-stuttgart.de/2067.html?kurs=${kurs}&goto=Kurs+anzeigen&day=${date.getDate()}&month=${date.getMonth() + 1}&year=${date.getFullYear()}`;
-
         let options: any = {
             method: 'GET',
             headers: {

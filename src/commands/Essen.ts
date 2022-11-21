@@ -15,6 +15,7 @@ export const Essen: Command = {
 
         await interaction.reply({ content: "Noch nicht implementiert", ephemeral: true });
         
+        
        
     }
 };
