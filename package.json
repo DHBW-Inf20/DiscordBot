@@ -14,9 +14,10 @@
   },
   "scripts": {
     "start": "node dist/Bot.js",
+    "dev": "tsc",
     "postinstall": "npm run build",
     "prestart": "npm run build",
-    "build": "tsc",
+    "build": "tsc -p ",
     "postbuild": "copyfiles -u 1 src/assets/*.* dist/"
   },
   "devDependencies": {
