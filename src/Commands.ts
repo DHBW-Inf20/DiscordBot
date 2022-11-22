@@ -6,4 +6,4 @@ import { Verify } from './commands/Verify';
 import { Essen } from './commands/Essen';
 
 // Register Commands of the bot
-export const Commands: (Command | ContextMenuCommand)[] = [Stundenplan, Kantine, Zitat, Verify, Essen];
+export const Commands: (Command | ContextMenuCommand)[] = [Stundenplan, Kantine, Zitat, Verify];
