@@ -20,7 +20,7 @@ export const Stundenplan: Command = {
         },
         {
             name: "kurs",
-            description: "Welcher Kurs soll angezeigt werden? (HOR-TINF20xx) [Standardweise wird der Kurs aus deiner Verifizierung genommen]",
+            description: "Welcher Kurs soll angezeigt werden?",
             type: "STRING",
             required: false
         }
