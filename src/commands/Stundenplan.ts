@@ -19,7 +19,7 @@ export const Stundenplan: Command = {
             required: false
         },
         {
-            name: "kurs",
+            name: "course",
             description: "Welcher Kurs soll angezeigt werden?",
             type: "STRING",
             required: false
