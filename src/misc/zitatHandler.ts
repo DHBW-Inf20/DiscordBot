@@ -83,7 +83,7 @@ export default class ZitatHandler implements zitatHandler {
                 zitatAuthor = ownAuthor || zitatSplit[1];
                 zitatEmbed.setColor("#000000").setTitle(zitatAuthor);
             }
-            zitatEmbed.setDescription(`"${this.content}`);
+            zitatEmbed.setDescription(`"${this.content}"`);
         }
 
         if (!liveQuote && this.attachment.size > 0) {
