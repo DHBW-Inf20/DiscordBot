@@ -83,7 +83,7 @@ export default class ZitatHandler implements zitatHandler {
                 zitatAuthor = ownAuthor || zitatSplit[1];
                 zitatEmbed.setColor("#000000").setTitle(zitatAuthor);
             }
-            zitatEmbed.setDescription(this.content);
+            zitatEmbed.setDescription(`"${this.content}`);
         }
 
         if (!liveQuote && this.attachment.size > 0) {
@@ -106,7 +106,7 @@ export default class ZitatHandler implements zitatHandler {
         let embed = new MessageEmbed()
             .setTitle("Neues Zitat")
             .setURL(msg.url)
-            .setDescription(`${this.content !== "" ? this.content : "[Einbettung]"} - ${zitatAuthor}`)
+            .setDescription(`"${this.content !== "" ? this.content : "[Einbettung]"}" - ${zitatAuthor}`)
             .setTimestamp()
             .setFooter({ text: "Gespeichert von: " + zitatSaver, iconURL: interaction.user.avatarURL()! });
         await interaction.reply({ embeds: [embed] });
