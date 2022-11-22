@@ -4,6 +4,9 @@ export interface Grade{
     grade: boolean; // true = grade is given, false = grade is not given
 }
 
+export type Wochentag = "Montag" | "Dienstag" | "Mittwoch" | "Donnerstag" | "Freitag" ;
+export type wochentag = "montag" | "dienstag" | "mittwoch" | "donnerstag" | "freitag" ;
+
 export interface Schedule{
     moduleName: string;
     from: string;
@@ -11,6 +14,8 @@ export interface Schedule{
     room: string;
     person?:string;
     course?:string;
+    col?:number;
+    type?: 'lecture' | 'exam';
 }
 
 

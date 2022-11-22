@@ -21,11 +21,15 @@ export class StundenplanCanvas {
     tilePadding:number;
     tileWidth:number;
     timelineWidth: number;
-    headerOffset?: number;
+    headerOffset?: number = 0;
+    spans: number[];
+    examcolor: string;
     bodyHeight?: number;
+    textPadding: number;
     constructor(sched: ScheduleWeekData) {
         this.sched = sched.schedule;
         this.kw = sched.meta.kw
+        this.spans = sched.meta.spans;
         this.startDate = getDateOfISOWeek(this.kw, sched.meta.year);
         this.endDate = new Date(this.startDate.getTime() + 5 * 24 * 60 * 60 * 1000);
         this.width = 1920;
@@ -36,17 +40,20 @@ export class StundenplanCanvas {
         this.foreground = '#B9BAA3';
         this.tilecolor = '#902923';
         this.linecolor = '#A22C29';
+        this.examcolor = '#DD2C29';
         this.tileforeground = '#D6D5C9';
         this.tileMargin = 10;
-        this.timelineWidth = (this.width / 6) * 0.75;
+        this.timelineWidth = 0;//(this.width / 6) * 0.75;
         this.tileWidth = (this.width - this.timelineWidth) / 5;
-        this.tilePadding = 20;
+        this.bodyHeight = this.height - (this.headerOffset || 0);
+        this.tilePadding = 30;
+        this.textPadding = 15;
     }
 
     renderCanvas() {
 
-        this.setupHeader();
-        this.drawTimeline();
+        // this.setupHeader();
+        // this.drawTimeline();
         this.drawSchedule();
     }
 
@@ -60,65 +67,121 @@ export class StundenplanCanvas {
         this.context.translate(this.timelineWidth, this.headerOffset!);
         let minN = 2000;
         for (let i = 0; i < days.length; i++) {
+            
             let day = days[i];
             if (this.sched[day] === undefined) {
                 continue;
             }
-            for (let lesson of this.sched[day]!) {
+
+            // let maxColN = this.spans.slice(0).sort((a, b) => b - a)[0] - 3;
+            // if (maxColN > 0) maxColN /= 2;
+
+            for (let lesson of this.sched[day]!) { // Berechne die optimale Schriftgröße //TODO: Optimieren
                 let n = 100;
                 this.context.font = `${n}px Consolas`;
-                while (this.context.measureText(lesson.moduleName).width > this.tileWidth * 0.95) {
+                const nameSplit = lesson.moduleName.split(" ")[0];
+                const shortenedName = nameSplit.length === 1 ? nameSplit[0] : nameSplit[0] + ".";
+                while (this.context.measureText(lesson.moduleName).width > this.tileWidth * 0.85) {
                     n--;
                     this.context.font = `${n}px Consolas`;
                 }
                 if (n < minN) {
                     minN = n;
                 }
-                
-            
             }
         }
+
         for (let i = 0; i<days.length; i++) {
             let day = days[i];
+            let span = this.spans[i]; // Wie viel platz nimmt der Tag ein? Normal ist 3, pro Extra spalte kommen 2 dazu.
+            let columns = span - 3; // Entweder eine Spalte (=0), oder n+1 Spalten (=2*n)
+            if (columns > 0) columns /= 2; // 0..n spalten
+            const multiColumn: boolean = columns > 0;
+            let colWidth = this.tileWidth / (columns + 1); // Breite der Spalte
+
             if (this.sched[day] === undefined) {
                 continue;
             }
             for (let lesson of this.sched[day]!) {
                 let startTime = new Date(`0 ${lesson.from}:00`);
                 let endTime = new Date(`0 ${lesson.to}:00`);
+                let padding = !multiColumn ? this.tilePadding : this.tilePadding / columns;
+                let fontSize = minN;
+
+                if(multiColumn){
+                    fontSize = minN / (columns * 0.8);
+                }
+                const colN = lesson.col || 0;
                 startTime.setHours(startTime.getHours() + 1);
                 endTime.setHours(endTime.getHours() + 1);
                 let startY = map(startTime.getTime(), min.getTime(), max.getTime(), 0, this.bodyHeight!);
                 let endY = map(endTime.getTime(), min.getTime(), max.getTime(), 0, this.bodyHeight!);
-                let startX = this.tileMargin + (this.tileWidth * (i));
-                let endX = this.tileMargin + (this.tileWidth * (i+1));
-                this.context.fillStyle = this.tilecolor;
-                roundRect(this.context, startX, startY, this.tileWidth-this.tileMargin, endY - startY, 5, this.foreground);
-                this.context.fillStyle = this.tileforeground;
+                let startX = this.tileMargin + (colWidth * (colN)) + (this.tileWidth * i);
+                if(colN > 0) {
 
-                this.context.font = `${minN}px Consolas`;
-              
-                let textDimensions = this.context.measureText(`${lesson.moduleName}`);
-                let textHeight = (textDimensions.actualBoundingBoxAscent - textDimensions.actualBoundingBoxDescent);
-                let textWidth = textDimensions.width;
-                let x = startX + this.tilePadding;
-                let y = startY + this.tilePadding + textHeight;
-                this.context.fillText(`${lesson.moduleName}`, x, y);
-                this.context.font = (minN*0.95)+'px Consolas';
-                textDimensions = this.context.measureText(`${lesson.room}`);
-                let oldTextHeight = textHeight;
-                textHeight = (textDimensions.actualBoundingBoxAscent - textDimensions.actualBoundingBoxDescent);
-                textWidth = textDimensions.width;
-                x = startX + this.tilePadding;
-                y = startY + this.tilePadding + textHeight + oldTextHeight * 1.5;
+                    startX -= this.tileMargin / 2;
+                
+                }
+                let endX = this.tileMargin + (colWidth * (colN + 1)) + (this.tileWidth * i);
+                this.context.fillStyle = lesson.type == 'exam' ? this.examcolor : this.tilecolor;
+                roundRect(this.context, startX, startY, colWidth - this.tileMargin, endY - startY, 40, this.foreground);
+                this.context.fillStyle = this.tileforeground;
+                this.context.font = `bold ${fontSize}px Consolas`;
+                if (lesson.type === "exam") {
+
+                    let displayString = `${lesson.moduleName}-Klausur in ${lesson.room} (${lesson.from}-${lesson.to})`;
+                    let lines = getLines(this.context, displayString, colWidth - this.tileMargin - this.tilePadding * 2);
+                    let th = 0;
+                    for (let i = 0; i < lines.length; i++) {
+                        const line = lines[i];
+                        let textDimensions = this.context.measureText(`${line}`);
+                        th += (textDimensions.actualBoundingBoxAscent - textDimensions.actualBoundingBoxDescent);
+                        let x = startX + padding;
+                        let y = startY + th + this.tilePadding + (i * 9);
+                        this.context.fillText(`${line}`, x, y);
+                    }
+                    return;
+
+                }
+                
+                const lines = getLines(this.context, lesson.moduleName, colWidth - this.tileMargin - this.textPadding);
+                let courseTextHeight = 0;
+                for(let i = 0; i<lines.length; i++) {
+                    const line = lines[i];
+                let textDimensions = this.context.measureText(`${line}`);
+                    courseTextHeight += (textDimensions.actualBoundingBoxAscent - textDimensions.actualBoundingBoxDescent);
+                let x = startX + padding;
+                let y = startY + courseTextHeight + this.tilePadding + (i * 5);
+                this.context.fillText(`${line}`, x, y);
+            }
+
+                let textDimensions = this.context.measureText(`${lesson.room}`);
+                this.context.font = `${fontSize}px Consolas`;
+                let roomTextHeight = (textDimensions.actualBoundingBoxAscent - textDimensions.actualBoundingBoxDescent);
+                let x = startX + padding;
+                let y = startY + padding  + courseTextHeight + roomTextHeight + this.textPadding * 2;
                 this.context.fillText(`${lesson.room}`, x, y);
 
+                if(!multiColumn){
                 textDimensions = this.context.measureText(`${lesson.from}-${lesson.to}`);
-                textHeight = (textDimensions.actualBoundingBoxAscent - textDimensions.actualBoundingBoxDescent);
-                textWidth = textDimensions.width;
-                x = startX + this.tilePadding;
-                y = startY + this.tilePadding + textHeight + oldTextHeight * 1.5 + textHeight * 1.5;
-                this.context.fillText(`${lesson.from}-${lesson.to}`, x, y);
+                let timeTextHeight = (textDimensions.actualBoundingBoxAscent - textDimensions.actualBoundingBoxDescent);
+                x = startX + padding;
+                y = startY + padding + courseTextHeight + roomTextHeight + timeTextHeight + this.textPadding * 3;
+                this.context.fillText(`${lesson.from}-${lesson.to}`, x, y);}
+                else {
+                    this.context.font = `${fontSize}px Consolas`;
+                    textDimensions = this.context.measureText(`${lesson.from}-`);
+                    let timeTextHeight = (textDimensions.actualBoundingBoxAscent - textDimensions.actualBoundingBoxDescent);
+                    x = startX + padding;
+                    y = startY + padding + courseTextHeight + roomTextHeight + timeTextHeight + this.textPadding * 3;
+                    this.context.fillText(`${lesson.from}-`, x, y);
+                    this.context.font = `${fontSize}px Consolas`;
+                    textDimensions = this.context.measureText(`${lesson.to}`);
+                    timeTextHeight = (textDimensions.actualBoundingBoxAscent - textDimensions.actualBoundingBoxDescent);
+                    x = startX + padding;
+                    y = startY + padding + courseTextHeight + roomTextHeight + timeTextHeight*2 + this.textPadding * 3.5;
+                    this.context.fillText(`${lesson.to}`, x, y);
+                }
                 
 
             }
@@ -334,4 +397,28 @@ export function getDateOfISOWeek(w: number, y: number) {
     else
         ISOweekStart.setDate(simple.getDate() + 8 - simple.getDay());
     return ISOweekStart;
+}
+
+/**
+ * 
+ * Source: https://stackoverflow.com/a/16599668/14379859 Modified to work for letters
+ */
+
+function getLines(ctx: CanvasRenderingContext2D, text: string, maxWidth: number) {
+    var letters = text.split("");
+    var lines = [];
+    var currentLine = letters[0];
+    
+    for (var i = 1; i < letters.length; i++) {
+        var letter = letters[i];
+        var width = ctx.measureText(currentLine + letter).width;
+        if (width < maxWidth) {
+            currentLine += letter;
+        } else {
+            lines.push(currentLine);
+            currentLine = letter;
+        }
+    }
+    lines.push(currentLine);
+    return lines;
 }

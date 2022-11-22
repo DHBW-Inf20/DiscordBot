@@ -1,7 +1,7 @@
 import fetch from "node-fetch";
 import parse, { HTMLElement } from "node-html-parser";
 import { URLSearchParams } from "url";
-import { ScheduleWeek, ScheduleWeekData } from 'types/schedule';
+import { Schedule, ScheduleWeek, ScheduleWeekData, wochentag } from 'types/schedule';
 interface HorbIntranetFacade {
     getStundenplan(kurs: string, day: number): Promise<ScheduleWeekData>;
 }
@@ -134,33 +134,62 @@ class IntranetFacade implements HorbIntranetFacade {
         let appointments: HTMLElement[] = table.querySelectorAll(".week_block");
         for (let appointment of appointments) {
             let time = appointment.querySelector(".time")?.text;
+            let backgroundCol = appointment.attributes.style.split(":")[1];
+            let type : Schedule["type"] = 'lecture';
+            if (backgroundCol == "#f79f81"){
+                type = 'exam';
+            }   
             let from = time?.split("-")[0].trim();
             let to = time?.split("-")[1].trim();
             let name = appointment.querySelector(".name")?.text;
             let person = appointment.querySelector(".person")?.text;
             let room = appointment.querySelectorAll(".resource")[0]?.text;
             let course = appointment.querySelectorAll(".resource")[1]?.text;
-            let temp = appointment.previousElementSibling;
-            let i = 1;
+            let temp = appointment.previousElementSibling; // Das muss ein small_separator sein
+            let i = 0.0; // Laufvariable die mitzählt in welcher Spalte der Termin ist diese Variable liest die anzahl an Spalten die die Klasse (small_)separatorcell hat (+0.5), somit hat man am ende den Index für den richtigen Wochentag.
+            let visitedBigSeparator = false; // Flag ob schon ein großer Separator gefunden wurde, wenn nein, dann darf die die laufvar nicht hochgezählt werden, da es mehrere Termine gleichzeitig gibt, falls diese flag auf false sitzt werden alle week_blocks gezählt um die spalte in der woche zu finden.
+
+            let lastSmallSeparator = false;
+
+            let col = 0; // Zählt die spalte der Woche. Jede Spalte nimmt 2 Colspans ein.
 
             // FIXME: This is a very bad way to get the weekday, but I couldn't find a better way right now. Currently it measures the nTh Child of a Table-Row and with the spans it can be determined which weekday it is. Which doesnt work right now. Fix: Save the spans and use it to show multicolumn in the png at the end.
-            do {
-                // if(temp.rawTagName === "tr") i++;
-                if(temp?.rawTagName === "th"){
+            while (temp !== null) {
+                if (temp?.rawTagName === "th") { // Skip table header
                     break;
                 }
-                temp = temp.previousElementSibling;
-                i++;
-            } while (temp !== null)
+                let className = temp?.attributes.class;
+                switch(className){
+                    case "week_smallseparatorcell":
+                    case "week_smallseparatorcell_black":
+                        if(visitedBigSeparator){
+                            i += 0.5;
+                        }else if(lastSmallSeparator){
+                            col++;
+                        }
+                        lastSmallSeparator = true;
+                        break;
+                    case "week_separatorcell_black":
+                    case "week_separatorcell":
+                        visitedBigSeparator = true;
+                        lastSmallSeparator = false;
 
-            let j = 0;
-            let savei = i;
-            for (let span of spans) {
-                if (i < span) break;
-                i -= span;
-                j++;
-            }
-            let day = ["montag", "dienstag", "mittwoch", "donnerstag", "freitag"][j] as 'montag' | 'dienstag' | 'mittwoch' | 'donnerstag' | 'freitag';
+                        i+=0.5;
+                        break;
+                    case "week_block":
+                        lastSmallSeparator = false;
+                        if(!visitedBigSeparator){
+                            col++;
+                        }
+                        break;
+                }
+
+
+
+                temp = temp.previousElementSibling;
+            } 
+
+            let day = ["montag", "dienstag", "mittwoch", "donnerstag", "freitag"][i] as 'montag' | 'dienstag' | 'mittwoch' | 'donnerstag' | 'freitag';
             if (!data[day]) data[day] = [];
 
             data[day]?.push(
@@ -170,12 +199,17 @@ class IntranetFacade implements HorbIntranetFacade {
                     to: to || "",
                     room: room || "",
                     person: person || "",
-                    course: course || ""
+                    course: course || "",
+                    col, type
                 });
         }
 
+
         return { meta: { kw, year: date.getFullYear(), spans }, schedule: data };
     }
+
+    
+    
 }
 
 let intranet: IntranetFacade;

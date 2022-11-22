@@ -39,7 +39,7 @@ class StundenPlanHandler implements stundenPlanHandler {
         }
 
         this.interaction = interaction;
-        this.course = "HOR-T" + dbUser.course;
+        this.course = (interaction.options.get("kurs")?.value || "HOR-T" + dbUser.course) as string;
         
         await interaction.deferReply();
 

@@ -47,9 +47,7 @@ export const client = new Client({
 // Initializing Listeners...
 initListeners(client);
 // Logging in
-console.log(config.discord.token);
 client.login(config.discord.token);
-
 
 function loadConfig(): Config | undefined {
     return {

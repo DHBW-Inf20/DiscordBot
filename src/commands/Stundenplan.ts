@@ -1,23 +1,11 @@
 import {
     BaseCommandInteraction,
-    ButtonInteraction,
     Client,
-    MessageActionRow,
-    MessageAttachment,
-    MessageButton,
 } from "discord.js";
 import { Command } from "../types/command";
-import { StundenplanCanvas } from '../misc/stundenplanCanvas';
-import { randomUUID } from "crypto";
-import { Intranet } from './../interfaces/horbintranet';
-import dba from './../misc/databaseAdapter';
 import { newStundenplanHandler } from "../misc/stundenplanHandler";
 
 // Globally used constants by this command-Family
-const constantButtonRow = new MessageActionRow().addComponents([
-    new MessageButton().setCustomId('previousWeek').setLabel('<< Vorherige Woche').setStyle('SECONDARY'),
-    new MessageButton().setCustomId('nextWeek').setLabel('Nächste Woche >>').setStyle('SECONDARY')
-])
 
 export const Stundenplan: Command = {
     name: "stundenplan",
@@ -28,6 +16,12 @@ export const Stundenplan: Command = {
             name: "woche",
             description: "Welche Woche soll angezeigt werden? (n viele Wochen in die Zukunft)",
             type: "INTEGER",
+            required: false
+        },
+        {
+            name: "kurs",
+            description: "Welcher Kurs soll angezeigt werden? (HOR-TINF20xx) [Standardweise wird der Kurs aus deiner Verifizierung genommen]",
+            type: "STRING",
             required: false
         }
     ],

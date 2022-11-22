@@ -7,6 +7,8 @@ export default (client: Client): void => {
             return;
         }
 
+        console.log(`${client.user.tag} ist Online!`);
+
         if(!config!.dev) {
         // Register slash-Commands
         await client.application.commands.set(Commands);
