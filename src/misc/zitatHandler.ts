@@ -41,8 +41,8 @@ export default class ZitatHandler implements zitatHandler {
         
     }
 
-    zitatSenden = async (interaction: ModalSubmitInteraction, zitatAuthor?: string) => {
-        zitatAuthor = zitatAuthor || this.user.username;
+    zitatSenden = async (interaction: ModalSubmitInteraction, ownAuthor?: string) => {
+        let zitatAuthor = ownAuthor;
         let member = await interaction.guild?.members.fetch(this.user.id);
         if (member === null) {
             console.error("Member not found");
@@ -50,7 +50,7 @@ export default class ZitatHandler implements zitatHandler {
         }
 
         let zitatSaver = (await interaction.guild?.members.fetch(interaction.user.id))?.nickname || interaction.user.username;
-        zitatAuthor = member?.nickname || member?.user.username || zitatAuthor;
+        zitatAuthor = zitatAuthor || member?.nickname || member?.user.username || this.user.username;
         // get channel zitate from the guild
         const guild = interaction.guild;
         if (guild === null) {
@@ -69,23 +69,35 @@ export default class ZitatHandler implements zitatHandler {
             .setTitle(zitatAuthor)
             .setURL(this.contextLink)
 
-        
+        let liveQuote = false; // Wurde dieses Zitat nur ausgesprochen und in discord wieder aufgeschrieben, oder ist das ein Zitat aus Discord? (liveQuote z. B.: "lorem ipsum - i20029"). Autor ist i20029, nicht derjenige, der das Zitat aufgeschrieben hat.
+
         if(this.content !== "") {
+            // Check if the message itself is a quote of some form
+            const zitatSplit = this.content.split(" - ");
+            // Check if the message is a quote and not just a normal message
+            if (zitatSplit.length > 1) {
+                // Delete all quote marks from the quote
+                liveQuote = true;
+                zitatSplit[0] = zitatSplit[0].replace(/"/g, "");
+                this.content = zitatSplit[0];
+                zitatAuthor = ownAuthor || zitatSplit[1];
+                zitatEmbed.setColor("#000000").setTitle(zitatAuthor);
+            }
             zitatEmbed.setDescription(this.content);
         }
 
-        if (this.attachment.size > 0) {
+        if (!liveQuote && this.attachment.size > 0) {
             zitatEmbed.setImage(this.attachment.first()?.url || "");
         }
 
         // Check if the message has a reference
-        if(this.referencedID) {
+        if(!liveQuote && this.referencedID) {
             let referencedMessage = await interaction.channel?.messages.fetch(this.referencedID);
             if(referencedMessage) {
             const referenceAuthor = referencedMessage.author;
             const referenceMember = await interaction.guild?.members.fetch(referenceAuthor.id);
             const referenceAuthorName = referenceMember?.nickname || referenceAuthor.username;
-                zitatEmbed.addFields([{name: `Antwort auf: `, value: `${referencedMessage.content} - ${referenceAuthorName}](${referencedMessage.url})`}]);
+                zitatEmbed.addFields([{name: `Antwort auf: `, value: `[${referencedMessage.content} - ${referenceAuthorName}](${referencedMessage.url})`}]);
             }
         }
 
@@ -97,7 +109,6 @@ export default class ZitatHandler implements zitatHandler {
             .setDescription(`${this.content !== "" ? this.content : "[Einbettung]"} - ${zitatAuthor}`)
             .setTimestamp()
             .setFooter({ text: "Gespeichert von: " + zitatSaver, iconURL: interaction.user.avatarURL()! });
-
         await interaction.reply({ embeds: [embed] });
 
     }
