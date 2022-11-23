@@ -10,7 +10,7 @@ import { LiveTickerHandler, liveTickerHandlerMap } from './../misc/liveTickerHan
 
 export const LiveTicker: Command = {
     name: "liveticker",
-    description: "",
+    description: "Spielt einen Liveticker ab im momentanen Channel",
     type: "CHAT_INPUT",
     run: async (client: Client, interaction: BaseCommandInteraction) => {
 
