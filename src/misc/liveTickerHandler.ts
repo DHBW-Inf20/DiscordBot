@@ -21,7 +21,7 @@ class LiveTickerHandler implements liveTickerHandler {
     }
 
     async getData() : Promise<wmData[]>{
-        let response = await fetch("https://api.openligadb.de/getmatchdata/WM2022")
+        let response = await fetch("https://api.openligadb.de/getmatchdata/wmk")
         return response.json();
     }
 
