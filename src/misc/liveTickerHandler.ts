@@ -1,4 +1,5 @@
 import { Channel, EmbedFieldData, Message, MessageEmbed, TextBasedChannel } from "discord.js";
+import fetch from "node-fetch";
 import { wmData, wmGoal } from "types/misc";
 
 interface liveTickerHandler {
