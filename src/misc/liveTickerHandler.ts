@@ -29,10 +29,11 @@ class LiveTickerHandler implements liveTickerHandler {
 
         // get data
         let data = await this.getData();
-
         // check if data is new
         let germanMatches = this.getAllGermanMatches(data);
         if(config?.debug){
+            console.log(`Live-Ticker: Data Get: ${data}`)
+            console.log(`Live-Ticker: German Data Get: ${germanMatches}`)
             console.log(`Live-Ticker: Matches Found ${germanMatches.map(match=>{
                 return `${match.team1} vs. ${match.team2}`
             })}`);
@@ -153,6 +154,7 @@ class LiveTickerHandler implements liveTickerHandler {
 
     start(){
 
+        this.processData();
         const minutes = 1;
         this.interval = setInterval(async () => {
             this.processData();
