@@ -34,7 +34,7 @@ class LiveTickerHandler implements liveTickerHandler {
         if(config?.debug){
             console.log(`Live-Ticker: Data Get: ${util.inspect(data, false, null, true)}`);
             console.log(`Live-Ticker: German Matches Found ${germanMatches.map(match=>{
-                return `${match.team1} vs. ${match.team2}`
+                return `${match.team1.teamName} vs. ${match.team2.teamName}`
             })}`);
         }
         if(germanMatches.length > 0){
@@ -128,7 +128,8 @@ class LiveTickerHandler implements liveTickerHandler {
 
         let embed = new MessageEmbed().
             setTitle(`Endergebnis: ${match.team1.teamName} vs. ${match.team2.teamName}`).
-            setDescription(`Gewonnen hat ${winner}`).
+            setThumbnail(winner.teamIconUrl).
+            setDescription(`Gewonnen hat ${winner.teamName}`).
             addFields(fields)
 
         this.channel.send({embeds: [embed]});
