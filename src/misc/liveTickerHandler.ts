@@ -148,7 +148,7 @@ class LiveTickerHandler implements liveTickerHandler {
 
     getAllGermanMatches(data: wmData[]){
         return data.filter(match =>{
-            return match.team1.teamGroupName == "Deutschland" || match.team2.teamGroupName == "Deutschland";
+            return match.team1.teamName.trim() == "Deutschland" || match.team2.teamName.trim() == "Deutschland";
         })
     }
 
