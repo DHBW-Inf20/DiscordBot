@@ -1,6 +1,7 @@
-import { Channel, EmbedFieldData, Message, MessageEmbed, TextBasedChannel } from "discord.js";
+import { Channel, EmbedFieldData, Message, MessageEmbed, SystemChannelFlags, TextBasedChannel } from "discord.js";
 import fetch from "node-fetch";
 import { wmData, wmGoal } from "types/misc";
+import { config } from './../Bot';
 
 interface liveTickerHandler {
 
@@ -31,12 +32,29 @@ class LiveTickerHandler implements liveTickerHandler {
 
         // check if data is new
         let germanMatches = this.getAllGermanMatches(data);
+        if(config?.debug){
+            console.log(`Live-Ticker: Matches Found ${germanMatches.map(match=>{
+                return `${match.team1} vs. ${match.team2}`
+            })}`);
+        }
         if(germanMatches.length > 0){
             let newUpdate = germanMatches[0].matchDateTimeUTC;
+            config?.debug && console.log(`Live-Ticker: NewDate: ${newUpdate}, oldDate: ${this.lastUpdate}`)
             if(newUpdate != this.lastUpdate){
                 this.lastUpdate = newUpdate;
                 this.processMessage(germanMatches[0]);
             }
+        }
+    }
+
+    async sendInitialEmbed(match: wmData){
+        if(match.matchResults){
+            // Game already started
+            let embed = new MessageEmbed().
+            setTitle(`Aktuelles Spiel`).
+            setDescription(`${match.team1.teamName} vs. ${match.team2.teamName}`).
+            addFields(this.getGoalFields(match.goals, match.team1.shortName, match.team2.shortName));
+
         }
     }
 
@@ -47,6 +65,10 @@ class LiveTickerHandler implements liveTickerHandler {
             this.stop();
             await this.sendFinishedMessage(match);
             return;
+        }
+
+        if(!this.lastMessage){
+            await this.sendInitialEmbed(match);
         }
 
         // Check the goals
@@ -86,6 +108,7 @@ class LiveTickerHandler implements liveTickerHandler {
         if(this.lastMessage){
             this.lastMessage.deletable && this.lastMessage.delete();
         }
+
 
         this.lastMessage = await this.channel.send({embeds: [embed]});
     }

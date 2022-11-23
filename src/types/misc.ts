@@ -1,5 +1,6 @@
 export interface Config {
     dev: boolean;
+    debug: boolean;
     discord: {
         token: string;
         main_guild: string;

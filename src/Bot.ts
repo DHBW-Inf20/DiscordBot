@@ -74,6 +74,7 @@ function loadConfig(): Config | undefined {
         support: {
             userid: process.env.SUPPORT_USERID || "902550033084346378"
         },
+        debug: process.env.BOTDEBUG === "true",
         db: {
             host: process.env.DB_HOST || "",
             user: process.env.DB_USER || "",
