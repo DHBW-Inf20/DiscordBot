@@ -2,7 +2,7 @@ import { Channel, EmbedFieldData, Message, MessageEmbed, SystemChannelFlags, Tex
 import fetch from "node-fetch";
 import { wmData, wmGoal } from "types/misc";
 import { config } from './../Bot';
-
+import util from 'util';
 interface liveTickerHandler {
 
 }
@@ -32,7 +32,7 @@ class LiveTickerHandler implements liveTickerHandler {
         // check if data is new
         let germanMatches = this.getAllGermanMatches(data);
         if(config?.debug){
-            console.log(`Live-Ticker: Data Get: ${data}`)
+            console.log(`Live-Ticker: Data Get: ${util.inspect(data, false, null, true)}`);
             console.log(`Live-Ticker: German Data Get: ${germanMatches}`)
             console.log(`Live-Ticker: Matches Found ${germanMatches.map(match=>{
                 return `${match.team1} vs. ${match.team2}`
