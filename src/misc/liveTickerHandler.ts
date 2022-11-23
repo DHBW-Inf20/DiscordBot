@@ -33,8 +33,7 @@ class LiveTickerHandler implements liveTickerHandler {
         let germanMatches = this.getAllGermanMatches(data);
         if(config?.debug){
             console.log(`Live-Ticker: Data Get: ${util.inspect(data, false, null, true)}`);
-            console.log(`Live-Ticker: German Data Get: ${germanMatches}`)
-            console.log(`Live-Ticker: Matches Found ${germanMatches.map(match=>{
+            console.log(`Live-Ticker: German Matches Found ${germanMatches.map(match=>{
                 return `${match.team1} vs. ${match.team2}`
             })}`);
         }
