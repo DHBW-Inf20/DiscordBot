@@ -78,6 +78,11 @@ export class VoteZitatHandler implements zitatHandler {
 
         if (!liveQuote && (this.message).attachments.size > 0) {
             zitatEmbed.setImage(this.message.attachments.first()?.url || "");
+            if (this.message.attachments.first()?.url?.includes("mp4")) {
+                zitatEmbed.setImage("");
+                zitateChannel.send({ content: `Video von ${zitatAuthor} ${contextLink} ${this.message.attachments.first()?.url || ""}` });
+                return;
+            }
         }
 
         // Check if the message has a reference
@@ -197,6 +202,12 @@ export default class ZitatHandler implements zitatHandler {
 
         if (!liveQuote && this.attachment.size > 0) {
             zitatEmbed.setImage(this.attachment.first()?.url || "");
+            // check if the attachment is a video
+            if (this.attachment.first()?.url?.includes("mp4")) {
+                zitatEmbed.setImage("");
+                zitateChannel.send({ content: `Video von ${zitatAuthor} ${this.contextLink} ${this.attachment.first()?.url || ""}` });
+                return;
+            }
         }
 
         // Check if the message has a reference
