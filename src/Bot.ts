@@ -88,5 +88,9 @@ function initListeners(client: Client): void {
     ready(client);
     interactionCreate(client);
     messageListener(client);
-    messageReaction(client);
+    try{
+        messageReaction(client);
+    }catch(e){
+        console.error("Error with Reactions!:", e);
+    }
 }
