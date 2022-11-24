@@ -10,7 +10,7 @@ import {
     PartialMessage,
 } from 'discord.js';
 import { Message } from 'discord.js';
-import dba from './databaseAdapter';
+import dba, { IZitat } from './databaseAdapter';
 interface zitatHandler {
 
 }
@@ -81,6 +81,7 @@ export class VoteZitatHandler implements zitatHandler {
         }
 
         // Check if the message has a reference
+        let referenceZitat : IZitat | null = null;
         let referencedID = this.message.reference?.messageId;
         if (!liveQuote && referencedID) {
             let referencedMessage = await this.message.channel?.messages.fetch(referencedID);
@@ -89,6 +90,13 @@ export class VoteZitatHandler implements zitatHandler {
                 const referenceMember = await this.message.guild?.members.fetch(referenceAuthor.id);
                 const referenceAuthorName = referenceMember?.nickname || referenceAuthor.username;
                 zitatEmbed.addFields([{ name: `Antwort auf: `, value: `[${referencedMessage.content} - ${referenceAuthorName}](${referencedMessage.url})` }]);
+
+                const refExists = await dba.getInstance().zitatExists(referencedID);
+                if (refExists) {
+                    referenceZitat = await dba.getInstance().getZitat(referencedID);
+                } else {
+                    referenceZitat = await dba.getInstance().addZitat(referencedID, referencedMessage.content, referenceAuthorName, referencedMessage.url, null, referencedMessage.attachments.first()?.url);
+                } 
             }
         }
 
@@ -100,7 +108,7 @@ export class VoteZitatHandler implements zitatHandler {
             .setDescription(`"${content !== "" ? content : "[Einbettung]"}" - ${zitatAuthor}`)
             .setTimestamp()
         await this.message.channel.send({ embeds: [embed] });
-        await dba.getInstance().addZitat(this.message.id, content, zitatAuthor, this.message.attachments.first()?.url);
+        await dba.getInstance().addZitat(this.message.id, content, zitatAuthor, contextLink, referenceZitat, this.message.attachments.first()?.url);
     }
 
     
@@ -178,6 +186,7 @@ export default class ZitatHandler implements zitatHandler {
         }
 
         // Check if the message has a reference
+        let referenceZitat : IZitat | null = null;
         if(!liveQuote && this.referencedID) {
             let referencedMessage = await interaction.channel?.messages.fetch(this.referencedID);
             if(referencedMessage) {
@@ -185,6 +194,14 @@ export default class ZitatHandler implements zitatHandler {
             const referenceMember = await interaction.guild?.members.fetch(referenceAuthor.id);
             const referenceAuthorName = referenceMember?.nickname || referenceAuthor.username;
                 zitatEmbed.addFields([{name: `Antwort auf: `, value: `[${referencedMessage.content} - ${referenceAuthorName}](${referencedMessage.url})`}]);
+                const refExists = await dba.getInstance().zitatExists(this.referencedID);
+                if(refExists) {
+                    referenceZitat = await dba.getInstance().getZitat(this.referencedID);
+                }else{
+                    referenceZitat = await dba.getInstance().addZitat(this.referencedID, referencedMessage.content, referenceAuthorName, referencedMessage.url, null,  referencedMessage.attachments.first()?.url);
+                } 
+
+                
             }
         }
 
@@ -197,7 +214,8 @@ export default class ZitatHandler implements zitatHandler {
             .setTimestamp()
             .setFooter({ text: "Gespeichert von: " + zitatSaver, iconURL: interaction.user.avatarURL()! });
         await interaction.reply({ embeds: [embed] });
-        await dba.getInstance().addZitat(this.id, this.content, zitatAuthor, this.attachment.first()?.url);
+
+        await dba.getInstance().addZitat(this.id, this.content, zitatAuthor, this.contextLink, referenceZitat, this.attachment.first()?.url);
 
     }
 

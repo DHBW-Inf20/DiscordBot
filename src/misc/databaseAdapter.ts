@@ -5,21 +5,28 @@ interface DBA {
     initDB(): Promise<void>;
 }
 
-interface IUser {
+export interface IUser {
     dhusername: string,
     discordId: string,
     roles: string[],
     course: string,
 }
 
-interface IZitat {
+export interface IZitat {
     discordId: string,
     zitat: string,
     image: string,
+    reference: IZitat | null,
     author: string,
+    contextLink: string,
 }
 
 class DatabaseAdapter implements DBA {
+
+
+    async getZitat(referencedID: string): Promise<IZitat | null> {
+        return this.zitatModel.findOne({ discordId: referencedID });
+    }
 
     userModel: mongoose.Model<IUser>;
     zitatModel: mongoose.Model<IZitat>;
@@ -38,6 +45,8 @@ class DatabaseAdapter implements DBA {
             zitat: String,
             image: String,
             author: String,
+            contextLink: String,
+            reference: { type: mongoose.Schema.Types.ObjectId, ref: 'Zitat' }
         });
 
         this.userModel = mongoose.model<IUser>('User', UserSchema);
@@ -73,11 +82,13 @@ class DatabaseAdapter implements DBA {
         return user.save();
     }
 
-    async addZitat(id: string, zitat: string, author: string, imageURL?: string): Promise<IZitat> {
+    async addZitat(id: string, zitat: string, author: string, contextLink:string,  reference: IZitat | null,imageURL?: string): Promise<IZitat> {
         const zitatModel = new this.zitatModel({
             discordId: id,
             zitat: zitat,
             image: imageURL,
+            reference: reference,
+            contextLink: contextLink,
             author: author
         });
         return zitatModel.save();	
