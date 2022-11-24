@@ -12,11 +12,19 @@ interface IUser {
     course: string,
 }
 
+interface IZitat {
+    discordId: string,
+    zitat: string,
+    image: string,
+    author: string,
+}
+
 class DatabaseAdapter implements DBA {
 
     userModel: mongoose.Model<IUser>;
+    zitatModel: mongoose.Model<IZitat>;
     constructor(host: string, user: string, password: string, dbname: string) {
-      mongoose.connect(`mongodb+srv://${user}:${password}@${host}/${dbname}?retryWrites=true&w=majority`);
+        mongoose.connect(`mongodb+srv://${user}:${password}@${host}/${dbname}?retryWrites=true&w=majority`);
 
         const UserSchema = new mongoose.Schema<IUser>({
             dhusername: String,
@@ -25,8 +33,15 @@ class DatabaseAdapter implements DBA {
             course: String,
         });
 
+        const ZitatSchema = new mongoose.Schema<IZitat>({
+            discordId: String,
+            zitat: String,
+            image: String,
+            author: String,
+        });
+
         this.userModel = mongoose.model<IUser>('User', UserSchema);
-        
+        this.zitatModel = mongoose.model<IZitat>('Zitat', ZitatSchema);
     }
     initDB(): Promise<void> {
         throw new Error("Method not implemented.");
@@ -40,7 +55,7 @@ class DatabaseAdapter implements DBA {
 
     async verifyUser(dhusername: string, discordId: string): Promise<boolean> {
         const user = await this.userModel.findOne({ dhusername: dhusername, discordId: discordId });
-        return user !== null; 
+        return user !== null;
     }
 
     async getUser(discordId: string): Promise<IUser | null> {
@@ -57,15 +72,30 @@ class DatabaseAdapter implements DBA {
         });
         return user.save();
     }
+
+    async addZitat(id: string, zitat: string, author: string, imageURL?: string): Promise<IZitat> {
+        const zitatModel = new this.zitatModel({
+            discordId: id,
+            zitat: zitat,
+            image: imageURL,
+            author: author
+        });
+        return zitatModel.save();	
+    }
+
+    async zitatExists(id: string): Promise<boolean> {
+        const zitat = await this.zitatModel.findOne({ discordId : id });
+        return zitat !== null;
+    }
 }
 
 const dba = {
     instance: null as DatabaseAdapter | null,
-    setInstance: (host:string, user:string, password:string, db:string) => {
+    setInstance: (host: string, user: string, password: string, db: string) => {
         dba.instance = new DatabaseAdapter(host, user, password, db);
     },
     getInstance: () => {
-        if(!dba.instance) throw new Error("Instance not set");
+        if (!dba.instance) throw new Error("Instance not set");
         return dba.instance;
     }
 }
