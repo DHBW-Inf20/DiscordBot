@@ -8,17 +8,12 @@ import dba from './../misc/databaseAdapter';
 
 
 export default (client: Client): void => {
-
-    
-
     client.on('messageReactionAdd', async (reaction, user) => {
         if(reaction.message.partial) await reaction.message.fetch();
         if(reaction.partial) await reaction.fetch();
         if(user.partial) await user.fetch();
         if(user.bot) return; // Ignore bot messages
 
-        // Only really look at messages in the main guild
-        if(reaction.message.guildId !== config?.discord.main_guild) return;
         // Check if the message is in a channel that is used for roles
         if(reaction.message.channelId === config?.discord.roles_channel) {
             const member = reaction.message.guild?.members.cache.get(user.id);
@@ -28,7 +23,9 @@ export default (client: Client): void => {
             return;   
         }
 
-        console.log(`Reaction added: ${reaction.emoji.name} by ${user.username} in ${reaction.message.channelId}`);
+        if(config?.debug){   
+            console.log(`Reaction added: ${reaction.emoji.name} by ${user.username} in ${reaction.message.channelId}`);
+        }
         if (reaction.emoji.name === '⭐' ){
             if(config?.debug){
                 console.log(`Reaction with Star registered!`)
@@ -62,7 +59,7 @@ export default (client: Client): void => {
             const member = reaction.message.guild?.members.cache.get(user.id);
             if (!member) return;
             const f = member.roles.remove;
-            toggleRole(f ,reaction.emoji.name);
+            await toggleRole(f ,reaction.emoji.name);
         }
     });
 };
