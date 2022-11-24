@@ -18,7 +18,9 @@ export interface IZitat {
     image: string,
     reference: IZitat | null,
     author: string,
+    weird: boolean,
     contextLink: string,
+
 }
 
 class DatabaseAdapter implements DBA {
@@ -43,6 +45,7 @@ class DatabaseAdapter implements DBA {
         const ZitatSchema = new mongoose.Schema<IZitat>({
             discordId: String,
             zitat: String,
+            weird: Boolean,
             image: String,
             author: String,
             contextLink: String,
@@ -82,6 +85,19 @@ class DatabaseAdapter implements DBA {
         return user.save();
     }
 
+    async addWeirdZitat(id: string, zitat: string, contextLink: string){
+        const zitatModel = new this.zitatModel({
+            discordId: id,
+            zitat: zitat,
+            weird: true,
+            author: "",
+            image: "",
+            reference: null,
+            contextLink: contextLink
+        });
+        return zitatModel.save();
+    }
+
     async addZitat(id: string, zitat: string, author: string, contextLink:string,  reference: IZitat | null,imageURL?: string): Promise<IZitat> {
         const zitatModel = new this.zitatModel({
             discordId: id,
@@ -89,7 +105,8 @@ class DatabaseAdapter implements DBA {
             image: imageURL,
             reference: reference,
             contextLink: contextLink,
-            author: author
+            author: author,
+            weird: false
         });
         return zitatModel.save();	
     }

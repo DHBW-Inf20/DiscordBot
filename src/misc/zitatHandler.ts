@@ -128,8 +128,8 @@ export default class ZitatHandler implements zitatHandler {
         this.contextLink = contextLink;
         const message = interaction.options.get("message")!.message!;
         this.referencedID = ((message as Message).reference?.messageId);
-        console.log(this.referencedID);
         this.content = message.content;
+        console.log(this.content.split("\n"));
         this.attachment = message.attachments as Collection<string, MessageAttachment>;
         this.user = message.author as User;
         this.id = message.id;
@@ -143,6 +143,8 @@ export default class ZitatHandler implements zitatHandler {
             console.error("Member not found");
             return;
         }
+
+        
 
         let zitatSaver = (await interaction.guild?.members.fetch(interaction.user.id))?.nickname || interaction.user.username;
         zitatAuthor = zitatAuthor || member?.nickname || member?.user.username || this.user.username;
@@ -170,13 +172,25 @@ export default class ZitatHandler implements zitatHandler {
             // Check if the message itself is a quote of some form
             const zitatSplit = this.content.split(" - ");
             // Check if the message is a quote and not just a normal message
-            if (zitatSplit.length > 1) {
+            if (zitatSplit.length === 2) {
                 // Delete all quote marks from the quote
                 liveQuote = true;
                 zitatSplit[0] = zitatSplit[0].replace(/"/g, "");
                 this.content = zitatSplit[0];
                 zitatAuthor = ownAuthor || zitatSplit[1];
                 zitatEmbed.setColor("#000000").setTitle(zitatAuthor);
+            }else if(zitatSplit.length > 2){
+                // Its weird, just post it as plain text //TODO: Maybe make it better
+                let msg = await zitateChannel.send(this.content);
+                let embed = new MessageEmbed()
+                    .setTitle("Neues Zitat")
+                    .setURL(msg.url)
+                    .setDescription(`${this.content}`)
+                    .setTimestamp()
+                    .setFooter({ text: "Gespeichert von: " + zitatSaver, iconURL: interaction.user.avatarURL()! });
+                await interaction.reply({ embeds: [embed] });
+                await dba.getInstance().addWeirdZitat(this.id, this.content, this.contextLink);
+                return;
             }
             zitatEmbed.setDescription(`"${this.content}"`);
         }
