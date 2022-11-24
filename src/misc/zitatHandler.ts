@@ -37,6 +37,8 @@ export class VoteZitatHandler implements zitatHandler {
             return;
         }
 
+        
+
         zitatAuthor = zitatAuthor || member?.nickname || member?.user.username || this.user.username;
         // get channel zitate from the guild
         const guild = this.message.guild;

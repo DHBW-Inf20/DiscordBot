@@ -28,10 +28,18 @@ export default (client: Client): void => {
             return;   
         }
 
+        console.log(`Reaction added: ${reaction.emoji.name} by ${user.username} in ${reaction.message.channelId}`);
         if (reaction.emoji.name === '⭐' ){
-            if((reaction.count || 0) >= 4){
+            if(config?.debug){
+                console.log(`Reaction with Star registered!`)
+            }
+            if((reaction.count || 0) >= 1){
                 // Check if it already exists
-                if(await dba.getInstance().zitatExists(reaction.message.id)) return;
+                console.log(`Reaction with star reached over 4!`)
+                if(await dba.getInstance().zitatExists(reaction.message.id)) {
+                    console.log(`Reaction with star reached over 4 and already exists!`)
+                    return;
+                }
 
                 // Add the zitat
                 const zitat = new VoteZitatHandler(reaction as MessageReaction, user as User);
