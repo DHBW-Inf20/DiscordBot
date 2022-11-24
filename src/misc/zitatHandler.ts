@@ -197,6 +197,7 @@ export default class ZitatHandler implements zitatHandler {
             .setTimestamp()
             .setFooter({ text: "Gespeichert von: " + zitatSaver, iconURL: interaction.user.avatarURL()! });
         await interaction.reply({ embeds: [embed] });
+        await dba.getInstance().addZitat(this.id, this.content, zitatAuthor, this.attachment.first()?.url);
 
     }
 

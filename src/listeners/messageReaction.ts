@@ -30,7 +30,7 @@ export default (client: Client): void => {
             if(config?.debug){
                 console.log(`Reaction with Star registered!`)
             }
-            if((reaction.count || 0) >= 1){
+            if((reaction.count || 0) >= 4){
                 // Check if it already exists
                 console.log(`Reaction with star reached over 4!`)
                 if(await dba.getInstance().zitatExists(reaction.message.id)) {
