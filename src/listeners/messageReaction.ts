@@ -1,6 +1,6 @@
 
 import { Client, Collection, GuildMember, MessageReaction, Role, RoleResolvable, User } from 'discord.js';
-import { VoteZitatHandler } from 'misc/zitatHandler';
+import { VoteZitatHandler } from './../misc/zitatHandler';
 import { config } from '../Bot';
 import dba from './../misc/databaseAdapter';
 
