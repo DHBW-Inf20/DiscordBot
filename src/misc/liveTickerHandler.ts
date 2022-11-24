@@ -15,9 +15,11 @@ class LiveTickerHandler implements liveTickerHandler {
     channel: TextBasedChannel;
     lastMessage: Message | undefined = undefined;
     lastGoals: wmGoal[] = [];
+    land:string;
 
-    constructor(channel: TextBasedChannel){
+    constructor(channel: TextBasedChannel, land:string){
         this.channel = channel;
+        this.land = land;
     }
 
     async getData() : Promise<wmData[]>{
@@ -30,19 +32,19 @@ class LiveTickerHandler implements liveTickerHandler {
         // get data
         let data = await this.getData();
         // check if data is new
-        let germanMatches = this.getAllGermanMatches(data);
+        let countryMatches = this.getAllCountryMatches(data);
         if(config?.debug){
             console.log(`Live-Ticker: Data Get: ${util.inspect(data, false, null, true)}`);
-            console.log(`Live-Ticker: German Matches Found ${germanMatches.map(match=>{
+            console.log(`Live-Ticker: German Matches Found ${countryMatches.map(match=>{
                 return `${match.team1.teamName} vs. ${match.team2.teamName}`
             })}`);
         }
-        if(germanMatches.length > 0){
-            let newUpdate = germanMatches[0].matchDateTimeUTC;
+        if(countryMatches.length > 0){
+            let newUpdate = countryMatches[0].matchDateTimeUTC;
             config?.debug && console.log(`Live-Ticker: NewDate: ${newUpdate}, oldDate: ${this.lastUpdate}`)
             if(newUpdate != this.lastUpdate){
                 this.lastUpdate = newUpdate;
-                this.processMessage(germanMatches[0]);
+                this.processMessage(countryMatches[0]);
             }
         }
     }
@@ -146,9 +148,9 @@ class LiveTickerHandler implements liveTickerHandler {
         })
     }
 
-    getAllGermanMatches(data: wmData[]){
+    getAllCountryMatches(data: wmData[]){
         return data.filter(match =>{
-            return match.team1.teamName.trim() == "Deutschland" || match.team2.teamName.trim() == "Deutschland";
+            return match.team1.teamName.trim().toLowerCase() == this.land || match.team2.teamName.trim().toLowerCase() == this.land;
         })
     }
 
