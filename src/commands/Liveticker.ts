@@ -27,7 +27,7 @@ export const LiveTicker: Command = {
         let liveTicker = liveTickerHandlerMap.get(`${channelId}_${land}`);
         if(liveTicker){
             liveTicker.stop();
-            liveTickerHandlerMap.delete(channelId);
+            liveTickerHandlerMap.delete(`${channelId}_${land}`);
             await interaction.reply({ content: `Liveticker für ${land} wurde beendet`});
             return;
         }else{

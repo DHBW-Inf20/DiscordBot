@@ -15,66 +15,66 @@ class LiveTickerHandler implements liveTickerHandler {
     channel: TextBasedChannel;
     lastMessage: Message | undefined = undefined;
     lastGoals: wmGoal[] = [];
-    land:string;
+    land: string;
 
-    constructor(channel: TextBasedChannel, land:string){
+    constructor(channel: TextBasedChannel, land: string) {
         this.channel = channel;
         this.land = land;
     }
 
-    async getData() : Promise<wmData[]>{
+    async getData(): Promise<wmData[]> {
         let response = await fetch("https://api.openligadb.de/getmatchdata/wmk")
         return response.json();
     }
 
-    async processData(){
+    async processData() {
 
         // get data
         let data = await this.getData();
         // check if data is new
         let countryMatches = this.getAllCountryMatches(data);
-        if(config?.debug){
+        if (config?.debug) {
             console.log(`Live-Ticker: Data Get: ${util.inspect(data, false, null, true)}`);
-            console.log(`Live-Ticker: German Matches Found ${countryMatches.map(match=>{
+            console.log(`Live-Ticker: German Matches Found ${countryMatches.map(match => {
                 return `${match.team1.teamName} vs. ${match.team2.teamName}`
             })}`);
         }
-        if(countryMatches.length > 0){
+        if (countryMatches.length > 0) {
             let newUpdate = countryMatches[0].matchDateTimeUTC;
             config?.debug && console.log(`Live-Ticker: NewDate: ${newUpdate}, oldDate: ${this.lastUpdate}`)
-            if(newUpdate != this.lastUpdate){
+            if (newUpdate != this.lastUpdate) {
                 this.lastUpdate = newUpdate;
                 this.processMessage(countryMatches[0]);
             }
         }
     }
 
-    async sendInitialEmbed(match: wmData){
-        if(match.matchResults){
+    async sendInitialEmbed(match: wmData) {
+        if (match.matchResults) {
             // Game already started
             let embed = new MessageEmbed().
-            setTitle(`Aktuelles Spiel`).
-            setDescription(`${match.team1.teamName} vs. ${match.team2.teamName}`).
-            addFields(this.getGoalFields(match.goals, match.team1.shortName, match.team2.shortName));
+                setTitle(`Aktuelles Spiel`).
+                setDescription(`${match.team1.teamName} vs. ${match.team2.teamName}`).
+                addFields(this.getGoalFields(match.goals, match.team1.shortName, match.team2.shortName));
 
         }
     }
 
-    async processMessage(match: wmData){
-        
+    async processMessage(match: wmData) {
+
         // Check if game is finished
-        if(match.matchIsFinished){
+        if (match.matchIsFinished) {
             this.stop();
             await this.sendFinishedMessage(match);
             return;
         }
 
-        if(!this.lastMessage){
+        if (!this.lastMessage) {
             await this.sendInitialEmbed(match);
         }
 
         // Check the goals
-        if(match.goals.length > this.lastGoals.length){
+        if (match.goals.length > this.lastGoals.length) {
             this.lastGoals = match.goals;
             await this.sendNewGoal(match);
         }
@@ -82,13 +82,13 @@ class LiveTickerHandler implements liveTickerHandler {
 
     }
 
-    async sendNewGoal(match: wmData){
+    async sendNewGoal(match: wmData) {
 
         let goal = match.goals[match.goals.length - 1];
         let oldGoal: wmGoal | undefined = undefined;
-        if(match.goals.length > 2){
+        if (match.goals.length > 2) {
             oldGoal = match.goals[match.goals.length - 2];
-        }else {
+        } else {
             oldGoal = match.goals[0];
             oldGoal.scoreTeam1 = 0;
             oldGoal.scoreTeam2 = 0;
@@ -107,15 +107,15 @@ class LiveTickerHandler implements liveTickerHandler {
             setDescription(`${teamName}: ${goal.goalGetterName} ${goal.matchMinute} ${goal.isOwnGoal ? "(Eigentor)" : ""}${goal.isOvertime ? "(OT)" : ""}'`).
             setThumbnail(teamIcon)
 
-        if(this.lastMessage){
+        if (this.lastMessage) {
             this.lastMessage.deletable && this.lastMessage.delete();
         }
 
 
-        this.lastMessage = await this.channel.send({embeds: [embed]});
+        this.lastMessage = await this.channel.send({ embeds: [embed] });
     }
 
-    async sendFinishedMessage(match: wmData){
+    async sendFinishedMessage(match: wmData) {
 
         let endErgebnis = [match.matchResults[0].pointsTeam1, match.matchResults[0].pointsTeam2];
 
@@ -134,12 +134,12 @@ class LiveTickerHandler implements liveTickerHandler {
             setDescription(`Gewonnen hat ${winner.teamName}`).
             addFields(fields)
 
-        this.channel.send({embeds: [embed]});
+        this.channel.send({ embeds: [embed] });
     }
 
 
 
-    getGoalFields(goals: wmGoal[], team1: string, team2: string){
+    getGoalFields(goals: wmGoal[], team1: string, team2: string) {
         return goals.map(goal => {
             return {
                 name: `${goal.matchMinute}' ${goal.goalGetterName} ${goal.isPenalty ? "(Penalty)" : ""}${goal.isOwnGoal ? "(Eigentor)" : ""}${goal.isOvertime ? "(OT)" : ""}`,
@@ -148,25 +148,39 @@ class LiveTickerHandler implements liveTickerHandler {
         })
     }
 
-    getAllCountryMatches(data: wmData[]){
-        return data.filter(match =>{
+    getAllCountryMatches(data: wmData[]) {
+        return data.filter(match => {
             return match.team1.teamName.trim().toLowerCase() == this.land || match.team2.teamName.trim().toLowerCase() == this.land;
         })
     }
 
-    start(){
+    start() {
 
         this.processData();
         const minutes = 1;
         this.interval = setInterval(async () => {
-            this.processData();
+            if (this.isInTime()) {
+                this.processData();
+            }
         }, 1000 * 60 * minutes);
 
 
     }
 
-    stop(){
-        if(this.interval){
+    isInTime() {
+        let date = new Date()
+        const hour = date.getUTCHours();
+        const UTC_STARTHOUR = 9;
+        const UTC_ENDHOUR = 22;
+        if (UTC_STARTHOUR <= hour || hour <= UTC_ENDHOUR) {
+            return true;
+        }
+
+        return false;
+    }
+
+    stop() {
+        if (this.interval) {
             clearInterval(this.interval);
         }
     }
