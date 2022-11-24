@@ -15,7 +15,7 @@ export const LiveTicker: Command = {
     options: [
         {
             name: "land",
-            description: "Für welches land soll es einen Liveticker geben? (Deutschland, England, Spanien, Italien, Frankreich...)",
+            description: "Für welches land soll es einen Liveticker geben?",
             type: "STRING",
             required: true
         },
