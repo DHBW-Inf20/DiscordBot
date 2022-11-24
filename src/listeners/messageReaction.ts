@@ -18,8 +18,8 @@ export default (client: Client): void => {
         if(reaction.message.channelId === config?.discord.roles_channel) {
             const member = reaction.message.guild?.members.cache.get(user.id);
             if(!member) return;
-            const f = member.roles.add;
-            await toggleRole(f, reaction.emoji.name);     
+            if(member.partial) await member.fetch();
+            await toggleRole(member.roles.add, reaction.emoji.name);
             return;   
         }
 
@@ -58,6 +58,7 @@ export default (client: Client): void => {
         if (reaction.message.channelId === config?.discord.roles_channel) {
             const member = reaction.message.guild?.members.cache.get(user.id);
             if (!member) return;
+            if (member.partial) await member.fetch();
             const f = member.roles.remove;
             await toggleRole(f ,reaction.emoji.name);
         }
