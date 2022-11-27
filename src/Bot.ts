@@ -41,7 +41,7 @@ export const zitateMap = {} as { [id: string]: ZitatHandler };
 export const verifyMap = {} as { [id: string]: VerificationHandler };
 console.log("Bot is starting...");
 export const client = new Client({
-    partials: ["MESSAGE", "CHANNEL", "REACTION"],
+    partials: ["MESSAGE", "CHANNEL", "REACTION", "GUILD_MEMBER"],
     intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.GUILD_MESSAGE_REACTIONS, Intents.FLAGS.DIRECT_MESSAGE_REACTIONS]
 });
 // Initializing Listeners...
