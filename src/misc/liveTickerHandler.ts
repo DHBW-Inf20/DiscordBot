@@ -3,6 +3,8 @@ import fetch from "node-fetch";
 import { wmData, wmGoal } from "types/misc";
 import { config } from './../Bot';
 import util from 'util';
+import { wmTeamData } from './../types/misc';
+import { send } from "process";
 interface liveTickerHandler {
 
 }
@@ -16,6 +18,7 @@ class LiveTickerHandler implements liveTickerHandler {
     lastMessage: Message | undefined = undefined;
     lastGoals: wmGoal[] = [];
     api: string = 'WM2022';
+    currentMatchId: number = 0;
 
     constructor(channel: TextBasedChannel) {
         this.channel = channel;
@@ -30,7 +33,68 @@ class LiveTickerHandler implements liveTickerHandler {
 
         // get data
         let data = await this.getData();
+        this.sendGoalsIfChanged(data);
+        this.sendFinish(data);
         // check if data is new
+    }
+
+    async sendFinish(data: wmData[]) {
+        if (this.currentGameFinished(data)) {
+            const currentMatch = this.getCurrentMatch(data);
+            if (currentMatch) {
+                const winner = currentMatch.matchResults[0].pointsTeam1 > currentMatch.matchResults[0].pointsTeam2 ? currentMatch.team1 : currentMatch.team2;
+                const embed = new MessageEmbed()
+                    .setTitle(`Spiel beendet`)
+                    .setDescription(`**${currentMatch.matchResults[0].pointsTeam1} : ${currentMatch.matchResults[0].pointsTeam2}** ${winner.teamName} gewinnt!`)
+                    .addFields(this.getGoalFields(currentMatch.goals))
+                    .setThumbnail(winner.teamIconUrl)
+                await this.channel.send({ embeds: [embed] });
+                this.sendInitialEmbed();
+            }
+        }
+    }
+
+    currentGameFinished(data: wmData[]) {
+        const currentMatch = this.getCurrentMatch(data);
+        if (currentMatch) {
+            return currentMatch.matchIsFinished;
+        }
+        return false;
+    }
+
+    getGoalGetterTeam(goals: wmGoal[], team1: wmTeamData, team2: wmTeamData) {
+        
+        const lastStandings: wmGoal = goals[goals.length - 2] || {
+            scoreTeam1: 0,
+            scoreTeam2: 0
+        } as wmGoal;
+        
+        if(lastStandings.scoreTeam1 < goals[goals.length - 1].scoreTeam1){
+            return team1;
+        }else{
+            return team2;
+        }
+
+    }
+
+    async sendGoalsIfChanged(data: wmData[]) {
+
+        let currentMatch = this.getCurrentMatch(data);
+        if (currentMatch) {
+            if (currentMatch.goals.length > this.lastGoals.length) {
+                this.lastGoals = currentMatch.goals;
+                const scoreTeam = this.getGoalGetterTeam(currentMatch.goals, currentMatch.team1, currentMatch.team2);
+                const fields = this.getGoalFields(currentMatch.goals.slice(currentMatch.goals.length - 1));
+                const embed = new MessageEmbed()
+                    .setTitle(`Tor für ${scoreTeam.teamName}`)
+                    .setDescription(`**${currentMatch.matchResults[0].pointsTeam1} : ${currentMatch.matchResults[0].pointsTeam2}**`)
+                    .addFields(fields)
+                    .setThumbnail(scoreTeam.teamIconUrl)
+                
+                this.lastMessage?.deletable && await this.lastMessage?.delete();
+                this.lastMessage = await this.channel.send({ embeds: [embed] });
+            }
+        }
     }
 
     async getUpcomingOrCurrentMatch(wmData?: wmData[]) {
@@ -59,10 +123,19 @@ class LiveTickerHandler implements liveTickerHandler {
         return wmData.matchResults.length > 0;
     }
 
+    getCurrentMatch(data: wmData[]) {
+            return data.find((match) => {
+                return match.matchID == this.currentMatchId ;
+            });
+    }
+
     async sendInitialEmbed() {
 
         let upcomingOrCurrentMatch = await this.getUpcomingOrCurrentMatch();
+        this.currentMatchId = upcomingOrCurrentMatch.matchID;
+        this.lastGoals = upcomingOrCurrentMatch.goals;
         let embed = new MessageEmbed();
+
         if (this.hasStarted(upcomingOrCurrentMatch)) {
             // Send embed with current match details (Standings etc)
             const fields = this.getGoalFields(upcomingOrCurrentMatch.goals);
