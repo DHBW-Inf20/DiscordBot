@@ -42,10 +42,11 @@ class LiveTickerHandler implements liveTickerHandler {
         if (this.currentGameFinished(data)) {
             const currentMatch = this.getCurrentMatch(data);
             if (currentMatch) {
-                const winner = currentMatch.matchResults[0].pointsTeam1 > currentMatch.matchResults[0].pointsTeam2 ? currentMatch.team1 : currentMatch.team2;
+                const draw = currentMatch.matchResults[1].pointsTeam1 == currentMatch.matchResults[1].pointsTeam2;
+                const winner = currentMatch.matchResults[1].pointsTeam1 > currentMatch.matchResults[1].pointsTeam2 ? currentMatch.team1 : currentMatch.team2;
                 const embed = new MessageEmbed()
                     .setTitle(`Spiel beendet`)
-                    .setDescription(`**${currentMatch.matchResults[0].pointsTeam1} : ${currentMatch.matchResults[0].pointsTeam2}** ${winner.teamName} gewinnt!`)
+                    .setDescription(`**${currentMatch.matchResults[1].pointsTeam1} : ${currentMatch.matchResults[1].pointsTeam2}** ${draw ? "Unentschieden" : `**${winner.teamName} gewinnt**`}`)
                     .addFields(this.getGoalFields(currentMatch.goals))
                     .setThumbnail(winner.teamIconUrl)
                 await this.channel.send({ embeds: [embed] });
