@@ -87,7 +87,7 @@ class LiveTickerHandler implements liveTickerHandler {
                 const fields = this.getGoalFields(currentMatch.goals.slice(currentMatch.goals.length - 1));
                 const embed = new MessageEmbed()
                     .setTitle(`Tor für ${scoreTeam.teamName}`)
-                    .setDescription(`**${currentMatch.matchResults[0].pointsTeam1} : ${currentMatch.matchResults[0].pointsTeam2}**`)
+                    .setDescription(`**${currentMatch.goals[currentMatch.goals.length - 1].scoreTeam1} : ${currentMatch.goals[currentMatch.goals.length - 1].scoreTeam1}**`)
                     .addFields(fields)
                     .setThumbnail(scoreTeam.teamIconUrl)
                 
@@ -141,7 +141,7 @@ class LiveTickerHandler implements liveTickerHandler {
             const fields = this.getGoalFields(upcomingOrCurrentMatch.goals);
             embed
                 .setTitle(`${upcomingOrCurrentMatch.team1.teamName} vs. ${upcomingOrCurrentMatch.team2.teamName}`)
-                .setDescription(`**${upcomingOrCurrentMatch.matchResults[0].pointsTeam1} : ${upcomingOrCurrentMatch.matchResults[0].pointsTeam2}**`)
+                .setDescription(`**${upcomingOrCurrentMatch.goals[upcomingOrCurrentMatch.goals.length - 1].scoreTeam1} : ${upcomingOrCurrentMatch.goals[upcomingOrCurrentMatch.goals.length - 1].scoreTeam2}**`)
                 .setThumbnail(upcomingOrCurrentMatch.team2.teamIconUrl)
                 .setAuthor({ name: "OpenLigaDB", iconURL: upcomingOrCurrentMatch.team1.teamIconUrl })
                 .addFields(fields)
