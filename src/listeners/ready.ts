@@ -8,10 +8,10 @@ export default (client: Client): void => {
         }
 
         console.log(`${client.user.tag} ist Online!`);
-
+        await client.application.commands.set(Commands);
+        
         if(!config!.dev) {
         // Register slash-Commands
-        await client.application.commands.set(Commands);
         console.log(`${client.user.username} is online`);
         let channel = client.channels.cache.get(config!.discord.verification_channel)! as TextChannel;
         channel.bulkDelete(100);

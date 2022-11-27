@@ -12,28 +12,19 @@ export const LiveTicker: Command = {
     name: "liveticker",
     description: "Spielt einen Liveticker ab im momentanen Channel",
     type: "CHAT_INPUT",
-    options: [
-        {
-            name: "land",
-            description: "Für welches land soll es einen Liveticker geben?",
-            type: "STRING",
-            required: true
-        },
-    ],
     run: async (client: Client, interaction: BaseCommandInteraction) => {
 
         const channelId = interaction.channelId;
-        let land = interaction.options.get("land")?.value?.toString().toLowerCase() as string;
-        let liveTicker = liveTickerHandlerMap.get(`${channelId}_${land}`);
+        let liveTicker = liveTickerHandlerMap.get(`${channelId}`);
         if(liveTicker){
             liveTicker.stop();
-            liveTickerHandlerMap.delete(`${channelId}_${land}`);
-            await interaction.reply({ content: `Liveticker für ${land} wurde beendet`});
+            liveTickerHandlerMap.delete(`${channelId}`);
+            await interaction.reply({ content: `Liveticker wurde beendet`});
             return;
         }else{
-            await interaction.reply({ content: `Liveticker für ${land} wurde gestartet`});
-            liveTicker = new LiveTickerHandler(interaction.channel!, land);
-            liveTickerHandlerMap.set(`${channelId}_${land}`, liveTicker);
+            await interaction.reply({ content: `Liveticker wurde gestartet`});
+            liveTicker = new LiveTickerHandler(interaction.channel!);
+            liveTickerHandlerMap.set(`${channelId}`, liveTicker);
             liveTicker.start();
         }
     }

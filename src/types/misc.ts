@@ -34,7 +34,7 @@ export interface Config {
 
 export interface wmData {
     matchID: number;
-    machDateTime: string;
+    matchDateTime: string;
     leagueId: number;
     leagueName: string;
     leagueShortcut: string;

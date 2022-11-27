@@ -15,15 +15,14 @@ class LiveTickerHandler implements liveTickerHandler {
     channel: TextBasedChannel;
     lastMessage: Message | undefined = undefined;
     lastGoals: wmGoal[] = [];
-    land: string;
+    api: string = 'WM2022';
 
-    constructor(channel: TextBasedChannel, land: string) {
+    constructor(channel: TextBasedChannel) {
         this.channel = channel;
-        this.land = land;
     }
 
     async getData(): Promise<wmData[]> {
-        let response = await fetch("https://api.openligadb.de/getmatchdata/wmk")
+        let response = await fetch(`https://api.openligadb.de/getmatchdata/${this.api}/`)
         return response.json();
     }
 
@@ -32,131 +31,79 @@ class LiveTickerHandler implements liveTickerHandler {
         // get data
         let data = await this.getData();
         // check if data is new
-        let countryMatches = this.getAllCountryMatches(data);
-        if (config?.debug) {
-            console.log(`Live-Ticker: Data Get: ${util.inspect(data, false, null, true)}`);
-            console.log(`Live-Ticker: German Matches Found ${countryMatches.map(match => {
-                return `${match.team1.teamName} vs. ${match.team2.teamName}`
-            })}`);
-        }
-        if (countryMatches.length > 0) {
-            let newUpdate = countryMatches[0].matchDateTimeUTC;
-            config?.debug && console.log(`Live-Ticker: NewDate: ${newUpdate}, oldDate: ${this.lastUpdate}`)
-            if (newUpdate != this.lastUpdate) {
-                this.lastUpdate = newUpdate;
-                this.processMessage(countryMatches[0]);
-            }
-        }
     }
 
-    async sendInitialEmbed(match: wmData) {
-        if (match.matchResults) {
-            // Game already started
-            let embed = new MessageEmbed().
-                setTitle(`Aktuelles Spiel`).
-                setDescription(`${match.team1.teamName} vs. ${match.team2.teamName}`).
-                addFields(this.getGoalFields(match.goals, match.team1.shortName, match.team2.shortName));
-
+    async getUpcomingOrCurrentMatch(wmData?: wmData[]) {
+        if (!wmData) {
+            wmData = await this.getData();
         }
-    }
+        let unfinishedMatches = wmData.filter((match) => {
+            return match.matchIsFinished == false;
+        });
 
-    async processMessage(match: wmData) {
+        unfinishedMatches.sort((a, b) => {
+            const aDate = new Date(a.matchDateTimeUTC);
+            const bDate = new Date(b.matchDateTimeUTC);
+            return aDate.getTime() - bDate.getTime();
+        });
 
-        // Check if game is finished
-        if (match.matchIsFinished) {
-            this.stop();
-            await this.sendFinishedMessage(match);
-            return;
-        }
+        unfinishedMatches.forEach((match) => {
+            console.log(match.matchDateTime, match.matchIsFinished, match.team1.teamName, match.team2.teamName);
+        });
 
-        if (!this.lastMessage) {
-            await this.sendInitialEmbed(match);
-        }
-
-        // Check the goals
-        if (match.goals.length > this.lastGoals.length) {
-            this.lastGoals = match.goals;
-            await this.sendNewGoal(match);
-        }
-
+        return unfinishedMatches[0];
 
     }
 
-    async sendNewGoal(match: wmData) {
+    hasStarted(wmData: wmData) {
+        return wmData.matchResults.length > 0;
+    }
 
-        let goal = match.goals[match.goals.length - 1];
-        let oldGoal: wmGoal | undefined = undefined;
-        if (match.goals.length > 2) {
-            oldGoal = match.goals[match.goals.length - 2];
+    async sendInitialEmbed() {
+
+        let upcomingOrCurrentMatch = await this.getUpcomingOrCurrentMatch();
+        let embed = new MessageEmbed();
+        if (this.hasStarted(upcomingOrCurrentMatch)) {
+            // Send embed with current match details (Standings etc)
+            const fields = this.getGoalFields(upcomingOrCurrentMatch.goals);
+            embed
+                .setTitle(`${upcomingOrCurrentMatch.team1.teamName} vs. ${upcomingOrCurrentMatch.team2.teamName}`)
+                .setDescription(`**${upcomingOrCurrentMatch.matchResults[0].pointsTeam1} : ${upcomingOrCurrentMatch.matchResults[0].pointsTeam2}**`)
+                .setThumbnail(upcomingOrCurrentMatch.team2.teamIconUrl)
+                .setAuthor({ name: "OpenLigaDB", iconURL: upcomingOrCurrentMatch.team1.teamIconUrl })
+                .addFields(fields)
         } else {
-            oldGoal = match.goals[0];
-            oldGoal.scoreTeam1 = 0;
-            oldGoal.scoreTeam2 = 0;
+            // Send embed with upcoming match details
+            const d = new Date(upcomingOrCurrentMatch.matchDateTime);
+            embed
+                .setTitle(`Upcoming Match`)
+                .setDescription(`Als nächstes Spielen: ${upcomingOrCurrentMatch.team1.teamName} vs. ${upcomingOrCurrentMatch.team2.teamName}`)
+                .addFields([{ name: `Start`, value: d.toLocaleString("de-DE"), inline: true }])
+                .setThumbnail(upcomingOrCurrentMatch.team2.teamIconUrl)
+                .setAuthor({ name: "OpenLigaDB", iconURL: upcomingOrCurrentMatch.team1.teamIconUrl })
         }
-
-        // Check which team scored
-        const team1Scored = goal.scoreTeam1 > oldGoal.scoreTeam1;
-
-        let teamName = team1Scored ? match.team1.teamName : match.team2.teamName;
-
-        let teamIcon = team1Scored ? match.team1.teamIconUrl : match.team2.teamIconUrl;
-
-
-        let embed = new MessageEmbed().
-            setTitle(`Tor: ${match.team1.teamName} vs. ${match.team2.teamName}`).
-            setDescription(`${teamName}: ${goal.goalGetterName} ${goal.matchMinute} ${goal.isOwnGoal ? "(Eigentor)" : ""}${goal.isOvertime ? "(OT)" : ""}'`).
-            setThumbnail(teamIcon)
-
-        if (this.lastMessage) {
-            this.lastMessage.deletable && this.lastMessage.delete();
-        }
-
 
         this.lastMessage = await this.channel.send({ embeds: [embed] });
+
     }
 
-    async sendFinishedMessage(match: wmData) {
-
-        let endErgebnis = [match.matchResults[0].pointsTeam1, match.matchResults[0].pointsTeam2];
-
-        let winner = endErgebnis[0] > endErgebnis[1] ? match.team1 : match.team2;
-
-        let fields: EmbedFieldData[] = this.getGoalFields(match.goals, match.team1.teamName, match.team2.teamName);
-
-        fields.unshift({
-            name: "Endergebnis",
-            value: `${endErgebnis[0]} : ${endErgebnis[1]}`,
-        })
-
-        let embed = new MessageEmbed().
-            setTitle(`Endergebnis: ${match.team1.teamName} vs. ${match.team2.teamName}`).
-            setThumbnail(winner.teamIconUrl).
-            setDescription(`Gewonnen hat ${winner.teamName}`).
-            addFields(fields)
-
-        this.channel.send({ embeds: [embed] });
+    getGoalFields(goals: wmGoal[]): EmbedFieldData[] {
+        let fields: EmbedFieldData[] = [];
+        // TODO: add which team scored
+        goals.forEach((goal) => {
+            fields.push({
+                name: `${goal.goalGetterName}`,
+                value: `${goal.matchMinute}' ${goal.isOvertime ? '(OT)' : ''}${goal.isPenalty ? '(Penalty)' : ''}${goal.isOwnGoal ? '(Eigentor)' : ''}`,
+                inline: true
+            })
+        });
+        return fields;
     }
 
-
-
-    getGoalFields(goals: wmGoal[], team1: string, team2: string) {
-        return goals.map(goal => {
-            return {
-                name: `${goal.matchMinute}' ${goal.goalGetterName} ${goal.isPenalty ? "(Penalty)" : ""}${goal.isOwnGoal ? "(Eigentor)" : ""}${goal.isOvertime ? "(OT)" : ""}`,
-                value: `${goal.scoreTeam1} : ${goal.scoreTeam2}`
-            }
-        })
-    }
-
-    getAllCountryMatches(data: wmData[]) {
-        return data.filter(match => {
-            return match.team1.teamName.trim().toLowerCase() == this.land || match.team2.teamName.trim().toLowerCase() == this.land;
-        })
-    }
 
     start() {
 
-        this.processData();
+        this.sendInitialEmbed();
         const minutes = 1;
         this.interval = setInterval(async () => {
             if (this.isInTime()) {
