@@ -150,7 +150,10 @@ class LiveTickerHandler implements liveTickerHandler {
                 .setDescription(`**${upcomingOrCurrentMatch.goals[upcomingOrCurrentMatch.goals.length - 1].scoreTeam1} : ${upcomingOrCurrentMatch.goals[upcomingOrCurrentMatch.goals.length - 1].scoreTeam2}**`)
                 .setThumbnail(upcomingOrCurrentMatch.team2.teamIconUrl)
                 .setAuthor({ name: "OpenLigaDB", iconURL: upcomingOrCurrentMatch.team1.teamIconUrl })
-                .addFields(fields)
+                if(fields.length > 0){
+                    embed.addFields(fields);
+                }
+
         } else {
             // Send embed with upcoming match details
             const d = new Date(upcomingOrCurrentMatch.matchDateTime);
