@@ -189,7 +189,9 @@ class LiveTickerHandler implements liveTickerHandler {
         const minutes = 1;
         this.interval = setInterval(async () => {
             if (this.isInTime()) {
-                this.processData();
+                this.processData().catch((err) => {
+                    console.error(err);
+                });
             }
         }, 1000 * 60 * minutes);
 
