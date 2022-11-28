@@ -17,11 +17,12 @@ class LiveTickerHandler implements liveTickerHandler {
     channel: TextBasedChannel;
     lastMessage: Message | undefined = undefined;
     lastGoals: wmGoal[] = [];
-    api: string = 'WM2022';
+    api;
     currentMatchId: number = 0;
 
-    constructor(channel: TextBasedChannel) {
+    constructor(channel: TextBasedChannel, api: string) {
         this.channel = channel;
+        this.api = api;
     }
 
     async getData(): Promise<wmData[]> {
@@ -41,12 +42,16 @@ class LiveTickerHandler implements liveTickerHandler {
     async sendFinish(data: wmData[]) {
         if (this.currentGameFinished(data)) {
             const currentMatch = this.getCurrentMatch(data);
+            const lastGoal = currentMatch?.goals[currentMatch.goals.length - 1] || {
+                scoreTeam1: 0,
+                scoreTeam2: 0
+                } as wmGoal;
             if (currentMatch) {
-                const draw = currentMatch.matchResults[1].pointsTeam1 == currentMatch.matchResults[1].pointsTeam2;
-                const winner = currentMatch.matchResults[1].pointsTeam1 > currentMatch.matchResults[1].pointsTeam2 ? currentMatch.team1 : currentMatch.team2;
+                const draw = lastGoal.scoreTeam1 == lastGoal.scoreTeam2;
+                const winner = lastGoal.scoreTeam1 > lastGoal.scoreTeam2 ? currentMatch.team1 : currentMatch.team2;
                 const embed = new MessageEmbed()
                     .setTitle(`Spiel beendet`)
-                    .setDescription(`**${currentMatch.matchResults[1].pointsTeam1} : ${currentMatch.matchResults[1].pointsTeam2}** ${draw ? "Unentschieden" : `**${winner.teamName} gewinnt**`}`)
+                    .setDescription(`**${lastGoal.scoreTeam1} : ${lastGoal.scoreTeam2}** ${draw ? "Unentschieden" : `**${winner.teamName} gewinnt**`}`)
                     .addFields(this.getGoalFields(currentMatch.goals))
                     .setThumbnail(winner.teamIconUrl)
                 await this.channel.send({ embeds: [embed] });
