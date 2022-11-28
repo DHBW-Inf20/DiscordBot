@@ -174,8 +174,8 @@ class LiveTickerHandler implements liveTickerHandler {
         // TODO: add which team scored
         goals.forEach((goal) => {
             fields.push({
-                name: `${goal.goalGetterName}`,
-                value: `${goal.matchMinute}' ${goal.isOvertime ? '(OT)' : ''}${goal.isPenalty ? '(Penalty)' : ''}${goal.isOwnGoal ? '(Eigentor)' : ''}`,
+                name: `${goal.goalGetterName || 'Unbekannt'}`,
+                value: `${goal.matchMinute || 'Unbekannt'}' ${goal.isOvertime ? '(OT)' : ''}${goal.isPenalty ? '(Penalty)' : ''}${goal.isOwnGoal ? '(Eigentor)' : ''}`,
                 inline: true
             })
         });
