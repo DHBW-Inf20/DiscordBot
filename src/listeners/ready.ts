@@ -55,11 +55,7 @@ async function updateRoleEmbed(client: Client){
             .setTitle('Pings')
             .setDescription(`TTT: 🚸\n CS:GO: 🔫\n Events: 🎉\n Minecraft: <:mc:1049977349002760203> \n Apex: <:ApexLegends:873216132914479165> \n League of Legends: <:leagueoflegends:941482275693010974>`);
         
-        pings.edit({ embeds: [embed] });
-
-        pings.react('<:mc:1049977349002760203>');
-        pings.react('<:leagueoflegends:941482275693010974>')
-        pings.react('<:ApexLegends:873216132914479165>')
+        await pings.edit({ embeds: [embed] });
 
 
     }else {
