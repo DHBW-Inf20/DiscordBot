@@ -19,12 +19,12 @@ export default (client: Client): void => {
             const member = reaction.message.guild?.members.cache.get(user.id);
             if(!member) return;
             if(member.partial) await member.fetch();
-            await toggleRole(member.roles.add, reaction.emoji.name);
+            await addRole(member, reaction.emoji.name);
             return;   
         }
 
         if(config?.debug){   
-            console.log(`Reaction added: ${reaction.emoji.name} by ${user.username} in ${reaction.message.channelId}`);
+            console.log(`Reaction added: ${reaction.emoji.name} <:${reaction.emoji.name}:${reaction.emoji.id}> by ${user.username} in ${reaction.message.channelId}`);
         }
         if (reaction.emoji.name === '⭐' ){
             if(config?.debug){
@@ -59,51 +59,55 @@ export default (client: Client): void => {
             const member = reaction.message.guild?.members.cache.get(user.id);
             if (!member) return;
             if (member.partial) await member.fetch();
-            const f = member.roles.remove;
-            await toggleRole(f ,reaction.emoji.name);
+            await removeRole(member ,reaction.emoji.name);
         }
     });
 };
 
 
 
-async function toggleRole(toggleFunction : (roleOrRoles: RoleResolvable | readonly RoleResolvable[] | Collection<string, Role>, reason?: string | undefined) => Promise<GuildMember>, emoji: string | null) {
+async function addRole(member: GuildMember, emoji: string | null) {
+    const role = emoteToRole(emoji);
+    if (role) {
+       await member.roles.add(role);
+    }
+}
+
+async function removeRole(member: GuildMember, emoji: string | null) {
+    const role = emoteToRole(emoji);
+    if (role) {
+       await member.roles.remove(role);
+    }
+}
+
+
+function emoteToRole(emoji: string | null) {
     switch (emoji) {
         case '🤖':
-            await toggleFunction('1040794634881859674');
-            break;
+            return ('1040794634881859674');
         case '❤️':
-            await toggleFunction('1040794597401579571');
-            break;
+            return ('1040794597401579571');
         case '#️⃣':
-            await toggleFunction('1040794259386810388');
-            break;
+            return ('1040794259386810388');
         case '📝':
-            await toggleFunction('1040794629307650128');
-            break;
+            return ('1040794629307650128');
         case '⚖️':
-            await toggleFunction('1040794631832604832');
-            break;
+            return ('1040794631832604832');
         case '📱':
-            await toggleFunction('1040794633099300864');
-            break;
+            return ('1040794633099300864');
         case '🖼️':
-            await toggleFunction('1040794634206576721');
-            break;
+            return ('1040794634206576721');
         case '⌨️':
-            await toggleFunction('1040794604691275856');
-            break;
+            return ('1040794604691275856');
         case '🦾':
-            await toggleFunction('1040794626329694208');
-            break;
+            return ('1040794626329694208');
         case '🚸':
-            await toggleFunction('1040805738907447316');
-            break;
+            return ('1040805738907447316');
         case '🔫':
-            await toggleFunction('1040805750349512774');
-            break;
+            return ('1040805750349512774');
         case '🎉':
-            await toggleFunction('1040805752866091091');
-            break;
+            return ('1040805752866091091');
+        default:
+            return null;
     }
 }
