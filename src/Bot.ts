@@ -45,12 +45,14 @@ export const client = new Client({
     intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.GUILD_MESSAGE_REACTIONS, Intents.FLAGS.DIRECT_MESSAGE_REACTIONS]
 });
 // Initializing Listeners...
+client.login(config.discord.token);
 initListeners(client);
 // Logging in
-client.login(config.discord.token);
 
 function loadConfig(): Config | undefined {
+    console.log(process.env.OPEN_AI_KEY)
     return {
+        openaiKey: process.env.OPEN_AI_KEY || "",
         dev: process.env.DEV === "true",
         discord: {
             token: process.env.DISCORD_TOKEN || "",

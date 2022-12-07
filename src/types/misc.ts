@@ -1,6 +1,7 @@
 export interface Config {
     dev: boolean;
     debug: boolean;
+    openaiKey: string;
     discord: {
         token: string;
         main_guild: string;
