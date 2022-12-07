@@ -50,17 +50,21 @@ async function updateRoleEmbed(client: Client){
         wahlFächer.edit({ embeds: [embed] });
 
 
+        const mcEmoji = client.guilds.cache.get(config?.discord.main_guild!)?.emojis.cache.find(emoji => emoji.name === 'minecraft');
+        const lolEmoji = client.guilds.cache.get(config?.discord.main_guild!)?.emojis.cache.find(emoji => emoji.name === 'leagueoflegends');
+        const apexEmoji = client.guilds.cache.get(config?.discord.main_guild!)?.emojis.cache.find(emoji => emoji.name === 'ApexLegends');
+
         embed = new MessageEmbed()
             .setColor('#2387c0')
             .setTitle('Pings')
-            .setDescription('TTT: 🚸\n CS:GO: 🔫\n Events: 🎉\n Minecraft: <a:minecraft:843766809416171521> \n Apex: <:ApexLegends:873216132914479165> \n League of Legends: <:leagueoflegends:941482275693010974>');
+            .setDescription(`TTT: 🚸\n CS:GO: 🔫\n Events: 🎉\n Minecraft: ${mcEmoji}  \n Apex: ${apexEmoji} \n League of Legends: ${lolEmoji}`);
 
         
         pings.edit({ embeds: [embed] });
 
-        pings.react('<:minecraft:843766809416171521>');
-        pings.react('<:leagueoflegends:941482275693010974>')
-        pings.react('<:ApexLegends:873216132914479165>')
+        pings.react(mcEmoji?.toString()!);
+        pings.react(mcEmoji?.toString()!)
+        pings.react(mcEmoji?.toString()!)
 
 
     }else {
