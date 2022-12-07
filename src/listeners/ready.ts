@@ -9,22 +9,22 @@ export default (client: Client): void => {
 
         console.log(`${client.user.tag} ist Online!`);
         await client.application.commands.set(Commands);
-        
-        if(!config!.dev) {
-        // Register slash-Commands
-        console.log(`${client.user.username} is online`);
-        let channel = client.channels.cache.get(config!.discord.verification_channel)! as TextChannel;
-        channel.bulkDelete(100);
-        channel.send(
-            `\`\`\`Neben der Verifizierung, werdet ihr mit /verify auch eurem Kurs zugewiesen und ihr erhaltet Zugriff auf weitere Commands wie /stundenplan.\nFalls ihr wissen wollt, was im Backend mit eurem Nutzernamen \"passiert\", könnt ihr euch in GitHub den Code genauer ansehen (https://github.com/DHBW-Inf20/DiscordBot/blob/main/src/commands/Verify.ts)\`\`\``);
+
+        if (!config!.dev) {
+            // Register slash-Commands
+            console.log(`${client.user.username} is online`);
+            let channel = client.channels.cache.get(config!.discord.verification_channel)! as TextChannel;
+            channel.bulkDelete(100);
+            channel.send(
+                `\`\`\`Neben der Verifizierung, werdet ihr mit /verify auch eurem Kurs zugewiesen und ihr erhaltet Zugriff auf weitere Commands wie /stundenplan.\nFalls ihr wissen wollt, was im Backend mit eurem Nutzernamen \"passiert\", könnt ihr euch in GitHub den Code genauer ansehen (https://github.com/DHBW-Inf20/DiscordBot/blob/main/src/commands/Verify.ts)\`\`\``);
         }
         // sendRoleEmbed(client); // Uncomment this line to send the role embed again
-        // updateRoleEmbed(client);
+        updateRoleEmbed(client);
     });
 
 };
 
-async function updateRoleEmbed(client: Client){
+async function updateRoleEmbed(client: Client) {
     let channel = client.channels.cache.get(config!.discord.roles_channel)! as TextChannel;
 
     let messages = await channel.messages.fetch();
@@ -33,7 +33,7 @@ async function updateRoleEmbed(client: Client){
     let wahlFächer = messages.find(m => m.id === '1040807924961914932');
     let pings = messages.find(m => m.id === '1040807926824194129');
 
-    if(profilFächer && wahlFächer && pings){
+    if (profilFächer && wahlFächer && pings) {
 
         let embed = new MessageEmbed()
             .setColor('#FF3311')
@@ -50,15 +50,16 @@ async function updateRoleEmbed(client: Client){
         wahlFächer.edit({ embeds: [embed] });
 
 
+
         embed = new MessageEmbed()
             .setColor('#2387c0')
-            .setTitle('Pings')
-            .setDescription(`TTT: 🚸\n CS:GO: 🔫\n Events: 🎉\n Minecraft: <:mc:1049977349002760203> \n Apex: <:ApexLegends:873216132914479165> \n League of Legends: <:leagueoflegends:941482275693010974>`);
-        
+            .setTitle('Gaming / Events')
+            .setDescription(`TTT: 🚸\n CS:GO: 🔫\n Events: 🎉\n Minecraft: <a:minecraft:1050007779596845056> \n Apex: <:ApexLegends:1050007939567587418> \n League of Legends: <:leagueoflegends:1050007941039796254>`);
+
         await pings.edit({ embeds: [embed] });
 
 
-    }else {
+    } else {
         console.log('Could not find role messages...');
     }
 

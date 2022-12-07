@@ -4,7 +4,7 @@ import { Command, ContextMenuCommand } from './types/command';
 import { Zitat } from './commands/Zitat';
 import { Verify } from './commands/Verify';
 import { Essen } from './commands/Essen';
-import { Caesar } from "./commands/Caesar";
+import { Caesar } from "./commands/Caesar"; 
 import { LiveTicker } from './commands/Liveticker';
 import { Dalle } from './commands/Dalle';
 
