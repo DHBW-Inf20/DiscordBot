@@ -54,6 +54,8 @@ async function updateRoleEmbed(client: Client){
         const lolEmoji = client.guilds.cache.get(config?.discord.main_guild!)?.emojis.cache.find(emoji => emoji.name === 'leagueoflegends');
         const apexEmoji = client.guilds.cache.get(config?.discord.main_guild!)?.emojis.cache.find(emoji => emoji.name === 'ApexLegends');
 
+        if(!mcEmoji || !lolEmoji || !apexEmoji) return console.log(`Could not find emojis... ${mcEmoji} ${lolEmoji} ${apexEmoji}`);
+
         embed = new MessageEmbed()
             .setColor('#2387c0')
             .setTitle('Pings')
