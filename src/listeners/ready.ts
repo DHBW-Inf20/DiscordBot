@@ -29,9 +29,9 @@ async function updateRoleEmbed(client: Client){
 
     let messages = await channel.messages.fetch();
 
-    let profilFächer = messages.find(m => m.embeds[0]?.title === 'Profilfächer');
-    let wahlFächer = messages.find(m => m.embeds[0]?.title === 'Weitere Wahlfächer');
-    let pings = messages.find(m => m.embeds[0]?.title === 'Pings');
+    let profilFächer = messages.find(m => m.id === '1040807923854610432');
+    let wahlFächer = messages.find(m => m.id === '1040807924961914932');
+    let pings = messages.find(m => m.id === '1040807926824194129');
 
     if(profilFächer && wahlFächer && pings){
 
@@ -49,7 +49,6 @@ async function updateRoleEmbed(client: Client){
 
         wahlFächer.edit({ embeds: [embed] });
 
-        channel.send(`\`\`\`Wir versuchen immer mal wieder ein paar Leute für eine abendliche TTT/CS:GO/Apex-Lobby zu finden (oder andere Games), falls ihr generell Lust habt, könnt Ihr euch die Rollen zuteilen, damit Ihr Pings bekommt.\`\`\``)
 
         embed = new MessageEmbed()
             .setColor('#2387c0')
@@ -59,7 +58,7 @@ async function updateRoleEmbed(client: Client){
         
         pings.edit({ embeds: [embed] });
 
-        pings.react('<a:minecraft:843766809416171521>');
+        pings.react('<:minecraft:843766809416171521>');
         pings.react('<:leagueoflegends:941482275693010974>')
         pings.react('<:ApexLegends:873216132914479165>')
 
