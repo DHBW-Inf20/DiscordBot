@@ -19,10 +19,56 @@ export default (client: Client): void => {
             `\`\`\`Neben der Verifizierung, werdet ihr mit /verify auch eurem Kurs zugewiesen und ihr erhaltet Zugriff auf weitere Commands wie /stundenplan.\nFalls ihr wissen wollt, was im Backend mit eurem Nutzernamen \"passiert\", könnt ihr euch in GitHub den Code genauer ansehen (https://github.com/DHBW-Inf20/DiscordBot/blob/main/src/commands/Verify.ts)\`\`\``);
         }
         // sendRoleEmbed(client); // Uncomment this line to send the role embed again
-
+        updateRoleEmbed(client);
     });
 
 };
+
+async function updateRoleEmbed(client: Client){
+    let channel = client.channels.cache.get(config!.discord.roles_channel)! as TextChannel;
+
+    let messages = await channel.messages.fetch();
+
+    let profilFächer = messages.find(m => m.embeds[0]?.title === 'Profilfächer');
+    let wahlFächer = messages.find(m => m.embeds[0]?.title === 'Weitere Wahlfächer');
+    let pings = messages.find(m => m.embeds[0]?.title === 'Pings');
+
+    if(profilFächer && wahlFächer && pings){
+
+        let embed = new MessageEmbed()
+            .setColor('#FF3311')
+            .setTitle('Profilfächer')
+            .setDescription('Software: ⌨️\nHardware: 🦾');
+
+        await pings.edit({ embeds: [embed] });
+
+        embed = new MessageEmbed()
+            .setColor('#FF3311')
+            .setTitle('Weitere Wahlfächer')
+            .setDescription('C# : #️⃣\nC++: ❤️\nSeminar Informatik: 📝\nConsulting & Recht: ⚖️\nMobile Applikationen: 📱\nSprach & Bildverarbeitung: 🖼️\nKI: 🤖');
+
+        wahlFächer.edit({ embeds: [embed] });
+
+        channel.send(`\`\`\`Wir versuchen immer mal wieder ein paar Leute für eine abendliche TTT/CS:GO/Apex-Lobby zu finden (oder andere Games), falls ihr generell Lust habt, könnt Ihr euch die Rollen zuteilen, damit Ihr Pings bekommt.\`\`\``)
+
+        embed = new MessageEmbed()
+            .setColor('#2387c0')
+            .setTitle('Pings')
+            .setDescription('TTT: 🚸\n CS:GO: 🔫\n Events: 🎉\n Minecraft: <a:minecraft:843766809416171521> \n Apex: <:ApexLegends:873216132914479165> \n League of Legends: <:leagueoflegends:941482275693010974>');
+
+        
+        pings.edit({ embeds: [embed] });
+
+        pings.react('<a:minecraft:843766809416171521>');
+        pings.react('<:leagueoflegends:941482275693010974>')
+        pings.react('<:ApexLegends:873216132914479165>')
+
+
+    }else {
+        console.log('Could not find role messages...');
+    }
+
+}
 
 async function sendRoleEmbed(client: Client) {
 
@@ -61,13 +107,17 @@ async function sendRoleEmbed(client: Client) {
     embed = new MessageEmbed()
         .setColor('#2387c0')
         .setTitle('Pings')
-        .setDescription('TTT: 🚸\n CS:GO: 🔫\n Events: 🎉');
+        .setDescription('TTT: 🚸\n CS:GO: 🔫\n Events: 🎉\n Minecraft: <a:minecraft:843766809416171521> \n Apex: <:ApexLegends:873216132914479165> \n League of Legends: <:leagueoflegends:941482275693010974>');
 
     messageEmbed = await channel.send({ embeds: [embed] });
 
     messageEmbed.react('🚸');
     messageEmbed.react('🔫');
     messageEmbed.react('🎉');
+
+    messageEmbed.react('<a:minecraft:843766809416171521>');
+    messageEmbed.react('<:leagueoflegends:941482275693010974>')
+    messageEmbed.react('<:ApexLegends:873216132914479165>')
 }
 
 

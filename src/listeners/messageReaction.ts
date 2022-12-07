@@ -19,12 +19,12 @@ export default (client: Client): void => {
             const member = reaction.message.guild?.members.cache.get(user.id);
             if(!member) return;
             if(member.partial) await member.fetch();
-            await addRole(member, reaction.emoji.name);
+            await addRole(member, reaction.emoji.name, reaction.emoji.id);
             return;   
         }
 
         if(config?.debug){   
-            console.log(`Reaction added: ${reaction.emoji.name} <:${reaction.emoji.name}:${reaction.emoji.id}> by ${user.username} in ${reaction.message.channelId}`);
+            console.log(`Reaction added: <${reaction.emoji.animated}:${reaction.emoji.name}:${reaction.emoji.id}> by ${user.username} in ${reaction.message.channelId}`);
         }
         if (reaction.emoji.name === '⭐' ){
             if(config?.debug){
@@ -59,30 +59,30 @@ export default (client: Client): void => {
             const member = reaction.message.guild?.members.cache.get(user.id);
             if (!member) return;
             if (member.partial) await member.fetch();
-            await removeRole(member ,reaction.emoji.name);
+            await removeRole(member ,reaction.emoji.name, reaction.emoji.id);
         }
     });
 };
 
 
 
-async function addRole(member: GuildMember, emoji: string | null) {
-    const role = emoteToRole(emoji);
+async function addRole(member: GuildMember, emoji: string | null, emojiId: string | null) {
+    const role = emoteToRole(emoji, emojiId);
     if (role) {
        await member.roles.add(role);
     }
 }
 
-async function removeRole(member: GuildMember, emoji: string | null) {
-    const role = emoteToRole(emoji);
+async function removeRole(member: GuildMember, emoji: string | null, emojiId: string | null) {
+    const role = emoteToRole(emoji, emojiId);
     if (role) {
        await member.roles.remove(role);
     }
 }
 
 
-function emoteToRole(emoji: string | null) {
-    switch (emoji) {
+function emoteToRole(emojiName: string | null, emojiId: string | null) {
+    switch (emojiName) {
         case '🤖':
             return ('1040794634881859674');
         case '❤️':
@@ -107,7 +107,18 @@ function emoteToRole(emoji: string | null) {
             return ('1040805750349512774');
         case '🎉':
             return ('1040805752866091091');
-        default:
-            return null;
     }
+
+    switch (emojiId) {
+        case '941482275693010974':
+            if (emojiName === 'leagueoflegends') return ('1049974593567330305');
+            break;
+        case '843766809416171521':
+            if (emojiName === 'minecraft') return ('1040984491755323402');
+            break;
+        case '873216132914479165':
+            if (emojiName === "ApexLegends") return ('1049976189520982087')
+            break;
+    }
+    return null;
 }
