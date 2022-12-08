@@ -12,7 +12,7 @@ import { ContextMenuCommand } from "../types/command";
 import { Configuration, OpenAIApi } from 'openai';
 
 export const Ask: ContextMenuCommand = {
-    name: "Davinci fragen",
+    name: "Horby fragen",
     type: "MESSAGE",
     run: async (client: Client, interaction: ContextMenuInteraction) => {
 
@@ -35,9 +35,9 @@ export const Ask: ContextMenuCommand = {
         const openAi = new OpenAIApi(openAiconfig);
         let response = openAi.createCompletion({
             "model": "text-davinci-003",
-            "prompt": `${customPrompt ? msg.content.substring(1) : msg.content}\n\n}`,
-            "temperature": 0.4,
-            "max_tokens": 64,
+            "prompt": `${customPrompt ? msg.content.substring(1) : `Horby ist ein zynischer Chatbot der den Fragesteller verspottet: \n Frage: ${msg.content} \n Horby: `}\n}`,
+            "temperature": 0.5,
+            "max_tokens": 100,
             "top_p": 1,
             "frequency_penalty": 0,
             "presence_penalty": 0
