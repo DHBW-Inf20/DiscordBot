@@ -7,6 +7,7 @@ import { Essen } from './commands/Essen';
 import { Caesar } from "./commands/Caesar"; 
 import { LiveTicker } from './commands/Liveticker';
 import { Dalle } from './commands/Dalle';
+import { Ask } from "./commands/Ask";
 
 // Register Commands of the bot
-export const Commands: (Command | ContextMenuCommand)[] = [Stundenplan, Kantine, Zitat, Verify, Caesar, LiveTicker, Dalle];
+export const Commands: (Command | ContextMenuCommand)[] = [Stundenplan, Kantine, Zitat, Verify, Caesar, LiveTicker, Dalle, Ask];

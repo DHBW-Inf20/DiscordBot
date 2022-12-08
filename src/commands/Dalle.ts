@@ -25,7 +25,6 @@ export const Dalle: Command = {
     ],
     run: async (client: Client, interaction: BaseCommandInteraction) => {
 
-        console.log(config?.openaiKey)
         const openAiconfig = new Configuration({
             apiKey: config?.openaiKey
         })
