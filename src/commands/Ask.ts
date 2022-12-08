@@ -42,7 +42,7 @@ export const Ask: ContextMenuCommand = {
             "frequency_penalty": 0,
             "presence_penalty": 0
         }).then(res => {
-            interaction.followUp({ content: res.data.choices[0].text });
+            interaction.followUp({ content: `${msg?.content}\n${res.data.choices[0].text}` });
         }).catch(err => {
             console.log(err);
             interaction.followUp({ content: "Fehler beim Generieren einer antwort" });
