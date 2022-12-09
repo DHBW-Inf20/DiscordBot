@@ -16,7 +16,8 @@ export interface IDavinciData{
     personality_description: string,
     temperature: number,
     max_tokens: number,
-    top_p: number
+    top_p: number,
+    weight: number
 }
 
 export interface IZitat {
@@ -47,7 +48,8 @@ class DatabaseAdapter implements DBA {
             personality_description: String,
             temperature: Number,
             max_tokens: Number,
-            top_p: Number
+            top_p: Number,
+            weight: Number
         });
 
 
@@ -100,6 +102,19 @@ class DatabaseAdapter implements DBA {
         return random;
 
 
+    }
+
+    async getRandomWeightedDavinciData(): Promise<IDavinciData | null> {
+        const allPersonalityDescriptions = await this.davinciDataModel.find();
+        let sumOfWeights =  allPersonalityDescriptions.reduce((sum, current) => sum + (current.weight || 1), 0);
+        let random = Math.random() * sumOfWeights;
+        let randomIndex = 0;
+        while (random > 0) {
+            random -= allPersonalityDescriptions[randomIndex].weight || 1;
+            randomIndex++;
+        }
+        randomIndex--;
+        return allPersonalityDescriptions[randomIndex];
     }
 
     async setDavinciData(data: IDavinciData): Promise<IDavinciData> {

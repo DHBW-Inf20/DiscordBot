@@ -34,7 +34,7 @@ export const Ask: ContextMenuCommand = {
         const personalityIndex = 1;
         // const randomEntry = (arr: any[]) => arr[Math.floor(Math.random() * arr.length)];
 
-        const data = await dba.getInstance().getRandomDavinciData()
+        const data = await dba.getInstance().getRandomWeightedDavinciData()
         if(!data){
             await interaction.followUp({ content: "Fehler beim Generieren einer antwort" });
             return;
