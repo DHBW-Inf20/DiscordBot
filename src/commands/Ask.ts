@@ -10,6 +10,7 @@ import {
 import ZitatHandler from '../misc/zitatHandler';
 import { ContextMenuCommand } from "../types/command";
 import { Configuration, OpenAIApi } from 'openai';
+import dba, { IDavinciData } from '../misc/databaseAdapter';
 
 export const Ask: ContextMenuCommand = {
     name: "Horby fragen",
@@ -30,25 +31,31 @@ export const Ask: ContextMenuCommand = {
         })
 
         // Choose a random entry from a array
-        const randomEntry = (arr: any[]) => arr[Math.floor(Math.random() * arr.length)];
+        const personalityIndex = 1;
+        // const randomEntry = (arr: any[]) => arr[Math.floor(Math.random() * arr.length)];
+        await dba.getInstance().setDavinciData({
+            personality_description: "Horby ist ein bisexueller Chatbot der horny ist und den Fragesteller verführen will: \n Frage: ",
+            max_tokens: 200,
+            temperature: 0.5,
+            top_p: 1
+        } as IDavinciData)
 
-        const personalityArr = [
-            "Horby ist ein zynischer Chatbot der den Fragesteller verspottet. Am liebsten will Horby andere exmatrikulieren lassen: \n Frage: ",
-            "Horby ist ein bisexueller Chatbot der horny ist und den Fragesteller verführen will: \n Frage: ",
-            // "Horby ist ein autoritä7
-        ]
-
-        const personality = randomEntry(personalityArr)
+        const data = await dba.getInstance().getDavinciData()
+        if(!data){
+            await interaction.followUp({ content: "Fehler beim Generieren einer antwort" });
+            return;
+        }
         let customPrompt = msg.content.startsWith('#');
+
 
 
         const openAi = new OpenAIApi(openAiconfig);
         let response = openAi.createCompletion({
             "model": "text-davinci-003",
-            "prompt": `${customPrompt ? msg.content.substring(1) : `${personality} ${msg.content} \n Horby: `}\n}`,
-            "temperature": 0.5,
-            "max_tokens": 200,
-            "top_p": 1,
+            "prompt": `${customPrompt ? msg.content.substring(1) : `${data?.personality_description} ${msg.content} \n Horby: `}\n}`,
+            "temperature": data?.temperature,
+            "max_tokens": data?.max_tokens,
+            "top_p": data?.top_p,
             "frequency_penalty": 0,
             "presence_penalty": 0
         }).then(res => {

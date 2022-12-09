@@ -12,6 +12,13 @@ export interface IUser {
     course: string,
 }
 
+export interface IDavinciData{
+    personality_description: string,
+    temperature: number,
+    max_tokens: number,
+    top_p: number
+}
+
 export interface IZitat {
     discordId: string,
     zitat: string,
@@ -32,8 +39,17 @@ class DatabaseAdapter implements DBA {
 
     userModel: mongoose.Model<IUser>;
     zitatModel: mongoose.Model<IZitat>;
+    davinciDataModel: mongoose.Model<IDavinciData>;
     constructor(host: string, user: string, password: string, dbname: string) {
         mongoose.connect(`mongodb+srv://${user}:${password}@${host}/${dbname}?retryWrites=true&w=majority`);
+
+        const DavinciDataSchema = new mongoose.Schema<IDavinciData>({
+            personality_description: String,
+            temperature: Number,
+            max_tokens: Number,
+            top_p: Number
+        });
+
 
         const UserSchema = new mongoose.Schema<IUser>({
             dhusername: String,
@@ -54,6 +70,7 @@ class DatabaseAdapter implements DBA {
 
         this.userModel = mongoose.model<IUser>('User', UserSchema);
         this.zitatModel = mongoose.model<IZitat>('Zitat', ZitatSchema);
+        this.davinciDataModel = mongoose.model<IDavinciData>('DavinciData', DavinciDataSchema);
     }
     initDB(): Promise<void> {
         throw new Error("Method not implemented.");
@@ -74,6 +91,17 @@ class DatabaseAdapter implements DBA {
         const user = await this.userModel.findOne({ discordId: discordId });
         return user;
     }
+
+    async getDavinciData(): Promise<IDavinciData | null> {
+        const data = await this.davinciDataModel.findOne({});
+        return data;
+    }
+
+    async setDavinciData(data: IDavinciData): Promise<IDavinciData> {
+        const dataModel = new this.davinciDataModel(data);
+        return dataModel.save();
+    }
+
 
     async addUser(dhusername: string, discordId: string, course: string): Promise<IUser> {
         const user = new this.userModel({
