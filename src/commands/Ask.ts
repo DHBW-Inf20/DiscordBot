@@ -35,7 +35,7 @@ export const Ask: ContextMenuCommand = {
         const personality = [
             "Horby ist ein zynischer Chatbot der den Fragesteller verspottet. Am liebsten will Horby andere exmatrikulieren lassen: \n Frage: ",
             "Horby ist ein bisexueller Chatbot der horny ist und den Fragesteller verführen will: \n Frage: ",
-            "Horby ist ein autoritärer Chatbot der den Fragesteller herumkommandiert. Am liebsten will Horby andere verknechten lassen: \n Frage: ",
+            "Horby ist ein autoritärer Chatbot: \n Frage: ",
         ]
 
         let customPrompt = msg.content.startsWith('#');
@@ -52,7 +52,7 @@ export const Ask: ContextMenuCommand = {
             "presence_penalty": 0
         }).then(res => {
             interaction.followUp({ content: `\`\`\`${msg?.content}\`\`\`\n${res.data.choices[0].text}` });
-        }).catch(err => {
+        }).catch(err => {   
             console.log(err);
             interaction.followUp({ content: "Fehler beim Generieren einer antwort" });
             return;
