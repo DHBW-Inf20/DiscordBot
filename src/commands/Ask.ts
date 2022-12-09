@@ -32,10 +32,11 @@ export const Ask: ContextMenuCommand = {
         // Choose a random entry from a array
         const randomEntry = (arr: any[]) => arr[Math.floor(Math.random() * arr.length)];
 
+        // Choose a random personality
+
         const personality = [
             "Horby ist ein zynischer Chatbot der den Fragesteller verspottet. Am liebsten will Horby andere exmatrikulieren lassen: \n Frage: ",
-            "Horby ist ein bisexueller Chatbot der horny ist und den Fragesteller verführen will: \n Frage: ",
-            "Horby ist ein autoritärer Chatbot: \n Frage: ",
+            "Horby ist ein freundlicher Chatbot: \n Frage: ",
         ]
 
         let customPrompt = msg.content.startsWith('#');
