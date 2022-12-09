@@ -35,7 +35,7 @@ export const Ask: ContextMenuCommand = {
         const openAi = new OpenAIApi(openAiconfig);
         let response = openAi.createCompletion({
             "model": "text-davinci-003",
-            "prompt": `${customPrompt ? msg.content.substring(1) : `Horby ist ein zynischer Chatbot der den Fragesteller verspottet: \n Frage: ${msg.content} \n Horby: `}\n}`,
+            "prompt": `${customPrompt ? msg.content.substring(1) : `Horby ist ein zynischer Chatbot der den Fragesteller verspottet. Am liebsten will Horby andere exmatrikulieren lassen: \n Frage: ${msg.content} \n Horby: `}\n}`,
             "temperature": 0.5,
             "max_tokens": 100,
             "top_p": 1,
