@@ -31,7 +31,7 @@ export const Dalle: Command = {
 
         const openAi = new OpenAIApi(openAiconfig);
 
-        interaction.deferReply();
+        await interaction.deferReply();
 
         try{
 
