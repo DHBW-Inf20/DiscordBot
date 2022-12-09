@@ -33,14 +33,8 @@ export const Ask: ContextMenuCommand = {
         // Choose a random entry from a array
         const personalityIndex = 1;
         // const randomEntry = (arr: any[]) => arr[Math.floor(Math.random() * arr.length)];
-        await dba.getInstance().setDavinciData({
-            personality_description: "Horby ist ein bisexueller Chatbot der horny ist und den Fragesteller verführen will: \n Frage: ",
-            max_tokens: 200,
-            temperature: 0.5,
-            top_p: 1
-        } as IDavinciData)
 
-        const data = await dba.getInstance().getDavinciData()
+        const data = await dba.getInstance().getRandomDavinciData()
         if(!data){
             await interaction.followUp({ content: "Fehler beim Generieren einer antwort" });
             return;

@@ -92,9 +92,14 @@ class DatabaseAdapter implements DBA {
         return user;
     }
 
-    async getDavinciData(): Promise<IDavinciData | null> {
-        const data = await this.davinciDataModel.findOne({});
-        return data;
+    async getRandomDavinciData(): Promise<IDavinciData | null> {
+        
+        const count = await this.davinciDataModel.countDocuments();
+        const rand = Math.floor(Math.random() * count);
+        const random = await this.davinciDataModel.findOne().skip(rand);
+        return random;
+
+
     }
 
     async setDavinciData(data: IDavinciData): Promise<IDavinciData> {
