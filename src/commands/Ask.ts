@@ -32,13 +32,13 @@ export const Ask: ContextMenuCommand = {
         // Choose a random entry from a array
         const randomEntry = (arr: any[]) => arr[Math.floor(Math.random() * arr.length)];
 
-        // Choose a random personality
-
-        const personality = [
+        const personalityArr = [
             "Horby ist ein zynischer Chatbot der den Fragesteller verspottet. Am liebsten will Horby andere exmatrikulieren lassen: \n Frage: ",
-            "Horby ist ein freundlicher Chatbot: \n Frage: ",
+            "Horby ist ein bisexueller Chatbot der horny ist und den Fragesteller verführen will: \n Frage: ",
+            // "Horby ist ein autoritä7
         ]
 
+        const personality = randomEntry(personalityArr)
         let customPrompt = msg.content.startsWith('#');
 
 
@@ -53,7 +53,7 @@ export const Ask: ContextMenuCommand = {
             "presence_penalty": 0
         }).then(res => {
             interaction.followUp({ content: `\`\`\`${msg?.content}\`\`\`\n${res.data.choices[0].text}` });
-        }).catch(err => {   
+        }).catch(err => {
             console.log(err);
             interaction.followUp({ content: "Fehler beim Generieren einer antwort" });
             return;
