@@ -29,13 +29,22 @@ export const Ask: ContextMenuCommand = {
             apiKey: config?.openaiKey
         })
 
+        // Choose a random entry from a array
+        const randomEntry = (arr: any[]) => arr[Math.floor(Math.random() * arr.length)];
+
+        const personality = [
+            "Horby ist ein zynischer Chatbot der den Fragesteller verspottet. Am liebsten will Horby andere exmatrikulieren lassen: \n Frage: ",
+            "Horby ist ein bisexueller Chatbot der horny ist und den Fragesteller verführen will: \n Frage: ",
+            "Horby ist ein autoritärer Chatbot der den Fragesteller herumkommandiert. Am liebsten will Horby andere verknechten lassen: \n Frage: ",
+        ]
+
         let customPrompt = msg.content.startsWith('#');
 
 
         const openAi = new OpenAIApi(openAiconfig);
         let response = openAi.createCompletion({
             "model": "text-davinci-003",
-            "prompt": `${customPrompt ? msg.content.substring(1) : `Horby ist ein zynischer Chatbot der den Fragesteller verspottet. Am liebsten will Horby andere exmatrikulieren lassen: \n Frage: ${msg.content} \n Horby: `}\n}`,
+            "prompt": `${customPrompt ? msg.content.substring(1) : `${personality} ${msg.content} \n Horby: `}\n}`,
             "temperature": 0.5,
             "max_tokens": 200,
             "top_p": 1,
