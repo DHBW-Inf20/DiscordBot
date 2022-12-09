@@ -37,7 +37,7 @@ export const Ask: ContextMenuCommand = {
             "model": "text-davinci-003",
             "prompt": `${customPrompt ? msg.content.substring(1) : `Horby ist ein zynischer Chatbot der den Fragesteller verspottet. Am liebsten will Horby andere exmatrikulieren lassen: \n Frage: ${msg.content} \n Horby: `}\n}`,
             "temperature": 0.5,
-            "max_tokens": 100,
+            "max_tokens": 200,
             "top_p": 1,
             "frequency_penalty": 0,
             "presence_penalty": 0
