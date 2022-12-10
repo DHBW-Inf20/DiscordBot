@@ -10,4 +10,4 @@ import { Dalle } from './commands/Dalle';
 import { Ask } from "./commands/Ask";
 
 // Register Commands of the bot
-export const Commands: (Command | ContextMenuCommand)[] = [Stundenplan, Kantine, Zitat, Verify, Caesar, LiveTicker]//, Dalle, Ask];
+export const Commands: (Command | ContextMenuCommand)[] = [Stundenplan, Kantine, Zitat, Verify, Caesar, LiveTicker, Dalle, Ask];
