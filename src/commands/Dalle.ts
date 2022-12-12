@@ -36,7 +36,8 @@ export const Dalle: Command = {
             name: "n",
             description: "Wie viele Bilder sollen generiert werden",
             type: "INTEGER",
-            required: false
+            required: false,
+            max_value: 5
         },
         (cmd.options[0] as unknown as ApplicationCommandOptionData)
     ],
