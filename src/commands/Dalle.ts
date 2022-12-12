@@ -59,9 +59,12 @@ export const Dalle: Command = {
                 n:1,
                 size: sizeString
             })   
-            
+            let urlString = img.data.data[0].url;
+            for(let i = 1; i < img.data.data.length; i++){
+                urlString += `\n${img.data.data[i].url}`;   
+            }
 
-            await interaction.editReply({ content: `${img.data.data[0].url}` });
+            await interaction.editReply({ content: `${urlString}` });
         }catch(err){
             console.log(err);
             await interaction.editReply({ content: "Fehler beim Generieren des Bildes" });
