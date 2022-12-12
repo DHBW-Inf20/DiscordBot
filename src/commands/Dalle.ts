@@ -43,6 +43,7 @@ export const Dalle: Command = {
     run: async (client: Client, interaction: BaseCommandInteraction) => {
 
         const size = interaction.options.get("size")?.value as number | undefined;
+        const n = (interaction.options.get("n")?.value || 1) as number;
         const sizeString = size === 1 ? "256x256" : size === 2 ? "512x512" : size === 3 ? "1024x1024" : "256x256";
         const openAiconfig = new Configuration({
             apiKey: config?.openaiKey
@@ -56,7 +57,7 @@ export const Dalle: Command = {
 
             const img = await openAi.createImage({
                 prompt: interaction.options.get("prompt")?.value as string,
-                n:1,
+                n,
                 size: sizeString
             })   
             let urlString = img.data.data[0].url;
