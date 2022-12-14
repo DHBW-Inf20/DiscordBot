@@ -2,10 +2,6 @@ import { config, zitateMap } from '../Bot';
 import {
     Client,
     ContextMenuInteraction,
-    Modal,
-    MessageActionRow,
-    TextInputComponent,
-    ModalActionRowComponent,
 } from 'discord.js';
 import ZitatHandler from '../misc/zitatHandler';
 import { ContextMenuCommand } from "../types/command";
@@ -17,6 +13,10 @@ export const Ask: ContextMenuCommand = {
     type: "MESSAGE",
     run: async (client: Client, interaction: ContextMenuInteraction) => {
 
+        if (interaction.user.id === "377396628660813824") {
+            interaction.reply({ content: "Du kannst mich nicht fragen, du hs!", ephemeral: false });
+            return;
+        }
         let msg = interaction.options.get("message")?.message;
 
         if (!msg) {
@@ -31,7 +31,6 @@ export const Ask: ContextMenuCommand = {
         })
 
         // Choose a random entry from a array
-        const personalityIndex = 1;
         // const randomEntry = (arr: any[]) => arr[Math.floor(Math.random() * arr.length)];
 
         const data = await dba.getInstance().getRandomWeightedDavinciData()
