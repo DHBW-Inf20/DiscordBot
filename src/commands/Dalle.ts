@@ -1,21 +1,10 @@
 import { BaseCommandInteraction, Client, ApplicationCommandOptionData } from 'discord.js';
 import { Command } from "../types/command";
-import { SlashCommandBuilder } from "@discordjs/builders"
 import { Configuration, OpenAIApi } from "openai";
 import { config } from './../Bot';
 
 
 
-
-let cmd = new SlashCommandBuilder().setName("dalle").setDescription("Generiert ein img mit Dalle").addIntegerOption(option =>
-    option.setName("size")
-        .setDescription("Größe des Bildes (Bitte klein halten)")
-        .setRequired(false)
-        .addChoices(
-            { value: 1, name: "256x256" },
-            { value: 2, name: "512x512" },
-            { value: 3, name: "1024x1024" }
-        ));
 
 
 
@@ -38,8 +27,7 @@ export const Dalle: Command = {
             type: "INTEGER",
             required: false,
             max_value: 5
-        },
-        (cmd.options[0] as unknown as ApplicationCommandOptionData)
+        }
     ],
     run: async (client: Client, interaction: BaseCommandInteraction) => {
 

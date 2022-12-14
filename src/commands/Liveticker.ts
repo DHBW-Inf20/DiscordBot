@@ -1,18 +1,6 @@
 import { ApplicationCommandOptionData, BaseCommandInteraction, Client } from 'discord.js';
 import { Command } from "../types/command";
-import { SlashCommandBuilder } from "@discordjs/builders"
 import { LiveTickerHandler, liveTickerHandlerMap } from './../misc/liveTickerHandler';
-
-
-let cmd = new SlashCommandBuilder().setName("liveticker").setDescription("Spielt einen Liveticker ab im momentanen Channel").addIntegerOption(option =>
-    option.setName("api")
-        .setDescription("Welche Openligadb API soll verwendet werden?")
-        .setRequired(false)
-        .addChoices(
-            { value: 0, name: "wmk" },
-            { value: 1, name: "WM2022" },
-        ));
-
 
 
 
@@ -21,7 +9,24 @@ export const LiveTicker: Command = {
     name: "liveticker",
     description: "Spielt einen Liveticker ab im momentanen Channel",
     type: "CHAT_INPUT",
-    options:   [ (cmd.options[0] as unknown as ApplicationCommandOptionData)],
+    options:   [
+        {
+            name: "api",
+            description: "Welche API soll verwendet werden?",
+            type: "INTEGER",
+            required: false,
+            choices: [
+                {
+                    name: "wmk",
+                    value: 0
+                },
+                {
+                    name: "WM2022",
+                    value: 1
+                }
+            ]
+        }
+     ],
     run: async (client: Client, interaction: BaseCommandInteraction) => {
         const apiN = interaction.options.get("api")?.value || 0;
         const api = ["wmk", "WM2022"][apiN as number];

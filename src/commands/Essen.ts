@@ -1,6 +1,5 @@
 import { BaseCommandInteraction, Client } from 'discord.js';
 import { Command } from "../types/command";
-import { SlashCommandBuilder } from "@discordjs/builders"
 
 
 

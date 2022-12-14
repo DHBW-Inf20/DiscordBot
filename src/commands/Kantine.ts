@@ -1,6 +1,5 @@
-import { ApplicationCommandOptionData, BaseCommandInteraction, Client, MessageActionRow, MessageButton, MessageEmbed, ButtonInteraction, User } from 'discord.js';
+import { ApplicationCommandOptionData, BaseCommandInteraction, Client, MessageActionRow, MessageButton, MessageEmbed, ButtonInteraction, User, ApplicationCommandChoicesData } from 'discord.js';
 import { Command } from "../types/command";
-import { SlashCommandBuilder } from "@discordjs/builders"
 import { kantinenInterface } from "../Bot";
 import { kantine } from "interfaces/kantine";
 import { Menu } from "types/schedule";
@@ -11,19 +10,8 @@ const constantButtonRow = new MessageActionRow().addComponents([
     new MessageButton().setCustomId('nextDay').setEmoji("⏭️").setStyle('SECONDARY')
 ])
 
-// For some reason without the builder it has a problem creating choices...
-let cmd = new SlashCommandBuilder().setName("kantine").setDescription("Zeigt den Kantineplan an").addIntegerOption(option => 
-    option.setName("kantine")
-    .setDescription("Welche Kantine soll angezeigt werden?")
-    .setRequired(false)
-    .addChoices(
-        { value: 1, name: "Mensa Ludwigsburg" },
-        { value: 6, name: "Mensa Flandernstrasse" },
-        { value: 9, name: "Mensa Esslingen Stadtmitte" },
-        { value: 12, name: "Mensa Am Campus Horb" },
-        { value: 13, name: "Mensa Göppingen" },
-        { value: 21, name: "Foodtruck" }
-));
+
+
 
 
 export const Kantine: Command = {
@@ -37,10 +25,25 @@ export const Kantine: Command = {
             type: "INTEGER",
             required: false
         },
-        (cmd.options[0] as unknown as ApplicationCommandOptionData)
+        {
+            description: "Welche Kantine soll angezeigt werden?",
+            name: "kantine",
+            required: false,
+            choices: [
+                { value: 1, name: "Mensa Ludwigsburg" },
+                { value: 6, name: "Mensa Flandernstrasse" },
+                { value: 9, name: "Mensa Esslingen Stadtmitte" },
+                { value: 12, name: "Mensa Am Campus Horb" },
+                { value: 13, name: "Mensa Göppingen" },
+                { value: 21, name: "Foodtruck" }
+            ],
+            type: "INTEGER"
+        }
+
     ],
     run: async (client: Client, interaction: BaseCommandInteraction) => {
 
+        await interaction.deferReply();
         let dayParameter:number|undefined = (interaction.options.get("tag"))?.value as number | undefined;
 
         let locIdParameter: kantine["locId"] |undefined = (interaction.options.get("kantine"))?.value as kantine["locId"] | undefined;
@@ -48,10 +51,9 @@ export const Kantine: Command = {
         let mealData = await kantinenInterface.getMenu(dayParameter,locIdParameter);
 
         let components = [constantButtonRow];
-        if(Object.keys(mealData.meals).length > 0) {
+        if(Object.keys(mealData.meals).length > 0 && Object.keys(mealData.previews).length > 0) {
             components.push(createPreviewButtonRow(mealData.previews));
         }
-        await interaction.deferReply();
         await interaction.followUp({
             embeds: [createEmbed(mealData.meals, mealData.date, interaction.user)],
             components
