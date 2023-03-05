@@ -35,7 +35,15 @@ class StundenPlanHandler implements stundenPlanHandler {
 
 
         this.weekOffset = (interaction.options.get("woche")?.value || this.weekOffset) as number;
-
+        if(this.weekOffset === 0){
+            // Check if its a weekend
+            const today = new Date();
+            const day = today.getDay();
+            if(day === 0 || day === 6){
+                // Its a weekend
+                this.weekOffset = 1;
+            }
+        }
         let dbUser = await dba.getInstance().getUser(interaction.user.id);
         if (!dbUser) {
             interaction.reply({ content: "Dein Discord-Account ist noch nicht verifiziert und es fehlt eine Kurs-Zuordnung. Bitte verifiziere deinen Account mit dem Befehl `/verify <ixxxx>` und versuche es erneut.", ephemeral: true });
@@ -71,7 +79,7 @@ class StundenPlanHandler implements stundenPlanHandler {
     async sendStundenplan(buttonInteraction?: ButtonInteraction) {
             const interaction = buttonInteraction || this.interaction;
             if (!interaction) return;
-            if(!this.interaction?.deferred){
+            if(!interaction?.deferred){
                 await interaction.deferReply();
             }
             if(buttonInteraction){
@@ -90,7 +98,7 @@ class StundenPlanHandler implements stundenPlanHandler {
                 await interaction.editReply({
                     content: "https://tenor.com/view/free-dave-chappelle-celebrate-finally-freedom-gif-4581850",
                     components: [constantButtonRow]
-                }).catch(this.catch);
+                }).catch(e=>this.catch(e));
             }
 
             const stundenplanCanvas = new StundenplanCanvas(stundenplan);
@@ -111,7 +119,7 @@ class StundenPlanHandler implements stundenPlanHandler {
                 .setColor(0x771100)
                 .setFooter({text: `Angefragt von ${interaction.user.username}`, iconURL: interaction.user.avatarURL() || undefined});
 
-            let message = await interaction.editReply({ embeds:[embed], components: [constantButtonRow], files: [attachment] }).catch(this.catch);
+            let message = await interaction.editReply({ embeds:[embed], components: [constantButtonRow], files: [attachment] }).catch(e=>this.catch(e));
 
             if(!message) return;
             stundenPlanMap.delete(this.id);
