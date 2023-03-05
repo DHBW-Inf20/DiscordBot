@@ -10,26 +10,24 @@ class IntranetFacade implements HorbIntranetFacade {
 
     username: string;
     password: string;
-    sessid: string;
-    typoid: string;
+    typouser: string;
 
     constructor(username: string, password: string) {
         this.username = username;
         this.password = password;
-        this.sessid = "";
-        this.typoid = "";
+        this.typouser = "";
     }
 
     async logIn(): Promise<boolean> {
 
         // Might already be logged in
-        if (this.sessid !== "" && this.typoid !== "") {
+        if (this.typouser !== "") {
 
-            let url = 'https://www.hb.dhbw-stuttgart.de/2067.html';
+            let url = 'https://www.hb.dhbw-stuttgart.de/intranet';
             let options: any = {
                 method: 'GET',
                 headers: { Accept: '*/*' },
-                'Cookie': `PHPSESSID=${this.sessid}; fe_typo_user=${this.typoid}`
+                'Cookie': `fe_typo_user=${this.typouser}`
             }
             // First request to get the session-id
             const response = await fetch(url, options).catch(err => console.error('error:' + err));
@@ -39,8 +37,7 @@ class IntranetFacade implements HorbIntranetFacade {
             const text = await response.text();
             if (text.includes("Benutzeranmeldung")) {
                 // Session is invalid
-                this.sessid = "";
-                this.typoid = "";
+                this.typouser = "";
             } else {
                 // Session is valid
                 return true;
@@ -51,11 +48,8 @@ class IntranetFacade implements HorbIntranetFacade {
         encodedParams.set('user', `${this.username}`);
         encodedParams.set('pass', `${this.password}`);
         encodedParams.set('logintype', 'login');
-        encodedParams.set('pid', '404');
-        encodedParams.set('referer', 'https://www.hb.dhbw-stuttgart.de/intranet.html');
 
-
-        const url = 'https://www.hb.dhbw-stuttgart.de/intranet.html';
+        const url = 'https://www.hb.dhbw-stuttgart.de/intranet';
         const options = {
             method: 'POST',
             headers: {
@@ -63,7 +57,7 @@ class IntranetFacade implements HorbIntranetFacade {
                 'Accept': '*/*',
                 "User-Agent": "Discord", // User-Agent is obligated, the value doesn't matter
                 "Connection": "keep-alive",
-                "Referer": "https://www.hb.dhbw-stuttgart.de/intranet.html",
+                "Referer": "https://www.hb.dhbw-stuttgart.de/intranet",
                 "Accept-Encoding": "gzip, deflate, br",
 
                 "Accept-Language": "de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7"
@@ -74,13 +68,13 @@ class IntranetFacade implements HorbIntranetFacade {
         
         // Get the reponse for the typouserresponse.
         let loginresponse = await fetch(url, options);
+        // console.log(await loginresponse.text());
         const cookies = loginresponse.headers.get('set-cookie')?.split(';');
 
         if(cookies){
-            this.sessid = cookies[0].split('=')[1] || "";
-            this.typoid = cookies[1].split('=')[2] || "";
+            this.typouser = cookies[0].split('=')[1] || "";
         }
-        return this.typoid !== "" && this.sessid !== "";
+        return this.typouser !== "";
     }
 
     /**
@@ -98,7 +92,7 @@ class IntranetFacade implements HorbIntranetFacade {
         const date = new Date();
         date.setTime(date.getTime() + (week * 7 * 24 * 60 * 60 * 1000));
 
-        let url = `https://www.hb.dhbw-stuttgart.de/2067.html?kurs=${kurs}&goto=Kurs+anzeigen&day=${date.getDate()}&month=${date.getMonth() + 1}&year=${date.getFullYear()}`;
+        let url = `https://www.hb.dhbw-stuttgart.de/intranet/digitaler-stundenplan?kurs=${kurs}&goto=Kurs+anzeigen&day=${date.getDate()}&month=${date.getMonth() + 1}&year=${date.getFullYear()}`;
         let options: any = {
             method: 'GET',
             headers: {
@@ -107,7 +101,7 @@ class IntranetFacade implements HorbIntranetFacade {
                 "Referer": "https://www.hb.dhbw-stuttgart.de/intranet.html",
                 "Accept-Encoding": "gzip, deflate, br",
                 "Accept-Language": "de-DE,de;q=0.9,en-US;q=0.8,en;q=0.7",
-                'Cookie': `PHPSESSID=${this.sessid}; fe_typo_user=${this.typoid}`
+                'Cookie': `fe_typo_user=${this.typouser}`
             }
         };
 

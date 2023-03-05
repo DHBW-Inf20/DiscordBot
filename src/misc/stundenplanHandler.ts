@@ -27,6 +27,10 @@ class StundenPlanHandler implements stundenPlanHandler {
     id: string = "";
     currentTimeout: NodeJS.Timeout | undefined = undefined;
 
+    constructor(){
+        this.catch.bind(this);
+    }
+
     init = async (interaction: BaseCommandInteraction) => {
 
 
@@ -40,19 +44,17 @@ class StundenPlanHandler implements stundenPlanHandler {
 
         this.interaction = interaction;
         this.course = (interaction.options.get("kurs")?.value || "HOR-T" + dbUser.course) as string;
-        
-        await interaction.deferReply();
-
+    
         await this.sendStundenplan();
 
         return this;
 
     }
 
-    catch(error: any) {
+    async catch(error: any) {
         console.error(error);
-        if (!this.interaction) return;
-        this.interaction.editReply({ content: "Ein Fehler ist aufgetreten. Bitte versuche es erneut.", components: [] });
+        if (this.interaction == undefined) return;
+        await this.interaction.editReply({ content: "Ein Fehler ist aufgetreten. Bitte versuche es erneut.", components: [] });
 
     }
 
@@ -68,16 +70,19 @@ class StundenPlanHandler implements stundenPlanHandler {
 
     async sendStundenplan(buttonInteraction?: ButtonInteraction) {
             const interaction = buttonInteraction || this.interaction;
+            if (!interaction) return;
+            if(!this.interaction?.deferred){
+                await interaction.deferReply();
+            }
             if(buttonInteraction){
-                await buttonInteraction.deferReply();
                 const originalMessageId = buttonInteraction.message.id;
                 const originalMessage = await buttonInteraction.channel?.messages.fetch(originalMessageId);
                 if(!originalMessage) return;
                 originalMessage.deletable && originalMessage.delete();
+            }else{
             }
-            if (!interaction) return;
-
-            const stundenplan = await Intranet.getInstance().getStundenplan(this.course, this.weekOffset).catch(this.catch);
+            
+            const stundenplan = await Intranet.getInstance().getStundenplan(this.course, this.weekOffset).catch((e)=> this.catch(e));
             if (!stundenplan) return;
 
             
