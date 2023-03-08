@@ -8,7 +8,7 @@ import { ContextMenuCommand } from "../types/command";
 import { Configuration, OpenAIApi } from 'openai';
 import dba, { IDavinciData } from '../misc/databaseAdapter';
 
-let chatHistory: string[] = [];
+let chatHistory: {[key:string]: string[]} = {};
 
 export const Ask: ContextMenuCommand = {
     name: "Horby fragen",
@@ -44,16 +44,18 @@ export const Ask: ContextMenuCommand = {
 
         
         const openAi = new OpenAIApi(openAiconfig);
-        chatHistory.push(msg.content);
-        let chatMessages = chatHistory.map((msg, index) => {
+        chatHistory[msg.author.id] = chatHistory[msg.author.id] || [];
+        
+        if (chatHistory[msg.author.id].length > 5) {
+            chatHistory[msg.author.id].shift();
+        }
+        chatHistory[msg.author.id].push(msg.content);
+        let chatMessages = chatHistory[msg.author.id].map((msg, index) => {
             return {
                 "role": "user",
                 "content": msg
             }
         });
-        if (chatHistory.length > 5) {
-            chatHistory.shift();
-        }
         let chatGPTResponse = openAi.createCompletion({
             "model": "gpt-3.5-turbo",
             "messages": [
