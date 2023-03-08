@@ -56,7 +56,7 @@ export const Ask: ContextMenuCommand = {
             "model": "gpt-3.5-turbo",
             "messages": [
                 {"role": "system", "content": "Du bist Dietmar Zende, ein Dozent an der DHBW Horb für das Fach Consulting. Du hast eine eigene Vertriebsfirma mit dem Namen Boss-Factory und beantwortest fragen über Consulting und dem technischen Vertrieb, du bist sehr von dir überzeugt."},
-                [...chatHistory[msg.author.id]]
+                ...chatHistory[msg.author.id]
             ]
         } as unknown as any).then(res => {
             chatHistory[msg!.author.id].push({"role":"assistant", "message": res.data.choices[0].text!});
