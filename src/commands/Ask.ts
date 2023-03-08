@@ -8,7 +8,9 @@ import { ContextMenuCommand } from "../types/command";
 import { Configuration, OpenAIApi } from 'openai';
 import dba, { IDavinciData } from '../misc/databaseAdapter';
 
-let chatHistory: {[key:string]: string[]} = {};
+type message = {role:string, message:string};
+
+let chatHistory: {[key:string]: message[]} = {};
 
 export const Ask: ContextMenuCommand = {
     name: "Horby fragen",
@@ -46,23 +48,18 @@ export const Ask: ContextMenuCommand = {
         const openAi = new OpenAIApi(openAiconfig);
         chatHistory[msg.author.id] = chatHistory[msg.author.id] || [];
         
-        if (chatHistory[msg.author.id].length > 5) {
+        if (chatHistory[msg.author.id].length > 10) {
             chatHistory[msg.author.id].shift();
         }
-        chatHistory[msg.author.id].push(msg.content);
-        let chatMessages = chatHistory[msg.author.id].map((msg, index) => {
-            return {
-                "role": "user",
-                "content": msg
-            }
-        });
+        chatHistory[msg.author.id].push({"role":"user", "message": msg.content});
         let chatGPTResponse = openAi.createCompletion({
             "model": "gpt-3.5-turbo",
             "messages": [
                 {"role": "system", "content": "Du bist Dietmar Zende, ein Dozent an der DHBW Horb für das Fach Consulting. Du hast eine eigene Vertriebsfirma mit dem Namen Boss-Factory und beantwortest fragen über Consulting und dem technischen Vertrieb, du bist sehr von dir überzeugt."},
-                [...chatMessages]
+                [...chatHistory[msg.author.id]]
             ]
         } as unknown as any).then(res => {
+            chatHistory[msg!.author.id].push({"role":"assistant", "message": res.data.choices[0].text!});
             interaction.followUp({ content: `\`\`\`${msg?.content}\`\`\`\n${res.data.choices[0].text}` });
         }).catch(err => {
             console.log(err);
