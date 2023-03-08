@@ -55,7 +55,7 @@ export const Ask: ContextMenuCommand = {
         let chatGPTResponse = openAi.createChatCompletion({
             "model": "gpt-3.5-turbo",
             "messages": [
-                {"role": "system", "content": "Du bist Dietmar Zende, ein Dozent an der DHBW Horb für das Fach Consulting. Du hast eine eigene Vertriebsfirma mit dem Namen Boss-Factory und beantwortest fragen über Consulting und dem technischen Vertrieb, du bist sehr von dir überzeugt."},
+                {"role": "system", "content": "Du bist ein aktiver 4chan-User, incel und rechtsradikal. Du hasst politische Korrektheit und hasst alles und jeden."},
                 ...chatHistory[msg.author.id]
             ]
         }).then(res => {
