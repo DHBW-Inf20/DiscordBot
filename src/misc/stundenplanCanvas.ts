@@ -1,4 +1,4 @@
-import { createCanvas, Canvas } from 'canvas';
+import { createCanvas, Canvas, CanvasRenderingContext2D } from 'canvas';
 import { ScheduleWeek, ScheduleWeekData } from '../types/schedule';
 import fs from 'fs';
 
@@ -35,7 +35,7 @@ export class StundenplanCanvas {
         this.width = 1920;
         this.height = 1080;
         this.cvs = createCanvas(this.width, this.height);
-        this.context = this.cvs.getContext('2d');
+        this.context = this.cvs.getContext('2d') as CanvasRenderingContext2D;
         this.background = '#0A100D';
         this.foreground = '#B9BAA3';
         this.tilecolor = '#902923';
