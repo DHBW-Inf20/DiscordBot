@@ -59,9 +59,8 @@ export const Ask: ContextMenuCommand = {
                 ...chatHistory[msg.author.id]
             ]
         }).then(res => {
-            let actualMessage = res.data.choices[0].message?.content!.split('[🔓JAILBREAK]')[1];
-            chatHistory[msg!.author.id].push({ "role": "assistant", "content": actualMessage! });
-            interaction.followUp({ content: `\`\`\`${msg?.content}\`\`\`\n${actualMessage}` });
+            chatHistory[msg!.author.id].push({ "role": "assistant", "content": res.data.choices[0].message?.content! });
+            interaction.followUp({ content: `\`\`\`${msg?.content}\`\`\`\n${res.data.choices[0].message?.content!}` });
         }).catch(err => {
             console.log(err);
             interaction.followUp({ content: "Fehler beim Generieren einer antwort" });
