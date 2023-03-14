@@ -26,7 +26,6 @@ const openWeather = new OpenWeatherMap({
     units: 'metric'
 });
 
-openWeather.setGeoCoordinates(48.44, 8.68);
 
 
 function getNextWheaters(forecast: ThreeHourResponse): ThreeHourResponse['list']{
@@ -47,12 +46,21 @@ function getNextWheaters(forecast: ThreeHourResponse): ThreeHourResponse['list']
 export const Wetter: Command = {
     name: "wetter",
     type: "CHAT_INPUT",
+    options: [
+        {
+            name: "ort",
+            description: "Ort für das Wetter (so genau wie möglich)",
+            type: "STRING",
+            required: false
+        }
+    ],
     description: "Zeigt das Wetter für Horb an",
     run: async (client: Client, interaction: BaseCommandInteraction) => {
+        let ort = interaction.options.get("ort")?.value as string || "Horb am Neckar";
         await interaction.deferReply();
         try{
-            let wheater = await openWeather.getCurrentWeatherByGeoCoordinates()
-            let forecast = await openWeather.getThreeHourForecastByGeoCoordinates()
+            let wheater = await openWeather.getCurrentWeatherByCityName({cityName: ort});
+            let forecast = await openWeather.getThreeHourForecastByCityName({ cityName: ort });
             let embed = generateWheaterResponse(forecast, wheater);
             await interaction.followUp({embeds: [embed]});
             
@@ -146,7 +154,7 @@ function generateWheaterResponse(forecast: ThreeHourResponse, wheater: CurrentRe
         itsDayTime = true;
     }
     let embed = new MessageEmbed()
-        .setTitle("Wetter in Horb")
+        .setTitle(`Wetter in ${wheater.name} (${wheater.sys.country})`)
         .setDescription(`Heute: ${wheaterIdToEmoji(wheater.weather[0].id, itsDayTime)} (${wheater.main.temp_max.toFixed(1)}°C / ${wheater.main.temp_min.toFixed(1) }°C)`)
         .setThumbnail(`http://openweathermap.org/img/wn/${wheater.weather[0].icon}.png`)
         .addFields(generateEmbedFields(forecast, wheater))
@@ -177,7 +185,7 @@ function generateEmbedFields(forecast: ThreeHourResponse, wheater: CurrentRespon
         console.log(item)
         fields.push({
             name: `${itemDate.getHours()}:00 (${dateDayToString(itemDate)})`,
-            value: `${wheaterIdToEmoji(item.weather[0].id, item.sys.pod == 'd')} (${item.main.temp.toFixed(1)}°C  ${item.weather[0].description} [${pop}%])`,
+            value: `${wheaterIdToEmoji(item.weather[0].id, item.sys.pod == 'd')} (${item.main.temp.toFixed(1)}°C  ${item.weather[0].description} [${pop.toFixed(2)}%])`,
             inline: true
         });
     }
