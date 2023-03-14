@@ -58,8 +58,7 @@ initListeners(client);
 // Logging in
 
 function loadConfig(): Config | undefined {
-
-    console.log(process.env.OPEN_AI_KEY,   process.env.OPEN_WEATHER_KEY)
+    process.env.TZ = "Europe/Berlin";
     return {
         openaiKey: process.env.OPEN_AI_KEY || "",
         openWeatherKey: process.env.OPEN_WEATHER_KEY || "",
