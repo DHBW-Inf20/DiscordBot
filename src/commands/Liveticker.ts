@@ -8,7 +8,6 @@ import { LiveTickerHandler, liveTickerHandlerMap } from './../misc/liveTickerHan
 export const LiveTicker: Command = {
     name: "liveticker",
     description: "Spielt einen Liveticker ab im momentanen Channel",
-    type: "CHAT_INPUT",
     options:   [
         {
             name: "api",
