@@ -85,7 +85,7 @@ function getWeathersForNextNEvenings(forecast: ThreeHourResponse, n: number = 3)
 }
 const thresholds = {
     rain: 0.5,
-    temp: 6
+    temp: 10
 }
 function calcGrillen(wheater: CurrentResponse, forecast: ThreeHourResponse, n: number = 3): [EmbedFieldData[], ColorResolvable] {
     // Calc if it is good to grill and when its the best time in the next 3 days
@@ -134,7 +134,7 @@ function calcGrillen(wheater: CurrentResponse, forecast: ThreeHourResponse, n: n
         // Calc avg temp and prob
         let avgTemp = 0;
         let avgRainProb = 0;
-        let maxTemp = 0;
+        let maxTemp = -Infinity;
         let maxRainProb = 0;
         for (let j = 0; j < bufferTodySpan.length; j++) {
             let next3Hours = bufferTodySpan[j];
@@ -153,7 +153,7 @@ function calcGrillen(wheater: CurrentResponse, forecast: ThreeHourResponse, n: n
         if(bufferTodySpan.length == 0) {
             avgTemp = 0;
             avgRainProb = 0;
-            maxTemp = 0;
+            maxTemp = -Infinity;
             maxRainProb = 0;
             for (let j = 0; j < nextWheaters[i].length; j++) {
                 let next3Hours = nextWheaters[i][j];
@@ -205,11 +205,11 @@ function calcGrillen(wheater: CurrentResponse, forecast: ThreeHourResponse, n: n
                     value: `Gutes Grillwetter!${forecastString}`,
                 inline: true});
             }else {
-                embedFields.push({
-                    name: `😡 ${new Date(nextWheaters[i][0].dt * 1000).getDate()}.${new Date(nextWheaters[i][0].dt * 1000).getMonth() + 1}`,
-                    value: `Kein Gutes Wetter :(.${forecastString}`,
-                    inline: true
-                });
+                // embedFields.push({
+                //     name: `😡 ${new Date(nextWheaters[i][0].dt * 1000).getDate()}.${new Date(nextWheaters[i][0].dt * 1000).getMonth() + 1}`,
+                //     value: `Kein Gutes Wetter${forecastString}`,
+                //     inline: true
+                // });
             }
         }
 
