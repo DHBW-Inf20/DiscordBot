@@ -227,7 +227,7 @@ export const GrillWetter: Command = {
             description: "Anzahl der Tage für die die Aussichten berechnet werden sollen",
             type: "INTEGER",
             required: false,
-            max_value: 5,
+            max_value: 4,
             min_value: 1
         },
         {
