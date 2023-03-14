@@ -15,6 +15,7 @@ import VerificationHandler from "./misc/verificationHandler";
 import dba from './misc/databaseAdapter';
 import messageListener from "./listeners/messageListener";
 import messageReaction from "./listeners/messageReaction";
+import OpenWeatherMap from "openweathermap-ts";
 dotenv.config({ path: ".env" });
 // Load Config...
 
@@ -24,6 +25,13 @@ if (!config) {
     console.error("Failed to load config");
     process.exit(1);
 }
+
+export const openWeather = new OpenWeatherMap({
+    apiKey: config.openWeatherKey || "",
+    language: 'de',
+    units: 'metric'
+});
+
 
 // use PKCS#1 padding (RSA_PKCS1_PADDING)
 // console.log(k.encryptPrivate('Hello RSA!', 'base64'));
@@ -50,9 +58,11 @@ initListeners(client);
 // Logging in
 
 function loadConfig(): Config | undefined {
-    console.log(process.env.OPEN_AI_KEY)
+
+    console.log(process.env.OPEN_AI_KEY,   process.env.OPEN_WEATHER_KEY)
     return {
         openaiKey: process.env.OPEN_AI_KEY || "",
+        openWeatherKey: process.env.OPEN_WEATHER_KEY || "",
         dev: process.env.DEV === "true",
         discord: {
             token: process.env.DISCORD_TOKEN || "",
