@@ -15,6 +15,7 @@ import dba, { IDavinciData } from '../misc/databaseAdapter';
 import OpenWeatherMap from 'openweathermap-ts';
 import { CurrentResponse, ThreeHourResponse } from 'openweathermap-ts/dist/types';
 import { MessageEmbed } from 'discord.js';
+import fetch from 'node-fetch';
 let chatHistory: {[key:string]: ChatCompletionRequestMessage[]} = {};
 
 
@@ -31,8 +32,14 @@ openWeather.setGeoCoordinates(48.44, 8.68);
 function getNextWheaters(forecast: ThreeHourResponse): ThreeHourResponse['list']{
     let now = new Date();
     let nextWheaters = forecast.list.filter((item) => {
-        let itemDate = new Date(item.dt * 1000);
-        return itemDate.getHours() > now.getHours();
+        return item.dt > (now.getTime() / 1000);
+    });
+
+    // Sort by time
+    nextWheaters.sort((a, b) => {
+        let aDate = new Date(a.dt * 1000);
+        let bDate = new Date(b.dt * 1000);
+        return aDate.getTime() - bDate.getTime();
     });
     return nextWheaters;
 }
@@ -163,12 +170,14 @@ function generateEmbedFields(forecast: ThreeHourResponse, wheater: CurrentRespon
     });
 
     // Add next wheaters
-    for(let i = 0; i < 3; i++){
+    for(let i = 0; i < 6; i++){
         let item = nextWheaters[i];
         let itemDate = new Date(item.dt * 1000);
+        let pop = (item as unknown as any).pop * 100;
+        console.log(item)
         fields.push({
-            name: `${itemDate.getHours()}:00`,
-            value: `${wheaterIdToEmoji(item.weather[0].id, item.sys.pod == 'd')} (${item.main.temp.toFixed(1)}°C  ${item.weather[0].description})`,
+            name: `${itemDate.getHours()}:00 (${dateDayToString(itemDate)})`,
+            value: `${wheaterIdToEmoji(item.weather[0].id, item.sys.pod == 'd')} (${item.main.temp.toFixed(1)}°C  ${item.weather[0].description} [${pop}%])`,
             inline: true
         });
     }
@@ -176,3 +185,32 @@ function generateEmbedFields(forecast: ThreeHourResponse, wheater: CurrentRespon
     return fields;
 
 }
+
+function dateDayToString(date: Date): string{
+
+    // if its today, return "Heute"
+    let now = new Date();
+    if(date.getDate() == now.getDate() && date.getMonth() == now.getMonth() && date.getFullYear() == now.getFullYear()){
+        return "Heute";
+    }
+
+    switch (date.getDay()) {
+        case 0:
+            return "Sonntag";
+        case 1:
+            return "Montag";
+        case 2:
+            return "Dienstag";
+        case 3:
+            return "Mittwoch";
+        case 4:
+            return "Donnerstag";
+        case 5:
+            return "Freitag";
+        case 6:
+            return "Samstag";
+        default:
+            return "Unbekannt";
+    }
+}
+
