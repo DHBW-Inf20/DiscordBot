@@ -65,7 +65,7 @@ export default (client: Client): void => {
                 ]
             }).then(res => {
                 chatHistory[message.author.id].push({ "role": "assistant", "content": res.data.choices[0].message?.content! });
-                message.reply({ content: `\`\`\`${msg}\`\`\`\n${res.data.choices[0].message?.content!}` });
+                message.reply({ content: `\`\`\`${msg}\`\`\`\n${res.data.choices[0].message?.content!}`, allowedMentions: { repliedUser: false } });
             }).catch(err => {
                 return;
             })
