@@ -7,9 +7,10 @@ import ZitatHandler from '../misc/zitatHandler';
 import { ContextMenuCommand } from "../types/command";
 import { ChatCompletionRequestMessage, Configuration, OpenAIApi } from 'openai';
 import dba, { IDavinciData } from '../misc/databaseAdapter';
+import { Interaction } from 'discord.js';
 
 
-let chatHistory: {[key:string]: ChatCompletionRequestMessage[]} = {};
+export let chatHistory: {[key:string]: ChatCompletionRequestMessage[]} = {};
 
 export const Ask: ContextMenuCommand = {
     name: "Horby fragen",
@@ -83,3 +84,7 @@ export const Ask: ContextMenuCommand = {
         // })
     }
 };
+
+export function askSomething(interaction: Interaction){
+    
+}
