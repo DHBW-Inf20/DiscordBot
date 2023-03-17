@@ -29,7 +29,6 @@ export default (client: Client): void => {
         }
         if (message.mentions.has(client.user)) {
             let msg = message.content.replace(`<@${client.user.id}>`, "Horby").trim();
-            
             let attachment = message.attachments.first();
 
             // check if the attachment is a txt file
@@ -86,6 +85,8 @@ export default (client: Client): void => {
             }).then(res => {
                 message.reply({ content: `${res.data.choices[0].message?.content!} (${model})`, allowedMentions: { repliedUser: false } });
             }).catch(err => {
+                console.error(err);
+                message.reply({ content: `Error Handling the request`, allowedMentions: { repliedUser: false } });
                 return;
             })
 
