@@ -12,7 +12,7 @@ export default (client: Client): void => {
         if (message.author.id === "411916947773587456") {
             jockieNickname(message);
         }
-        if (message.author.bot) return; // Ignore bot messages
+        // if (message.author.bot) return; // Ignore bot messages
         // Only really look at messages in the main guild
         // if (message.guildId !== config?.discord.main_guild) return;
 
