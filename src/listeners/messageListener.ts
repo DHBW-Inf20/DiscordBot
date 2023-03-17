@@ -62,7 +62,7 @@ export default (client: Client): void => {
             // Keep the longest message in the history:
             let longest = {} as ChatCompletionRequestMessage;
             for (const msg of chatHistory[message.author.id]) {
-                if (msg.content.length > longest.content.length) {
+                if (msg.content.length > (longest?.content?.length || 0)) {
                     longest = msg;
                 }
             }
