@@ -70,11 +70,12 @@ export default (client: Client): void => {
                 chatHistory[message.author.id] = [longest];
             }
             chatHistory[message.author.id].push({ "role": "user", "content": msg });
+            let completeLength = chatHistory[message.author.id].reduce((acc, cur) => acc + cur.content.length, 0);
             await message.channel.sendTyping();
 
             let model = 'gpt-3.5-turbo';
             if (message.author.id === '902550033084346378'){
-                if(msg.length > 1500){
+                if(completeLength > 1500){
                     model = 'gpt-4-32k';
                 }else{
                     model = 'gpt-4';
