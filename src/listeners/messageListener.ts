@@ -34,7 +34,9 @@ export default (client: Client): void => {
             // check if the attachment is a txt file
             if (attachment && attachment.name?.endsWith(".txt")) {
                 // fetch the attachment
-                const attachmentContent = await fetch(attachment.url).then(res => res.text());
+                let attachmentContent = await fetch(attachment.url).then(res => res.text());
+                // reduce the size to be max 2900 chars
+                attachmentContent = attachmentContent.substring(0, 2900);
                 msg = `${attachmentContent}\n ---- \n${msg}`;
             }
             

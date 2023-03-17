@@ -10,7 +10,7 @@ import { Dalle } from './commands/Dalle';
 import { Ask } from "./commands/Ask";
 import { Wetter, GrillWetter } from './commands/Wetter';
 import { RemindMe } from "./commands/RemindMe";
-import { Session } from "./commands/session";
+import { Session } from "./commands/Session";
 
 // Register Commands of the bot
 export const Commands: (Command | ContextMenuCommand)[] = [Stundenplan, Kantine, Zitat, Verify, Caesar, LiveTicker,  Ask, Wetter, GrillWetter, RemindMe, Session];

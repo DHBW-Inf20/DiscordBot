@@ -7,11 +7,6 @@ import {
     ModalActionRowComponent,
 } from 'discord.js';
 import { Command } from '../types/command';
-import { randomUUID } from 'crypto';
-import VerificationHandler from '../misc/verificationHandler';
-import { verifyMap } from '../Bot';
-import Verifier from '../misc/EmailClient';
-import dba from '../misc/databaseAdapter';
 import { chatHistory } from './Ask';
 
 
