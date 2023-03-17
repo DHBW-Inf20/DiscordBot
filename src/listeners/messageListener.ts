@@ -52,10 +52,7 @@ export default (client: Client): void => {
             // Choose a random entry from a array
             // const randomEntry = (arr: any[]) => arr[Math.floor(Math.random() * arr.length)];
 
-            const data = await dba.getInstance().getRandomWeightedDavinciData()
-            if (!data) {
-                return;
-            }
+        
 
 
             const openAi = new OpenAIApi(openAiconfig);
@@ -69,7 +66,9 @@ export default (client: Client): void => {
                     longest = msg;
                 }
             }
-            chatHistory[message.author.id] = [longest];
+            if(Object.keys(longest).length !== 0){
+                chatHistory[message.author.id] = [longest];
+            }
             chatHistory[message.author.id].push({ "role": "user", "content": msg });
             await message.channel.sendTyping();
 
