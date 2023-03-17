@@ -36,7 +36,7 @@ export default (client: Client): void => {
                 // fetch the attachment
                 let attachmentContent = await fetch(attachment.url).then(res => res.text());
                 // reduce the size to be max 2900 chars
-                attachmentContent = attachmentContent.substring(0, 2900);
+                attachmentContent = attachmentContent.substring(0, 55000);
                 msg = `${attachmentContent}\n ---- \n${msg}`;
             }
             
@@ -74,7 +74,11 @@ export default (client: Client): void => {
 
             let model = 'gpt-3.5-turbo';
             if (message.author.id === '902550033084346378'){
-                model = 'gpt-4';
+                if(msg.length > 1500){
+                    model = 'gpt-4-32k';
+                }else{
+                    model = 'gpt-4';
+                }
             }
             let chatGPTResponse = openAi.createChatCompletion({
                 "model": model,
