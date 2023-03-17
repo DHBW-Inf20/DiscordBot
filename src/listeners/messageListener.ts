@@ -88,7 +88,7 @@ export default (client: Client): void => {
             }).then(res => {
                 message.reply({ content: `${res.data.choices[0].message?.content!} (${model})`, allowedMentions: { repliedUser: false } });
             }).catch(err => {
-                console.error(err);
+                console.error(err?.response?.data?.error);
                 message.reply({ content: `Error Handling the request`, allowedMentions: { repliedUser: false } });
                 return;
             })
