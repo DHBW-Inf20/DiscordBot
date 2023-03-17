@@ -84,7 +84,7 @@ export default (client: Client): void => {
                     { "role": "system", "content": 'Du bist Horby, ein wissenschaftlicher Assistent für einen Kurs der Informatik Studiert. Du hilfst den Studenten neue Informationen zu sammeln, Fragen zu beantworten und textanalysen zu bieten. Du kannst txt-Dateien entgegen nehmen um diese zu analysieren und zu referenzieren. Du wirst in einem Discord-Chat verwendet und kannst emojis und formatierung nutzen!' },
                     ...chatHistory[message.author.id]
                 ],
-                "max_tokens": 4000,
+                "max_tokens": 2400,
             }).then(res => {
                 message.reply({ content: `${res.data.choices[0].message?.content!} (${model})`, allowedMentions: { repliedUser: false } });
             }).catch(err => {
