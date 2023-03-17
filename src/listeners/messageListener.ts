@@ -86,7 +86,19 @@ export default (client: Client): void => {
                 ],
                 "max_tokens": 2400,
             }).then(res => {
-                message.reply({ content: `${res.data.choices[0].message?.content!} (${model})`, allowedMentions: { repliedUser: false } });
+                // Split the response up into multiple messages of max 2000 chars
+                let messages = res.data.choices[0].message?.content!;
+                let messageArray = [];
+                while (messages.length > 2000) {
+                    let split = messages.substring(0, 2000);
+                    let lastSpace = split.lastIndexOf(" ");
+                    messageArray.push(split.substring(0, lastSpace));
+                    messages = messages.substring(lastSpace);
+                }
+                messageArray.push(messages);
+                for (const msg of messageArray) {
+                        message.reply({ content: `${msg}`, allowedMentions: { repliedUser: false } });
+                }
             }).catch(err => {
                 console.error(err?.response?.data?.error);
                 message.reply({ content: `Error Handling the request`, allowedMentions: { repliedUser: false } });
