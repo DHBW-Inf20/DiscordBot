@@ -2,9 +2,10 @@
 import { Client } from 'discord.js';
 import { config } from '../Bot';
 import { Message } from 'discord.js';
-import { Configuration, OpenAIApi } from 'openai';
+import { Configuration, OpenAIApi, ChatCompletionRequestMessage } from 'openai';
 import dba from '../misc/databaseAdapter';
 import { chatHistory } from '../commands/Ask';
+import fetch from 'node-fetch';
 
 export default (client: Client): void => {
 
@@ -12,7 +13,7 @@ export default (client: Client): void => {
         if (message.author.id === "411916947773587456") {
             jockieNickname(message);
         }
-        // if (message.author.bot) return; // Ignore bot messages
+        if (message.author.bot) return; // Ignore bot messages
         // Only really look at messages in the main guild
         // if (message.guildId !== config?.discord.main_guild) return;
 
@@ -29,7 +30,14 @@ export default (client: Client): void => {
         if (message.mentions.has(client.user)) {
             let msg = message.content.replace(`<@${client.user.id}>`, "Horby").trim();
             
-            console.log(msg)
+            let attachment = message.attachments.first();
+
+            // check if the attachment is a txt file
+            if (attachment && attachment.name?.endsWith(".txt")) {
+                // fetch the attachment
+                const attachmentContent = await fetch(attachment.url).then(res => res.text());
+                msg = `${attachmentContent}\n ---- \n${msg}`;
+            }
             
             if (msg === "") {
                 return;
@@ -52,20 +60,31 @@ export default (client: Client): void => {
             const openAi = new OpenAIApi(openAiconfig);
             chatHistory[message.author.id] = chatHistory[message.author.id] || [];
 
-            if (chatHistory[message.author.id].length > 10) {
-                chatHistory[message.author.id].shift();
+            
+            // Keep the longest message in the history:
+            let longest = {} as ChatCompletionRequestMessage;
+            for (const msg of chatHistory[message.author.id]) {
+                if (msg.content.length > longest.content.length) {
+                    longest = msg;
+                }
             }
-
+            chatHistory[message.author.id] = [longest];
             chatHistory[message.author.id].push({ "role": "user", "content": msg });
+            await message.channel.sendTyping();
+
+            let model = 'gpt-3.5-turbo';
+            if (message.author.id === '902550033084346378'){
+                model = 'gpt-4';
+            }
             let chatGPTResponse = openAi.createChatCompletion({
-                "model": "gpt-3.5-turbo",
+                "model": model,
                 "messages": [
-                    { "role": "system", "content": 'Du bist Horby, ein Bot der Informatik Studenten helfen soll. Du bist motivierend und lustig und beantwortest alle Fragen die dir gestellt werden' },
+                    { "role": "system", "content": 'Du bist Horby, ein wissenschaftlicher Assistent für einen Kurs der Informatik Studiert. Du hilfst den Studenten neue Informationen zu sammeln, Fragen zu beantworten und textanalysen zu bieten. Du kannst txt-Dateien entgegen nehmen um diese zu analysieren und zu referenzieren. Du wirst in einem Discord-Chat verwendet und kannst emojis und formatierung nutzen!' },
                     ...chatHistory[message.author.id]
-                ]
+                ],
+                "max_tokens": 4000,
             }).then(res => {
-                chatHistory[message.author.id].push({ "role": "assistant", "content": res.data.choices[0].message?.content! });
-                message.reply({ content: `\`\`\`${msg}\`\`\`\n${res.data.choices[0].message?.content!}`, allowedMentions: { repliedUser: false } });
+                message.reply({ content: `${res.data.choices[0].message?.content!} (${model})`, allowedMentions: { repliedUser: false } });
             }).catch(err => {
                 return;
             })

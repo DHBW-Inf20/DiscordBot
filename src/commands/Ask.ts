@@ -54,7 +54,7 @@ export const Ask: ContextMenuCommand = {
         
         chatHistory[msg.author.id].push({"role":"user", "content": msg.content});
         let chatGPTResponse = openAi.createChatCompletion({
-            "model": "gpt-3.5-turbo",
+            "model": "gpt-4",
             "messages": [
                 { "role": "system", "content": 'Du bist Horby, ein Bot der Informatik Studenten helfen soll. Du bist motivierend und lustig und beantwortest alle Fragen die dir gestellt werden'},
                 ...chatHistory[msg.author.id]
