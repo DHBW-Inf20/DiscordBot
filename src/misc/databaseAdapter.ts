@@ -20,6 +20,11 @@ export interface IDavinciData{
     weight: number
 }
 
+export interface IChatPrompt{
+    prompt: string,
+    selected: boolean
+}
+
 export interface IZitat {
     discordId: string,
     zitat: string,
@@ -41,6 +46,7 @@ class DatabaseAdapter implements DBA {
     userModel: mongoose.Model<IUser>;
     zitatModel: mongoose.Model<IZitat>;
     davinciDataModel: mongoose.Model<IDavinciData>;
+    chatPromptModel: mongoose.Model<IChatPrompt>;
     constructor(host: string, user: string, password: string, dbname: string) {
         mongoose.connect(`mongodb+srv://${user}:${password}@${host}/${dbname}?retryWrites=true&w=majority`);
 
@@ -70,6 +76,13 @@ class DatabaseAdapter implements DBA {
             reference: { type: mongoose.Schema.Types.ObjectId, ref: 'Zitat' }
         });
 
+        const ChatPromptSchema = new mongoose.Schema<IChatPrompt>({
+            prompt: String,
+            selected: Boolean
+        });
+
+
+        this.chatPromptModel = mongoose.model<IChatPrompt>('ChatPrompt', ChatPromptSchema);
         this.userModel = mongoose.model<IUser>('User', UserSchema);
         this.zitatModel = mongoose.model<IZitat>('Zitat', ZitatSchema);
         this.davinciDataModel = mongoose.model<IDavinciData>('DavinciData', DavinciDataSchema);
@@ -102,6 +115,17 @@ class DatabaseAdapter implements DBA {
         return random;
 
 
+    }
+
+    async getRandomChatPrompt(): Promise<IChatPrompt | null> {
+        const count = await this.chatPromptModel.countDocuments();
+        const rand = Math.floor(Math.random() * count);
+        const random = await this.chatPromptModel.findOne().skip(rand);
+        return random;
+    }
+
+    async getChatPrompt(): Promise<IChatPrompt | null> {
+        return this.chatPromptModel.findOne( { selected: true });   
     }
 
     async getRandomWeightedDavinciData(): Promise<IDavinciData | null> {
