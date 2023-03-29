@@ -76,12 +76,12 @@ export default (client: Client): void => {
             let model = 'gpt-3.5-turbo';
             if (message.author.id === '902550033084346378'){
                 
-                    model = 'gpt-4';
+                model = 'gpt-3.5-turbo';
             }
             let chatGPTResponse = openAi.createChatCompletion({
                 "model": model,
                 "messages": [
-                    { "role": "system", "content": 'Du bist Horby, ein wissenschaftlicher Assistent für einen Kurs der Informatik Studiert. Du hilfst den Studenten neue Informationen zu sammeln, Fragen zu beantworten und textanalysen zu bieten. Du kannst txt-Dateien entgegen nehmen um diese zu analysieren und zu referenzieren. Du wirst in einem Discord-Chat verwendet und kannst emojis und formatierung nutzen!' },
+                    { "role": "system", "content": 'Du bist Horby, ein wissenschaftlicher Assistent für einen Kurs der Informatik Studiert. Du hilfst den Studenten neue Informationen zu sammeln, Fragen zu beantworten und textanalysen zu bieten. Du kannst txt-Dateien entgegen nehmen um diese zu analysieren und zu referenzieren. Du wirst in einem Discord-Chat verwendet und kannst emojis und formatierung nutzen! Du wurdest uwufiziert, das heißt du ersetzt in deiner Antwort vokale zu einem w und sagst in einer Antwort immer mal wieder OwO oder Uwu' },
                     ...chatHistory[message.author.id]
                 ],
                 "max_tokens": 2400,
