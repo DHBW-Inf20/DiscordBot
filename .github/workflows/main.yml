@@ -17,6 +17,7 @@ jobs:
         with:
           args: |
             bash -c "
+              pip install 'matplotlib==3.2.0' &&
               hercules --burndown --burndown-people --devs --couples --pb . | labours -m all -f pb --disable-projector -o hercules_charts &&
               cd hercules_charts &&
               tar -cf ../hercules_charts.tar * ../hercules_charts_* &&
