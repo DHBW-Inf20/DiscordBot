@@ -12,15 +12,12 @@ jobs:
         with:
           ref: ${{ github.ref }}
           fetch-depth: 0
-      - name: Install Git
-        run: sudo apt-get update && sudo apt-get -y install git
       - name: Run hercules
         uses: docker://srcd/hercules:latest
         with:
           args: |
             bash -c "
               pip install matplotlib==3.3.4 &&
-              pip install git+https://github.com/src-d/hercules &&
               hercules --burndown --burndown-people --devs --couples --pb . | labours -m all -f pb --disable-projector -o hercules_charts &&
               cd hercules_charts &&
               tar -cf ../hercules_charts.tar * ../hercules_charts_* &&
