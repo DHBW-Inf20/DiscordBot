@@ -48,13 +48,13 @@ export const AddPrompt: Command = {
     ],
     run: async (client: Client, interaction: BaseCommandInteraction) => {
         const name = (interaction.options.get("name")?.value || "Horby") as string;
-        const prompt = interaction.options.get("prompt") as string | null;
+        const prompt = interaction.options.get("prompt")?.value as string | null;
         if (prompt === null){
             await interaction.reply({ content: `Prompt darf nicht leer sein`, ephemeral: true});
             return;
         }
         const changeself = (interaction.options.get("changeself") || true) as boolean;    
-        dba.getInstance().setNameBasedPrompt(name, prompt);
+        await dba.getInstance().setNameBasedPrompt(name, prompt);
         if (changeself) {
             chatHistory[interaction.user.id] = [];
             dba.getInstance().setUserBasedPrompt(interaction.user.id, name);
@@ -78,9 +78,9 @@ export const SetPrompt: Command = {
     run: async (client: Client, interaction: BaseCommandInteraction) => {
         const name = (interaction.options.get("name")?.value || "Horby") as string;
         try{
-            dba.getInstance().setUserBasedPrompt(interaction.user.id, name);
+            await dba.getInstance().setUserBasedPrompt(interaction.user.id, name);
         }catch(e){
-            await interaction.reply({ content: `Prompt nicht gefunden`, ephemeral: true});
+            await interaction.reply({ content: `Es gab einen fehler beim erstellen der Prompt`, ephemeral: true});
             return;
         }
         chatHistory[interaction.user.id] = [];
@@ -92,8 +92,18 @@ export const ListPrompts: Command = {
     name: "listprompts",
     description: "Listet alle verfügbaren Prompts auf",
     run: async (client: Client, interaction: BaseCommandInteraction) => {
-        let rtString = dba.getInstance().listPrompts();
+        let rtString = await dba.getInstance().listPrompts();
         await interaction.reply({ content: `Verfügbare Prompts: ${rtString}`, ephemeral: true});
+    }
+}
+
+
+export const ShowPrompt: Command = {
+    name: "showprompt",
+    description: "Zeigt die aktuelle Prompt an",
+    run: async (client: Client, interaction: BaseCommandInteraction) => {
+        let prompt = await dba.getInstance().showPrompt(interaction.user.id);
+        await interaction.reply({ content: `Aktuelle Prompt: ${prompt}`, ephemeral: true});
     }
 }
 

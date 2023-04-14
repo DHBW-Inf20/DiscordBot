@@ -71,7 +71,7 @@ export default (client: Client): void => {
                 
                 model = 'gpt-3.5-turbo';
             }
-            const prompt = await dba.getInstance().getNameBasedPrompt(message.author.id) as string;
+            const prompt = await dba.getInstance().getUserBasedPrompt(message.author.id) as string;
             let chatGPTResponse = openAi.createChatCompletion({
                 "model": model,
                 "messages": [

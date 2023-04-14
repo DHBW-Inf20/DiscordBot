@@ -118,7 +118,7 @@ class DatabaseAdapter implements DBA {
     }
 
     async getUserBasedPrompt(discordId: string): Promise<String | null> {
-        const prompt = await this.userBasedPromptModel.findOne({ user_id: discordId });
+        const prompt = await this.userBasedPromptModel.findOne({ user_id: discordId }).populate('prompt');
         if (prompt === null){
             await this.initUserBasedPrompt(discordId);
             return this.getUserBasedPrompt(discordId);
@@ -134,10 +134,10 @@ class DatabaseAdapter implements DBA {
     }
 
     async listPrompts(): Promise<String> {
-        const prompts = await this.chatPromptModel.find();
+        const prompts = await this.nameBasedPromptModel.find();
         let promptString = "";
         prompts.forEach(prompt => {
-            promptString += `${prompt.prompt}, `;
+            promptString += `\`${prompt.name}\`, `;
         });
         // remove last 2 chars
         promptString = promptString.slice(0, -2);
@@ -145,15 +145,24 @@ class DatabaseAdapter implements DBA {
     }
 
 
+    async showPrompt(discordId: string): Promise<String> {
+        const userPrompt = await this.userBasedPromptModel.findOne({ user_id: discordId }).populate('prompt');
+        if (userPrompt === null) {
+            await this.initUserBasedPrompt(discordId);
+            return this.showPrompt(discordId);
+        }
+        return userPrompt.prompt.prompt;
+    }
+
     async setUserBasedPrompt(discordId: string, prompt_name: string): Promise<void> {
         const userPrompt = await this.userBasedPromptModel.findOne({ user_id: discordId });
         const prompt = await this.nameBasedPromptModel.findOne({ name: prompt_name });
+        if (prompt === null) throw new Error("Prompt not found");
         if (userPrompt === null) {
             const newPrompt = new this.userBasedPromptModel({ prompt: prompt, user_id: discordId });
             await newPrompt.save();
         }
         else {
-            if(prompt === null) throw new Error("Prompt not found");
             userPrompt.prompt = prompt;
             await userPrompt.save();
         }
@@ -166,7 +175,7 @@ class DatabaseAdapter implements DBA {
     }
 
     async setNameBasedPrompt(name: string, prompt: string): Promise<void> {
-        const namePrompt = await this.nameBasedPromptModel.findOne({ name: name });
+        const namePrompt = await this.nameBasedPromptModel.findOne({ name: name }).populate('prompt');
         if (namePrompt === null) {
             const newPrompt = new this.nameBasedPromptModel({ prompt: prompt, name: name });
             await newPrompt.save();
