@@ -25,6 +25,18 @@ export interface IChatPrompt{
     selected: boolean
 }
 
+export interface IUserBasedPrompt{
+    prompt: INameBasedPrompt,
+    user_id: string
+}
+
+export interface INameBasedPrompt{
+    prompt: string,
+    name: string
+}
+
+
+
 export interface IZitat {
     discordId: string,
     zitat: string,
@@ -47,6 +59,8 @@ class DatabaseAdapter implements DBA {
     zitatModel: mongoose.Model<IZitat>;
     davinciDataModel: mongoose.Model<IDavinciData>;
     chatPromptModel: mongoose.Model<IChatPrompt>;
+    userBasedPromptModel: mongoose.Model<IUserBasedPrompt>;
+    nameBasedPromptModel: mongoose.Model<INameBasedPrompt>;
     constructor(host: string, user: string, password: string, dbname: string) {
         mongoose.connect(`mongodb+srv://${user}:${password}@${host}/${dbname}?retryWrites=true&w=majority`);
 
@@ -81,7 +95,19 @@ class DatabaseAdapter implements DBA {
             selected: Boolean
         });
 
+        const UserBasedPromptSchema = new mongoose.Schema<IUserBasedPrompt>({
+            prompt: { type: mongoose.Schema.Types.ObjectId, ref: 'NameBasedPrompt' },
+            user_id: String
+        });
 
+        const NameBasedPromptSchema = new mongoose.Schema<INameBasedPrompt>({
+            prompt: String,
+            name: String
+        });
+
+
+        this.nameBasedPromptModel = mongoose.model<INameBasedPrompt>('NameBasedPrompt', NameBasedPromptSchema);
+        this.userBasedPromptModel = mongoose.model<IUserBasedPrompt>('UserBasedPrompt', UserBasedPromptSchema);
         this.chatPromptModel = mongoose.model<IChatPrompt>('ChatPrompt', ChatPromptSchema);
         this.userModel = mongoose.model<IUser>('User', UserSchema);
         this.zitatModel = mongoose.model<IZitat>('Zitat', ZitatSchema);
@@ -90,6 +116,68 @@ class DatabaseAdapter implements DBA {
     initDB(): Promise<void> {
         throw new Error("Method not implemented.");
     }
+
+    async getUserBasedPrompt(discordId: string): Promise<String | null> {
+        const prompt = await this.userBasedPromptModel.findOne({ user_id: discordId });
+        if (prompt === null){
+            await this.initUserBasedPrompt(discordId);
+            return this.getUserBasedPrompt(discordId);
+        }
+        if (prompt.prompt === null) return null;
+        else return prompt.prompt.prompt;
+    }
+
+    async initUserBasedPrompt(discordId: string): Promise<void> {
+            const namePrompt = await this.nameBasedPromptModel.findOne({ name: "Horby" });
+            const newPrompt = new this.userBasedPromptModel({ prompt: namePrompt, user_id: discordId });
+            await newPrompt.save();
+    }
+
+    async listPrompts(): Promise<String> {
+        const prompts = await this.chatPromptModel.find();
+        let promptString = "";
+        prompts.forEach(prompt => {
+            promptString += `${prompt.prompt}, `;
+        });
+        // remove last 2 chars
+        promptString = promptString.slice(0, -2);
+        return promptString;
+    }
+
+
+    async setUserBasedPrompt(discordId: string, prompt_name: string): Promise<void> {
+        const userPrompt = await this.userBasedPromptModel.findOne({ user_id: discordId });
+        const prompt = await this.nameBasedPromptModel.findOne({ name: prompt_name });
+        if (userPrompt === null) {
+            const newPrompt = new this.userBasedPromptModel({ prompt: prompt, user_id: discordId });
+            await newPrompt.save();
+        }
+        else {
+            if(prompt === null) throw new Error("Prompt not found");
+            userPrompt.prompt = prompt;
+            await userPrompt.save();
+        }
+    }
+
+    async getNameBasedPrompt(name: string = "Horby"): Promise<String | null> {
+        const prompt = await this.nameBasedPromptModel.findOne({ name: name });
+        if (prompt === null) return null;
+        else return prompt.prompt;   
+    }
+
+    async setNameBasedPrompt(name: string, prompt: string): Promise<void> {
+        const namePrompt = await this.nameBasedPromptModel.findOne({ name: name });
+        if (namePrompt === null) {
+            const newPrompt = new this.nameBasedPromptModel({ prompt: prompt, name: name });
+            await newPrompt.save();
+        }
+        else {
+            namePrompt.prompt = prompt;
+            await namePrompt.save();
+        }
+        
+    }
+        
 
     async userExists(discordId: string): Promise<boolean> {
         const user = await this.userModel.findOne({ discordId: discordId });
