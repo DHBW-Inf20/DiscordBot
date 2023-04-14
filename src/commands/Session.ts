@@ -8,7 +8,7 @@ import {
 } from 'discord.js';
 import { Command } from '../types/command';
 import { chatHistory } from './Ask';
-import dba from 'misc/databaseAdapter';
+import dba from '../misc/databaseAdapter';
 
 
 
