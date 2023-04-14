@@ -56,6 +56,7 @@ export const AddPrompt: Command = {
         const changeself = (interaction.options.get("changeself") || true) as boolean;    
         dba.getInstance().setNameBasedPrompt(name, prompt);
         if (changeself) {
+            chatHistory[interaction.user.id] = [];
             dba.getInstance().setUserBasedPrompt(interaction.user.id, name);
         }
         await interaction.reply({ content: `Prompt wurde hinzugefügt`, ephemeral: true});
@@ -82,6 +83,7 @@ export const SetPrompt: Command = {
             await interaction.reply({ content: `Prompt nicht gefunden`, ephemeral: true});
             return;
         }
+        chatHistory[interaction.user.id] = [];
         await interaction.reply({ content: `Prompt wurde auf ${name} gesetzt`, ephemeral: true});    
     }
 }

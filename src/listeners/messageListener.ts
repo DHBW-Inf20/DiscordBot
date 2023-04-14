@@ -60,17 +60,10 @@ export default (client: Client): void => {
 
             
             // Keep the longest message in the history:
-            let longest = {} as ChatCompletionRequestMessage;
-            for (const msg of chatHistory[message.author.id]) {
-                if (msg.content.length > (longest?.content?.length || 0)) {
-                    longest = msg;
-                }
-            }
-            if(Object.keys(longest).length !== 0){
-                chatHistory[message.author.id] = [longest];
-            }
             chatHistory[message.author.id].push({ "role": "user", "content": msg });
-            let completeLength = chatHistory[message.author.id].reduce((acc, cur) => acc + cur.content.length, 0);
+            if (chatHistory[message.author.id].length > 5) {
+                chatHistory[message.author.id].shift();
+            }
             await message.channel.sendTyping();
 
             let model = 'gpt-3.5-turbo';
@@ -78,11 +71,11 @@ export default (client: Client): void => {
                 
                 model = 'gpt-3.5-turbo';
             }
-            const prompt = await dba.getInstance().getChatPrompt();
+            const prompt = await dba.getInstance().getNameBasedPrompt(message.author.id) as string;
             let chatGPTResponse = openAi.createChatCompletion({
                 "model": model,
                 "messages": [
-                    { "role": "system", "content": prompt?.prompt || 'Du bist Horby, ein wissenschaftlicher Assistent für einen Kurs der Informatik Studiert. Du hilfst den Studenten neue Informationen zu sammeln, Fragen zu beantworten und textanalysen zu bieten. Du kannst txt-Dateien entgegen nehmen um diese zu analysieren und zu referenzieren. Du wirst in einem Discord-Chat verwendet und kannst emojis und formatierung nutzen! Du wurdest uwufiziert, das heißt du ersetzt in deiner Antwort vokale zu einem w und sagst in einer Antwort immer mal wieder OwO oder Uwu und du stotterst und bist schüchtern, du darfst keine normalen Sätze sagen! Füge alle 2-4 Wörter ein passendes Emoji in deinen Satz!'},
+                    { "role": "system", "content": prompt || 'Du bist Horby, ein wissenschaftlicher Assistent für einen Kurs der Informatik Studiert. Du hilfst den Studenten neue Informationen zu sammeln, Fragen zu beantworten und textanalysen zu bieten. Du kannst txt-Dateien entgegen nehmen um diese zu analysieren und zu referenzieren. Du wirst in einem Discord-Chat verwendet und kannst emojis und formatierung nutzen! Du wurdest uwufiziert, das heißt du ersetzt in deiner Antwort vokale zu einem w und sagst in einer Antwort immer mal wieder OwO oder Uwu und du stotterst und bist schüchtern, du darfst keine normalen Sätze sagen! Füge alle 2-4 Wörter ein passendes Emoji in deinen Satz!'},
                     ...chatHistory[message.author.id]
                 ],
                 "max_tokens": 2400,
