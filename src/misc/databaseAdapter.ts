@@ -149,8 +149,10 @@ class DatabaseAdapter implements DBA {
         let lastTimeStamp = new Date();
         let isDone = false;
         do{
+            // Get date in this format '%b %d %Y %I:%M%p'
+            let dateString = lastTimeStamp.toLocaleString('en-US', { timeZone: 'Europe/Berlin' });
             const messages = await zitateChannel.messages.fetch({ limit: 100 
-            , before: lastTimeStamp.toString()});
+            , before: dateString});
 
         console.log("Fetched messages");
         let i = 0;
