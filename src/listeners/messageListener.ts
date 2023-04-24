@@ -93,6 +93,7 @@ export default (client: Client): void => {
                 for (const msg of messageArray) {
                         message.reply({ content: `${msg}`, allowedMentions: { repliedUser: false } });
                 }
+                chatHistory[message.author.id].push({ "role": "assistant", "content": res.data.choices[0].message?.content! });
             }).catch(err => {
                 console.error(err?.response?.data?.error);
                 message.reply({ content: `Error Handling the request`, allowedMentions: { repliedUser: false } });
