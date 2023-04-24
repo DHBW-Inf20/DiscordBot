@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { Client, TextChannel } from 'discord.js';
+import { Client, Collection, Message, TextChannel } from 'discord.js';
 
 
 interface DBA {
@@ -146,12 +146,12 @@ class DatabaseAdapter implements DBA {
         if (firstTimeStamp === null) throw new Error("No zitate found");
         // Get all messages from the channel
         console.log("Fetching messages...");
-        let lastTimeStamp = new Date();
+        let lastTimeStamp = undefined;
         let isDone = false;
         do{
             // Get date in this format '%b %d %Y %I:%M%p'
             const messages = await zitateChannel.messages.fetch({ limit: 100 
-            , before: dateToSnowFlake(lastTimeStamp).toString()});
+            , before: lastTimeStamp}) as Collection<string, Message>;
         console.log("Fetched messages n:" + messages.size);
         let i = 0;
 
@@ -192,7 +192,11 @@ class DatabaseAdapter implements DBA {
 
         }
         isDone = messages.size < 100;
-        lastTimeStamp = messages.last()?.createdAt as Date;
+            if (messages.last()?.createdAt !== undefined){
+                lastTimeStamp = dateToSnowFlake(messages.last()!.createdAt).toString();
+            }else{
+                isDone = true;
+            }
 
     }while(!isDone)
 
