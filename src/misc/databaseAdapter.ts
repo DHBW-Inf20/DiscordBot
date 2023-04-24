@@ -150,11 +150,9 @@ class DatabaseAdapter implements DBA {
         let isDone = false;
         do{
             // Get date in this format '%b %d %Y %I:%M%p'
-            let dateString = lastTimeStamp.toLocaleString('en-US', { timeZone: 'Europe/Berlin' });
             const messages = await zitateChannel.messages.fetch({ limit: 100 
-            , before: dateString});
-
-        console.log("Fetched messages");
+            , before: dateToSnowFlake(lastTimeStamp).toString()});
+        console.log("Fetched messages n:" + messages.size);
         let i = 0;
 
         for(let message of messages.values()){
@@ -398,3 +396,8 @@ const dba = {
 }
 
 export default dba;
+
+
+function dateToSnowFlake(date: Date){
+    return date.getTime() - 1420070400000;
+}
