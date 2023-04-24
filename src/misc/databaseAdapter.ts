@@ -129,6 +129,59 @@ class DatabaseAdapter implements DBA {
         else return prompt.prompt.prompt;
     }
 
+    async getFirstTimeStamp(): Promise<Date | null> {
+        const zitat = await this.zitatModel.findOne().sort({ timestamp: 1 });
+        if (zitat === null) return null;
+        else return zitat.timestamp;
+    }
+
+    async syncZitateBeforeDataTime(client: Client){
+
+        const zitateChannel = client.channels.cache.get("849242671821619230") as TextChannel;
+        if (zitateChannel === undefined) throw new Error("Channel not found");
+        const firstTimeStamp = await this.getFirstTimeStamp();
+        if (firstTimeStamp === null) throw new Error("No zitate found");
+        // Get all messages from the channel
+        const messages = await zitateChannel.messages.fetch({ limit: 600 
+        });
+
+        // Go through every message one by one and add it to the database
+        messages.forEach(async (message, index) => {
+            // Check if the message is already in db, (is a embed in the message)
+            if ( message.embeds.length !== 0) return;
+
+            let messageImage = message.attachments.first();
+            let messageText = message.content;
+            if (messageText === "") {
+                if (messageImage === undefined) return;
+                messageText = "<no text>";       
+            }
+            let messageSplit = messageText.split("-");
+
+            let author = "unknown"
+            let zitatText = messageText;
+            if(messageSplit.length >= 2){
+                author = messageSplit[messageSplit.length - 1].trim();
+                zitatText = messageSplit.slice(0, messageSplit.length - 1).join("-").trim();
+                // Replace the quotes if there are any at the start or beginning
+                if (zitatText.startsWith("\"") && zitatText.endsWith("\"")) zitatText = zitatText.slice(1, zitatText.length - 1);
+            }
+
+            this.zitatModel.create({
+                discordId: message.id,
+                zitat: zitatText,
+                weird: false,
+                image: messageImage?.url,
+                author: author,
+                contextLink: message.url,
+                reference: null,
+                timestamp: message.createdAt
+        });
+            
+        });
+
+    }
+
     async syncTimeStampForZitat(client: Client){
         // Go through every Zitat in the database one by one
         const zitate = await this.zitatModel.find();
