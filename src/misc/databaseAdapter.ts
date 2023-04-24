@@ -147,7 +147,7 @@ class DatabaseAdapter implements DBA {
         // Get all messages from the channel
         console.log("Fetching messages...");
         let lastTimeStamp = undefined;
-        let isDone = false;
+        let isDone = false; 
         do{
             // Get date in this format '%b %d %Y %I:%M%p'
             const messages = await zitateChannel.messages.fetch({ limit: 100 
@@ -155,13 +155,14 @@ class DatabaseAdapter implements DBA {
         console.log("Fetched messages n:" + messages.size);
         let i = 0;
 
-        for(let message of messages.values()){
-
+        for(let messageKey in messages){
+            let message = messages.get(messageKey);
+            if(message === undefined) continue;
+            if( i % 10 === 0) console.log(`Syncing message ${i} of ${messages.size}`);
         // Go through every message one by one and add it to the database
             // Check if the message is already in db, (is a embed in the message)
             i++;
             if ( message.embeds.length !== 0) return;
-            if( i % 10 === 0) console.log(`Syncing message ${i} of ${messages.size}`);
             let messageImage = message.attachments.first();
             let messageText = message.content;
             if (messageText === "") {
