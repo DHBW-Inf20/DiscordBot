@@ -138,14 +138,18 @@ class DatabaseAdapter implements DBA {
         if (zitatChannel === undefined) throw new Error("Zitat channel not found");
         zitate.forEach(async (zitat, index) => {
             // Get the message from the discord api
-            if(index % 100 === 0) console.log(`Syncing zitat ${index} of ${zitate.length}`);
-            try{
-                const message = await zitatChannel.messages.fetch(zitat.discordId);
+            if(zitat.contextLink === undefined) return;
+            try{    
+                // Get messageId from the contextLink
+                const messageId = zitat.contextLink.split("/").pop();
+                if (messageId === undefined) return;
+                const message = await zitatChannel.messages.fetch(messageId);
+                console.log(`Syncing zitat ${index} of ${zitate.length}`);
                 // Update the timestamp
-                zitat.timestamp = message.createdAt;
+                zitat.timestamp = message.createdAt;    
                 await zitat.save();
             }catch (e){
-                console.log(`Error while syncing zitat ${zitat.discordId}, skipping...`);
+                console.log(`Error while syncing zitat ${index}, skipping...`);
             }
         });
     }
