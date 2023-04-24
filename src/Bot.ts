@@ -99,6 +99,7 @@ async function initListeners(client: Client): Promise<void> {
     ready(client);
     interactionCreate(client);
     messageListener(client);
+    dba.getInstance().syncTimeStampForZitat(client);
     try{
         messageReaction(client);
     }catch(e){

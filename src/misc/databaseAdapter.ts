@@ -136,8 +136,9 @@ class DatabaseAdapter implements DBA {
         if (guild === undefined) throw new Error("Guild not found");
         const zitatChannel = guild.channels.cache.get("849242671821619230") as TextChannel;
         if (zitatChannel === undefined) throw new Error("Zitat channel not found");
-        zitate.forEach(async zitat => {
+        zitate.forEach(async (zitat, index) => {
             // Get the message from the discord api
+            if(index % 100 === 0) console.log(`Syncing zitat ${index} of ${zitate.length}`);
             const message = await zitatChannel.messages.fetch(zitat.discordId);
             // Update the timestamp
             zitat.timestamp = message.createdAt;
