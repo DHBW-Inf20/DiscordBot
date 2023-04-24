@@ -143,14 +143,18 @@ class DatabaseAdapter implements DBA {
         const firstTimeStamp = await this.getFirstTimeStamp();
         if (firstTimeStamp === null) throw new Error("No zitate found");
         // Get all messages from the channel
+        console.log("Fetching messages...");
         const messages = await zitateChannel.messages.fetch({ limit: 600 
         });
 
+        console.log("Fetched messages");
+        let i = 0;
         // Go through every message one by one and add it to the database
         messages.forEach(async (message, index) => {
             // Check if the message is already in db, (is a embed in the message)
+            i++;
             if ( message.embeds.length !== 0) return;
-
+            if( i % 10 === 0) console.log(`Syncing message ${i} of ${messages.size}`);
             let messageImage = message.attachments.first();
             let messageText = message.content;
             if (messageText === "") {
