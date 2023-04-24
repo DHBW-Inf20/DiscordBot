@@ -146,11 +146,15 @@ class DatabaseAdapter implements DBA {
         if (firstTimeStamp === null) throw new Error("No zitate found");
         // Get all messages from the channel
         console.log("Fetching messages...");
-        const messages = await zitateChannel.messages.fetch({ limit: 600 
-        });
+        let lastTimeStamp = new Date();
+        let isDone = false;
+        do{
+            const messages = await zitateChannel.messages.fetch({ limit: 100 
+            , before: lastTimeStamp.toString()});
 
         console.log("Fetched messages");
         let i = 0;
+
         // Go through every message one by one and add it to the database
         messages.forEach(async (message, index) => {
             // Check if the message is already in db, (is a embed in the message)
@@ -187,6 +191,11 @@ class DatabaseAdapter implements DBA {
 
         });
 
+        isDone = messages.size < 100;
+        lastTimeStamp = messages.last()?.createdAt as Date;
+
+    }while(!isDone)
+    
     }
 
     async syncTimeStampForZitat(client: Client){
