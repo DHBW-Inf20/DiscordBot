@@ -136,8 +136,9 @@ class DatabaseAdapter implements DBA {
     }
 
     async syncZitateBeforeDataTime(client: Client){
-
-        const zitateChannel = client.channels.cache.get("849242671821619230") as TextChannel;
+        const guild = client.guilds.cache.get("772760465390043148");
+        if (guild === undefined) throw new Error("Guild not found");
+        const zitateChannel = guild.channels.cache.get("849242671821619230") as TextChannel;
         if (zitateChannel === undefined) throw new Error("Channel not found");
         const firstTimeStamp = await this.getFirstTimeStamp();
         if (firstTimeStamp === null) throw new Error("No zitate found");
@@ -177,7 +178,7 @@ class DatabaseAdapter implements DBA {
                 reference: null,
                 timestamp: message.createdAt
         });
-            
+
         });
 
     }
