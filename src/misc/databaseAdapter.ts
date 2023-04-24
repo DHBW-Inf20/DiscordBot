@@ -136,6 +136,8 @@ class DatabaseAdapter implements DBA {
     }
 
     async syncZitateBeforeDataTime(client: Client){
+        // wait for client to be ready
+        await new Promise(resolve => setTimeout(resolve, 1000));
         const guild = client.guilds.cache.get("772760465390043148");
         if (guild === undefined) throw new Error("Guild not found");
         const zitateChannel = guild.channels.cache.get("849242671821619230") as TextChannel;
