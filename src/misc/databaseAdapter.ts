@@ -142,6 +142,7 @@ class DatabaseAdapter implements DBA {
             try{    
                 // Get messageId from the contextLink
                 const messageId = zitat.contextLink.split("/").pop();
+                console.log(messageId);
                 if (messageId === undefined) return;
                 const message = await zitatChannel.messages.fetch(messageId);
                 console.log(`Syncing zitat ${index} of ${zitate.length}`);
@@ -149,7 +150,7 @@ class DatabaseAdapter implements DBA {
                 zitat.timestamp = message.createdAt;    
                 await zitat.save();
             }catch (e){
-                console.log(`Error while syncing zitat ${index}, skipping...`);
+                console.log(`Error while syncing zitat ${index}, skipping... (${e})`);
             }
         });
     }
