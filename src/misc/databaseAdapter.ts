@@ -139,10 +139,14 @@ class DatabaseAdapter implements DBA {
         zitate.forEach(async (zitat, index) => {
             // Get the message from the discord api
             if(index % 100 === 0) console.log(`Syncing zitat ${index} of ${zitate.length}`);
-            const message = await zitatChannel.messages.fetch(zitat.discordId);
-            // Update the timestamp
-            zitat.timestamp = message.createdAt;
-            await zitat.save();
+            try{
+                const message = await zitatChannel.messages.fetch(zitat.discordId);
+                // Update the timestamp
+                zitat.timestamp = message.createdAt;
+                await zitat.save();
+            }catch (e){
+                console.log(`Error while syncing zitat ${zitat.discordId}, skipping...`);
+            }
         });
     }
 
