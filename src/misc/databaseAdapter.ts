@@ -155,9 +155,8 @@ class DatabaseAdapter implements DBA {
         console.log("Fetched messages n:" + messages.size);
         let i = 0;
 
-        for(let messageKey in messages){
-            let message = messages.get(messageKey);
-            if(message === undefined) continue;
+        messages.forEach(async (message) => {
+            
             if( i % 10 === 0) console.log(`Syncing message ${i} of ${messages.size}`);
         // Go through every message one by one and add it to the database
             // Check if the message is already in db, (is a embed in the message)
@@ -190,8 +189,8 @@ class DatabaseAdapter implements DBA {
                 reference: null,
                 timestamp: message.createdAt
         });
-
-        }
+        });
+        
         isDone = messages.size < 100;
             if (messages.last()?.createdAt !== undefined){
                 lastTimeStamp = dateToSnowFlake(messages.last()!.createdAt).toString();
