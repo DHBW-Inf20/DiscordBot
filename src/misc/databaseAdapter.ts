@@ -156,12 +156,14 @@ class DatabaseAdapter implements DBA {
         let i = 0;
 
         messages.forEach(async (message) => {
-            
+
             if( i % 10 === 0) console.log(`Syncing message ${i} of ${messages.size}`);
         // Go through every message one by one and add it to the database
             // Check if the message is already in db, (is a embed in the message)
             i++;
             if ( message.embeds.length !== 0) return;
+            // check if the message is already in db
+            const zitat = await this.zitatModel.findOne({ discordId: message.id });
             let messageImage = message.attachments.first();
             let messageText = message.content;
             if (messageText === "") {
@@ -179,8 +181,17 @@ class DatabaseAdapter implements DBA {
                 if (zitatText.startsWith("\"") && zitatText.endsWith("\"")) zitatText = zitatText.slice(1, zitatText.length - 1);
             }
 
+            if (zitat !== null) {
+                zitat.zitat = zitatText;
+                zitat.weird = true;
+                if(messageImage !== undefined){
+                    zitat.image = messageImage?.url;
+                }
+                zitat.author = author;
+            }else{
+
             this.zitatModel.create({
-                discordId: message.id,
+            discordId: message.id,
                 zitat: zitatText,
                 weird: false,
                 image: messageImage?.url,
@@ -189,15 +200,11 @@ class DatabaseAdapter implements DBA {
                 reference: null,
                 timestamp: message.createdAt
         });
-        });
-        
-        isDone = messages.size < 100;
-            if (messages.last()?.createdAt !== undefined){
-                lastTimeStamp = dateToSnowFlake(messages.last()!.createdAt).toString();
-            }else{
-                isDone = true;
             }
-
+            
+            lastTimeStamp = message.id;
+        });
+        isDone = messages.size < 100;
     }while(!isDone)
 
     }
