@@ -95,7 +95,7 @@ function loadConfig(): Config | undefined {
     };
 }
 
-function initListeners(client: Client): void {
+async function initListeners(client: Client): Promise<void> {
     ready(client);
     interactionCreate(client);
     messageListener(client);

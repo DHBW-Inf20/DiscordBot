@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { Client, TextChannel } from 'discord.js';
 
 
 interface DBA {
@@ -45,7 +46,7 @@ export interface IZitat {
     author: string,
     weird: boolean,
     contextLink: string,
-
+    timestamp: Date
 }
 
 class DatabaseAdapter implements DBA {
@@ -87,7 +88,8 @@ class DatabaseAdapter implements DBA {
             image: String,
             author: String,
             contextLink: String,
-            reference: { type: mongoose.Schema.Types.ObjectId, ref: 'Zitat' }
+            reference: { type: mongoose.Schema.Types.ObjectId, ref: 'Zitat' },
+            timestamp: Date
         });
 
         const ChatPromptSchema = new mongoose.Schema<IChatPrompt>({
@@ -125,6 +127,22 @@ class DatabaseAdapter implements DBA {
         }
         if (prompt.prompt === null) return null;
         else return prompt.prompt.prompt;
+    }
+
+    async syncTimeStampForZitat(client: Client){
+        // Go through every Zitat in the database one by one
+        const zitate = await this.zitatModel.find();
+        const guild = client.guilds.cache.get("772760465390043148");
+        if (guild === undefined) throw new Error("Guild not found");
+        const zitatChannel = guild.channels.cache.get("849242671821619230") as TextChannel;
+        if (zitatChannel === undefined) throw new Error("Zitat channel not found");
+        zitate.forEach(async zitat => {
+            // Get the message from the discord api
+            const message = await zitatChannel.messages.fetch(zitat.discordId);
+            // Update the timestamp
+            zitat.timestamp = message.createdAt;
+            await zitat.save();
+        });
     }
 
     async initUserBasedPrompt(discordId: string): Promise<void> {
@@ -275,7 +293,8 @@ class DatabaseAdapter implements DBA {
             reference: reference,
             contextLink: contextLink,
             author: author,
-            weird: false
+            weird: false,
+            timestamp: new Date()
         });
         return zitatModel.save();	
     }

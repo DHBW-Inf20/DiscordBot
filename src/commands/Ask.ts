@@ -7,7 +7,7 @@ import ZitatHandler from '../misc/zitatHandler';
 import { ContextMenuCommand } from "../types/command";
 import { ChatCompletionRequestMessage, Configuration, OpenAIApi } from 'openai';
 import dba, { IDavinciData } from '../misc/databaseAdapter';
-import { Interaction } from 'discord.js';
+import { Interaction, BaseCommandInteraction } from 'discord.js';
 
 
 export let chatHistory: {[key:string]: ChatCompletionRequestMessage[]} = {};
@@ -84,7 +84,3 @@ export const Ask: ContextMenuCommand = {
         // })
     }
 };
-
-export function askSomething(interaction: Interaction){
-    
-}
