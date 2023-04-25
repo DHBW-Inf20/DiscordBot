@@ -11,7 +11,20 @@ export interface IUser {
     discordId: string,
     roles: string[],
     course: string,
+}   
+
+export interface IBracket {
+    id: number, 
+    order_id: number,
+    name: string,
+    from: Date,
+    to: Date,   
+    zitate: IZitat[],
+    winner: IZitatWahl | null,
+    voters: { voter: IUser, zitat: IZitatWahl }[],
+    next_id: number,
 }
+
 
 export interface IDavinciData{
     personality_description: string,
@@ -36,7 +49,12 @@ export interface INameBasedPrompt{
     name: string
 }
 
-
+export interface IZitatWahl{
+    id: number,
+    zitat: IZitat,
+    votes: number,
+    order_id: number,
+}   
 
 export interface IZitat {
     discordId: string,
@@ -51,17 +69,22 @@ export interface IZitat {
 
 class DatabaseAdapter implements DBA {
 
-
     async getZitat(referencedID: string): Promise<IZitat | null> {
         return this.zitatModel.findOne({ discordId: referencedID });
     }
 
+
+    zitatWahlModel: mongoose.Model<IZitatWahl>;
     userModel: mongoose.Model<IUser>;
     zitatModel: mongoose.Model<IZitat>;
     davinciDataModel: mongoose.Model<IDavinciData>;
     chatPromptModel: mongoose.Model<IChatPrompt>;
     userBasedPromptModel: mongoose.Model<IUserBasedPrompt>;
     nameBasedPromptModel: mongoose.Model<INameBasedPrompt>;
+
+
+
+    bracketModel: mongoose.Model<IBracket>;
     constructor(host: string, user: string, password: string, dbname: string) {
         mongoose.connect(`mongodb+srv://${user}:${password}@${host}/${dbname}?retryWrites=true&w=majority`);
 
@@ -73,6 +96,12 @@ class DatabaseAdapter implements DBA {
             weight: Number
         });
 
+        const ZitatWahlSchema = new mongoose.Schema<IZitatWahl>({
+            id: Number,
+            zitat: { type: mongoose.Schema.Types.ObjectId, ref: 'Zitat' },
+            votes: Number,
+            order_id: Number
+        });
 
         const UserSchema = new mongoose.Schema<IUser>({
             dhusername: String,
@@ -107,7 +136,21 @@ class DatabaseAdapter implements DBA {
             name: String
         });
 
+        const BracketSchema = new mongoose.Schema<IBracket>({
+            id: Number,
+            order_id: Number,
+            name: String,
+            from: Date,
+            to: Date,
+            zitate: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Zitat' }],
+            voters: [{ voter: { type: mongoose.Schema.Types.ObjectId, ref: 'User' }, zitat: { type: mongoose.Schema.Types.ObjectId, ref: 'ZitatWahl' } }],
+            winner: { type: mongoose.Schema.Types.ObjectId, ref: 'Zitat' },
+            next_id: Number
+        });
 
+        this.zitatWahlModel = mongoose.model<IZitatWahl>('ZitatWahl', ZitatWahlSchema);
+
+        this.bracketModel = mongoose.model<IBracket>('Bracket', BracketSchema);
         this.nameBasedPromptModel = mongoose.model<INameBasedPrompt>('NameBasedPrompt', NameBasedPromptSchema);
         this.userBasedPromptModel = mongoose.model<IUserBasedPrompt>('UserBasedPrompt', UserBasedPromptSchema);
         this.chatPromptModel = mongoose.model<IChatPrompt>('ChatPrompt', ChatPromptSchema);
@@ -117,6 +160,91 @@ class DatabaseAdapter implements DBA {
     }
     initDB(): Promise<void> {
         throw new Error("Method not implemented.");
+    }
+
+    async isBracketInited() {
+        const bracket = await this.bracketModel.findOne({ id: 1 });
+        if (bracket === null) return false;
+        else return true;
+    }
+
+    async getBracket(id: number, order_id: number){
+        const bracket = await this.bracketModel.findOne({ id: id, order_id: order_id }).populate('zitate').populate('voters.voter').populate('voters.zitat').populate('winner');
+        if (bracket === null) return null;
+        else return bracket;
+    }
+
+    async getAllBracketZitate(id: number, order_id: number){
+        const bracket = await this.bracketModel.findOne({ id: id, order_id: order_id }).populate('zitate');
+        if (bracket === null) return null;
+        else return bracket.zitate;
+    }
+
+    async getSemesterWeekRange(id: number): Promise<[number,number]>{
+        
+        const months = await this.bracketModel.find({ next_id: id, order_id: 1 });
+        if (months.length === 0) return [-1,-1];
+        let range: [number,number] = [Infinity,-1];
+        months.forEach(async (month) => {
+            const weeks = await this.bracketModel.find({ next_id: month.id, order_id: 0 }).sort({ id: 1 }); 
+            if (weeks.length !== 0){
+                const from = weeks[0].id;
+                const to = weeks[weeks.length-1].id;
+                if (from < range[0]) range[0] = from;
+                if (to > range[1]) range[1] = to;
+            }
+        });
+        return range;
+
+    }
+
+    async getNextSemesterBracket(semesterId: number){
+        const range = await this.getSemesterWeekRange(semesterId);
+
+        for(let week = range[0]; week <= range[1]; week++){
+            const bracket = await this.bracketModel.findOne({ id: week, order_id: 0 }).populate('winner').populate('zitate').populate('voters.voter').populate('voters.zitat');
+            if(bracket === null) return null;
+            if (bracket.winner){
+                return bracket;
+            }
+        }
+        return null;
+    }
+
+    async voteZitatFromBracket(id: number, order_id: number, voterId: string, zitatId: number){
+
+        const bracket = await this.getBracket(id, order_id);
+        if(bracket === null) {
+            throw Error("Bracket not found");
+        }        
+        if(bracket.winner){
+            throw Error("Bracket already finished");
+        }
+        if(bracket.voters.find(voter => voter.voter.discordId === voterId)){
+            // IF the id from zitat is the same throw error
+            if(bracket.voters.find(voter => voter.voter.discordId === voterId)?.zitat.id === zitatId){
+                throw Error("Already voted for this zitat");
+            }else{
+                // Change the vote to the current zitat
+                const voter = bracket.voters.find(voter => voter.voter.discordId === voterId);
+                if(voter === undefined) throw Error("Voter not found");
+                const zitatWahl = await this.zitatWahlModel.findOne({ id: zitatId, order_id: order_id });
+                if(zitatWahl === null) throw Error("Zitat not found");
+                voter.zitat = zitatWahl;
+                await bracket.save();
+                return;
+            }
+        }else{
+            // Add new vote
+            const voter = await this.userModel.findOne({ discordId: voterId });
+            if(voter === null) throw Error("Voter not found");
+            const zitatWahl = await this.zitatWahlModel.findOne({ id: zitatId, order_id: order_id });
+            if(zitatWahl === null) throw Error("Zitat not found");
+            bracket.voters.push({ voter: voter, zitat: zitatWahl });
+            await bracket.save();
+            return;
+        }
+
     }
 
     async getUserBasedPrompt(discordId: string): Promise<String | null> {
@@ -134,6 +262,248 @@ class DatabaseAdapter implements DBA {
         if (zitat === null) return null;
         else return zitat.timestamp;
     }
+
+    async aggregateDuplicateZitate(){
+
+        var duplicates = await this.zitatModel.aggregate([
+            {
+                $match: { zitat: { $ne: "" } }
+            }
+            ,{
+                $group:{
+                    _id: { discordId: "$discordId", zitat: "$zitat" },
+                    dups: { $addToSet: "$_id" },  
+                    count: { $sum: 1 }  
+                }
+            },
+            {
+                $match: {
+                    count: { $gt: 1 }
+                }
+            }
+        ]);
+
+
+        console.log((duplicates).length)
+        
+        for (var i = 0; i < duplicates.length; i++) {
+            for (var j = 1; j < duplicates[i].dups.length; j++) {
+                await this.zitatModel.findByIdAndRemove(duplicates[i].dups[j]);
+            }
+        }
+
+    }
+
+    async initFirstBrackets(){
+        // Init all Brackets for the time (weekly)
+        const time_ranges = [
+            [1619397600, 1621743600], // 26.04. – 23.05.2021 Theoriephase
+            [1622440800, 1627206000], // 31.05. – 25.07.2021 Theoriephase
+            [1633330800, 1640521200], // 04.10. – 26.12.2021 Theoriephase
+            [1647327600, 1654402800], // 14.03. – 05.06.2022 Theoriephase
+            [1664818800, 1672028400], // 03.10. – 25.12.2022 Theoriephase
+            [1678057200, 1685224800]  // 06.03. – 28.05.2023 Theoriephase
+        ];
+
+        let id = 0;
+        let weeks = 0;
+        for(let time_range of time_ranges){
+
+            const [from, to] = time_range.map(x => new Date(x * 1000));
+
+            console.log("Next Week, ", from.toLocaleDateString(), to.toLocaleString(), "Weeks: ", weeks);
+            // This interval is not a week but can be a month or more, so we need to calculate the number of weeks and iiterate through it
+
+            for(let timeOffset = 0; timeOffset < (to.getTime() - from.getTime()); timeOffset += 24 * 7 * 60 * 60 * 1000){
+                let weekDate = new Date(from.getTime() + timeOffset);
+                let weekEnd = new Date(weekDate.getTime() + 24 * 7 * 60 * 60 * 1000);
+                weeks++;
+                console.log(weeks, weekDate.toLocaleDateString(), to.toLocaleDateString());
+            const center_time = new Date((from.getTime() + to.getTime()) / 2);
+
+            let zitate = await this.zitatModel.find({ timestamp: { $gte: weekDate, $lt: weekEnd } });
+            if (zitate.length === 0) {
+                console.log("No Zitate found for this range!");
+                continue
+            }
+            let zitatWahlArray: IZitatWahl[] = []
+            zitate.forEach(async (zitat, index) => {
+                let zitatWahl = new this.zitatWahlModel({
+                    id: index,
+                    votes: 0,
+                    zitat: zitat,
+                    order_id: 0
+                });
+                await zitatWahl.save();
+                zitatWahlArray.push(zitatWahl);
+            });
+
+            const bracket = new this.bracketModel({
+                id: id,
+                order_id: 0,
+                name: `Woche ${id + 1} - ${from.toLocaleDateString()} bis ${to.toLocaleDateString()}`,
+                from: weekDate,
+                to: weekEnd,
+                zitate: zitatWahlArray,
+                voters: [],
+                winner: null,
+                next_id: await this.getMonthId(center_time)
+            });   
+            bracket.save();
+            id++;
+        }
+        }
+    }
+
+    async getMonthId(date: Date): Promise<number> {
+
+        // Get the id from the bracket-Model where the date is in the range
+        let bracket = await this.bracketModel.find({order_id: 1, from: {$lte: date}, to: {$gte: date}});
+        if (bracket.length === 0) return -1;
+        else return bracket[0].id;
+
+    }
+    
+    async getSemesterId(date: Date): Promise<number> {
+        let bracket = await this.bracketModel.find({order_id: 2, from: {$lte: date}, to: {$gte: date}});
+        if (bracket.length === 0) return -1;
+        else return bracket[0].id;
+    }
+
+    async getYearId(date: Date): Promise<number> {
+        let bracket = await this.bracketModel.find({order_id: 3, from: {$lte: date}, to: {$gte: date}});
+        if (bracket.length === 0) return -1;
+        else return bracket[0].id;
+    }
+
+    async initThirdBrackets(){
+        const time_ranges = [
+            [1617235200, 1625097599], // 2. Semester
+            [1633046400, 1640908799], // 3. Semester
+            [1646064000, 1653926399], // 4. Semester
+            [1664553600, 1672415999], // 5. Semester
+            [1677091200, 1684867199], // 6. Semester
+        ]
+
+        let id = 0;
+        for(let time_range of time_ranges){
+
+            console.log("Next Semester, ", id, " ", time_range);
+            const [from, to] = time_range.map(x => new Date(x * 1000));
+            const center_time = new Date((from.getTime() + to.getTime()) / 2);
+
+            const bracket = new this.bracketModel({
+                id: id,
+                order_id: 2,
+                name: `Semester ${id + 2} - ${from.toLocaleDateString()} bis ${to.toLocaleDateString()}`,
+                from: from,
+                to: to,
+                zitate: [],
+                voters: [],
+                winner: null,
+                next_id: await this.getYearId(center_time)
+            }); 
+            bracket.save();
+            
+            id++;
+
+        }
+
+    }
+
+    async initLastBracket(){
+
+        const bracket = new this.bracketModel({
+            id: 0,
+            order_id: 4,
+            name: `Finale`,
+            from: new Date(1617235200),
+            to: new Date(1684867199),
+            zitate: [],
+            voters: [],
+            winner: null,
+            next_id: -1
+        });
+        bracket.save();
+    }
+
+    async initFourthBrackets(){
+        const time_ranges = [
+            [1617235200, 1625097599], // 1. Jahr
+            [1633046400, 1653926399], // 2. Jahr
+            [1664553600, 1684867199], // 3. Jahr
+        ]
+
+        let id = 0;
+        for(let time_range of time_ranges){
+            console.log("Next Year, ", id, " ", time_range);
+            const [from, to] = time_range.map(x => new Date(x * 1000));
+            
+            const bracket = new this.bracketModel({
+                id: id,
+                order_id: 3,
+                name: `Jahr ${id + 1} - ${from.toLocaleDateString()} bis ${to.toLocaleDateString()}`,
+                from: from,
+                to: to,
+                zitate: [],
+                voters: [],
+                winner: null,
+                next_id: 0,
+            });
+            bracket.save();
+            id++;
+        }
+
+
+    }
+
+    async initSecondBrackets(){
+        // Monthly Brackets
+        const time_ranges = [
+            [1617235200, 1625097599], // April 2021 - Juli 2021
+            [1633046400, 1640908799], // Oktober 2021 - Dezember 2021
+            [1646064000, 1653926399], // März 2022 - Juni 2022
+            [1664553600, 1672415999], // Oktober 2022 - Dezember 2022
+            [1677091200, 1684867199], // März 2023 - Mai 2023
+        ]
+        
+        let id = 0;
+        for(let time_range of time_ranges){
+
+            const [from, to] = time_range.map(x => new Date(x * 1000));
+            
+            // This interval is not a week but can be a month or more, so we need to calculate the number of weeks and iiterate through it
+            let nextMonth;
+            for(let currentMonth = from; currentMonth <= to ; currentMonth = nextMonth){
+                if (currentMonth.getMonth() === 11) {
+                    nextMonth = new Date(currentMonth.getFullYear() + 1, 0, 1);
+                } else {
+                    nextMonth = new Date(currentMonth.getFullYear(), currentMonth.getMonth() + 1, 1);
+                }
+                console.log("Next Month, ", currentMonth.toLocaleDateString(), nextMonth.toLocaleDateString());
+                
+
+                const bracket = new this.bracketModel({
+                    id: id,
+                    order_id: 1,
+                    name: `Monat ${id + 1} - ${currentMonth.toLocaleDateString()} bis ${nextMonth.toLocaleDateString()}`,
+                    from: currentMonth,
+                    to: nextMonth,
+                    zitate: [],
+                    voters: [],
+                    winner: null,
+                    next_id: await this.getSemesterId(currentMonth)
+                });
+                await bracket.save();
+
+                id++;
+                
+            }
+    
+
+
+        }
+    }   
 
     async syncZitateBeforeDataTime(client: Client){
         // wait for client to be ready
@@ -154,8 +524,8 @@ class DatabaseAdapter implements DBA {
             , before: lastTimeStamp}) as Collection<string, Message>;
         console.log("Fetched messages n:" + messages.size);
         let i = 0;
-
         messages.forEach(async (message) => {
+            console.log(message.author);
 
             if( i % 10 === 0) console.log(`Syncing message ${i} of ${messages.size}`);
         // Go through every message one by one and add it to the database

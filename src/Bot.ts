@@ -96,10 +96,16 @@ function loadConfig(): Config | undefined {
 }
 
 async function initListeners(client: Client): Promise<void> {
+    // if(!(await dba.getInstance().isBracketInited())){
+        // await dba.getInstance().initLastBracket();
+        // await dba.getInstance().initFourthBrackets();
+        // await dba.getInstance().initThirdBrackets();
+        // await dba.getInstance().initSecondBrackets();
+        // await dba.getInstance().initFirstBrackets();
+    // }
     ready(client);
     interactionCreate(client);
     messageListener(client);
-    // dba.getInstance().syncZitateBeforeDataTime(client);
     try{
         messageReaction(client);
     }catch(e){

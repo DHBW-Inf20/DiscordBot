@@ -11,6 +11,7 @@ import { Ask } from "./commands/Ask";
 import { Wetter, GrillWetter } from './commands/Wetter';
 import { RemindMe } from "./commands/RemindMe";
 import { AddPrompt, ListPrompts, Session, SetPrompt, ShowPrompt } from "./commands/Session";
+import { Umfrage } from "./commands/Umfrage";
 
 // Register Commands of the bot
-export const Commands: (Command | ContextMenuCommand)[] = [Stundenplan, Kantine, Zitat, Verify, Caesar, LiveTicker,  Ask, Wetter, GrillWetter, RemindMe, Session, SetPrompt, AddPrompt, ListPrompts, ShowPrompt];
+export const Commands: (Command | ContextMenuCommand)[] = [Stundenplan, Kantine, Zitat, Verify, Caesar, LiveTicker,  Ask, Wetter, GrillWetter, RemindMe, Session, SetPrompt, AddPrompt, ListPrompts, ShowPrompt, Umfrage];
