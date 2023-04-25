@@ -17,7 +17,7 @@
   "scripts": {
     "start": "node dist/Bot.js",
     "dev": "tsc",
-    "postinstall": "npm update && npm run build",
+    "postinstall": "npm run build",
     "prestart": "npm run build",
     "build": "tsc",
     "postbuild": "copyfiles -u 1 src/assets/*.* dist/"
