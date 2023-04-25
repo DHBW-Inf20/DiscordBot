@@ -4,15 +4,15 @@ export const umfrageMap = new Map<string, Map<string, Set<string>>>();
 
 export default async function selectListener(client: Client, interaction: SelectMenuInteraction){
     
-    let selectId = interaction.customId.split("_")[0];
-    let nextId = interaction.customId.split("_")[1] || '';
+    let selectId = interaction.customId.split("-")[0];
+    let nextId = interaction.customId.split("-")[1] || '';
 
     let message = interaction.message as Message;
     const msgId = message.id;
     const user = interaction.user;
     const userId = user.id;
 
-
+    console.log(selectId, nextId, msgId, userId)
     
     switch (selectId) {
         case "umfrage":
