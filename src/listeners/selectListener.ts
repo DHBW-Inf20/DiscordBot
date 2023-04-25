@@ -37,7 +37,7 @@ export default async function selectListener(client: Client, interaction: Select
                 }
 
             });
-
+            
             embed.fields = embed.fields.map((field, index) => {
                 return { name: field.name, value: `${umfrageMap.get(msgId)!.get(index.toString())?.size || 0} Stimmen`, inline: true };
             });
