@@ -170,6 +170,8 @@ function calcGrillen(wheater: CurrentResponse, forecast: ThreeHourResponse, n: n
             avgRainProb /= nextWheaters[i].length;
             
         }
+        avgRainProb *= 100;
+        maxRainProb *= 100;
         const forecastString = `\n:thermometer: ${avgTemp.toFixed(2)}°C (max. ${maxTemp.toFixed(2)}°C)\n :cloud_rain: ${avgRainProb.toFixed(2)}% (max. ${maxRainProb.toFixed(2)}%).`
         if(bufferTodySpan.length == 1) {
             let tempElement = JSON.parse(JSON.stringify(bufferTodySpan[0]));
