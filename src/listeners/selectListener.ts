@@ -1,11 +1,12 @@
 import { Client, ButtonInteraction, SelectMenuInteraction, Message } from "discord.js";
 import {APIMessage} from 'discord-api-types/v9'
+import ZitatWahl from "../misc/zitatWahl";
 export const umfrageMap = new Map<string, Map<string, Set<string>>>();
 
 export default async function selectListener(client: Client, interaction: SelectMenuInteraction){
     
     let selectId = interaction.customId.split("-")[0];
-    let nextId = interaction.customId.split("-")[1] || '';
+    let nextId = interaction.customId.split("-").slice(1) || '';
 
     let message = interaction.message as Message;
     const msgId = message.id;
@@ -50,6 +51,11 @@ export default async function selectListener(client: Client, interaction: Select
 
             return;
         case "zitatWahl":
+            console.log(nextId)
+            const order_id = +nextId[0];
+            const bracket_id = +nextId[1];
+            let zw = new ZitatWahl(interaction, order_id, bracket_id, +interaction.values[0]);
+            await zw.handleSelect();
             return;
         default:
             return;
