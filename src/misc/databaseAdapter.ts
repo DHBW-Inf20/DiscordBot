@@ -377,7 +377,7 @@ class DatabaseAdapter implements DBA {
         } else {
             // Add new vote
             const voter = await this.userModel.findOne({ discordId: voterId });
-            if (voter === null) throw Error("Voter not found");
+            if (voter === null) throw Error("Du bist noch nicht verifiziert, verifiziere dich mit /verify");
             const zitatWahl = await this.zitatWahlModel.findOne({ id: zitatId, order_id: order_id });
             if (zitatWahl === null) throw Error("Zitat not found");
             zitatWahl.votes++;
