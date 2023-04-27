@@ -12,7 +12,7 @@ export default class ZitatWahl{
     
     async handleSelect() {
         try{
-            dba.getInstance().voteZitatFromBracket(this.bracket_id, this.order_id, this.user.id, this.zitat_id); 
+            await dba.getInstance().voteZitatFromBracket(this.bracket_id, this.order_id, this.user.id, this.zitat_id); 
             this.interaction.reply({content: `Du hast für erfolgreich abgestimmt! Vielen Dank (Ergebnisse gibt es erst nach dem Abschluss jedes Brackets)`, ephemeral: true});
         }catch(e:any){
                 this.interaction.reply({content: `Es ist ein Fehler aufgetreten! ${e.message || ''}`, ephemeral: true});
