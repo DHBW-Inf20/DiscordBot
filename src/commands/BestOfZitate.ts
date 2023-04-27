@@ -112,15 +112,15 @@ function generateVotingEmbed(bracket: IBracket){
         embed.setDescription("Es sind keine Zitate mehr übrig! Das Bracket ist beendet!");
         return embed;
     }
-    let contextLink = bracket.zitate[0].zitat.contextLink;
     embed.setTitle(`${bracket.name} (${bracket.order_id};${bracket.id})`)
-    embed.setDescription(`<@1101120187291410483> Wähle dein Lieblingszitat aus! (Eine Stimme pro Person, Anonym, **Stimme kann geändert werden bis zum Schließen des Brackets**)`);
+    embed.setDescription(`<@&1101120187291410483> Wähle dein Lieblingszitat aus! (Eine Stimme pro Person, Anonym, **Stimme kann geändert werden bis zum Schließen des Brackets**)`);
     embed.fields = bracket.zitate.map((zitat, index) => {
         const name = limit(`${index + 1}. ${zitat.zitat.author}`, 256);
         let prefix = "";
         if(zitat.zitat.image != null){
             prefix = "🖼️ "
         }
+        let contextLink = zitat.zitat.contextLink;
         const linkText = contextLink == null ? " [Kein Kontext vorhanden]" : ` [Kontext](${contextLink})`;
         const value = limit(prefix + sanitizeMentions(zitat.zitat.zitat), 1024-linkText.length) + linkText;
         return {
