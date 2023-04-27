@@ -209,6 +209,7 @@ class DatabaseAdapter implements DBA {
 
     async getNextSemesterBracket(semesterId: number) {
         const range = await this.getSemesterWeekRange(semesterId);
+        let monthIds = new Set<number>();
         for (let week = range[0]; week <= range[1]; week++) {
             const bracket = await this.bracketModel.findOne({ id: week, order_id: 0 }).populate({
                 path: 'zitate',
@@ -216,11 +217,9 @@ class DatabaseAdapter implements DBA {
                     path: 'zitat',
                 },
             }).populate('voters.voter').populate('voters.zitat').populate('winner');
-
-
-
-
+            
             if (bracket === null) return null;
+            monthIds.add(bracket.next_id);	
             console.log("🚀 ~ file: databaseAdapter.ts:224 ~ DatabaseAdapter ~ getNextSemesterBracket ~ bracket:", bracket)
 
 
@@ -229,16 +228,86 @@ class DatabaseAdapter implements DBA {
                 return bracket;
             }
         }
+
+        let semesterIds = new Set<number>();
+        for(let nextId of monthIds){
+            const bracket = await this.aggregateBracket(nextId, 1);
+            semesterIds.add(bracket.next_id);
+            if (bracket.winner === null && bracket.zitate.length !== 0) {
+                return bracket;
+            }
+        }
+
+        for(let nextId of semesterIds){
+            const bracket = await this.aggregateBracket(nextId, 2);
+                
+                if (bracket === null) return null;
+                if (bracket.winner === null && bracket.zitate.length !== 0) {
+                    return bracket;
+                }
+            
+        }
         return null;
+    }
+
+
+
+    async aggregateBracket(id: number, order_id: number) {
+
+        let nextBracket = await this.bracketModel.findOne({ id: id, order_id: order_id }).populate({
+            path: 'zitate',
+            populate: {
+                path: 'zitat',
+            },
+            }).populate('voters.voter').populate('voters.zitat').populate({path: 'winner', populate: {path: 'zitat'}});
+
+
+        if(nextBracket === null) throw new Error(`Bracket ${id} in the ${order_id}. Layer does not exist`);
+        if(nextBracket.zitate.length !== 0) return nextBracket;
+
+        let previousBrackets = await this.bracketModel.find({ next_id: id, order_id: order_id - 1 }).populate({
+            path: 'zitate',
+            populate: {
+                path: 'zitat',
+            },
+        }).populate('voters.voter').populate('voters.zitat').populate({
+            path: 'winner',
+            populate: {
+                path: 'zitat',
+            },
+        }).populate('winner.zitat');
+        await Promise.all(previousBrackets.map(async (bracket) => {
+
+            if (bracket.winner == null) {
+                if(bracket.zitate.length !== 0){
+                    throw new Error(`Bracket ${bracket.id} in the ${bracket.order_id}. Layer is not finished`);
+                }
+                return;	
+            }
+
+            let zitatWahl = new this.zitatWahlModel({
+                id: nextBracket!.zitate.length,
+                votes: 0,
+                zitat: bracket.winner.zitat,
+                order_id: order_id,
+            });
+
+            nextBracket!.zitate.push(zitatWahl);
+            await zitatWahl.save();
+        }));
+
+        await nextBracket!.save();
+        return nextBracket;
+
     }
 
     async syncZitate() {
 
         let zitate = await this.zitatModel.find();
-        let zitatWahlArray: IZitatWahl[] = []
         let maxId = (await this.zitatWahlModel.findOne({ order_id: 0 }).sort({ id: -1 }))?.id ?? 0;
-        zitate.forEach(async (zitat, index) => {
-
+        console.log("Started syncing Zitate")
+        await Promise.all(zitate.map(async (zitat, index) => {
+            if(index % 100 === 0) console.log(`Synced ${index} Zitate`);
             let found = (await this.zitatWahlModel.findOne({ zitat: zitat._id, order_id: 0 })) !== null;
             if (found) return;
 
@@ -256,7 +325,8 @@ class DatabaseAdapter implements DBA {
             await bracket.save();
             // Get matching bracket based on the date
 
-        });
+        }));
+        console.log("Synced Zitate ready");
     }
 
     async finishBracket(id: number, order_id: number) {

@@ -101,7 +101,7 @@ async function initListeners(client: Client): Promise<void> {
         // await dba.getInstance().initThirdBrackets();
         // await dba.getInstance().initSecondBrackets();
         // await dba.getInstance().initFirstBrackets();
-        // await dba.getInstance().syncZitate();
+        await dba.getInstance().syncZitate();
     ready(client);
     interactionCreate(client);
     messageListener(client);

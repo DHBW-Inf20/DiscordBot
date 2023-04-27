@@ -7,6 +7,7 @@ import { IBracket, IZitatWahl } from '../misc/databaseAdapter';
 
 
 
+export const lastBracketCreated = [0,0];
 
 export const NextBracket: Command = {
     name: "nextbracket",
@@ -34,6 +35,8 @@ export const NextBracket: Command = {
                 await interaction.followUp({content: `Es gibt kein nächstes Bracket für das Semester ${semester}, oder es ist ein Fehler aufgetreten`, ephemeral: true});
                 return;
             }
+            lastBracketCreated[0] = bracket.order_id;
+            lastBracketCreated[1] = bracket.id;
             await interaction.followUp({content: `Das nächste Bracket für das Semester ${semester} wurde gestartet!`, ephemeral: true});
 
             let embed = generateVotingEmbed(bracket);
@@ -59,10 +62,7 @@ export const NextBracket: Command = {
             // channel?.send({content: `Das nächste Bracket für das Semester ${semester} wurde gestartet!`});
         }catch (e:any){
             console.error(e);
-            if(!interaction.replied){
-
-                await interaction.reply({content: `Es ist ein Fehler aufgetreten! ${e.message || ''}`, ephemeral: true});
-            }
+            await interaction.followUp({content: `Es ist ein Fehler aufgetreten! ${e.message || ''}`, ephemeral: true});
         }
         
         
@@ -147,13 +147,13 @@ export const EndBracket: Command = {
             name: "order_id",
             description: "order_id des brackets",
             type: "INTEGER",
-            required: true
+            required: false,
         },
         {
             name: "id",
             description: "id des brackets",
             type: "INTEGER",
-            required: true
+            required: false,
         }
     ],
     run: async (client: Client, interaction: BaseCommandInteraction) => {
@@ -162,8 +162,8 @@ export const EndBracket: Command = {
             await interaction.followUp({ content: `Ich will nicht den Autokraten spielen, aber ein wenig die Wahl moderieren. Deshalb darfst du den Command nicht ausführen :(.`, ephemeral: true });
             return;
         }
-        const order_id = (interaction.options.get("order_id")?.value) as number;
-        const id = (interaction.options.get("id")?.value) as number;
+        const order_id = (interaction.options.get("order_id")?.value || lastBracketCreated[0]) as number;
+        const id = (interaction.options.get("id")?.value || lastBracketCreated[1]) as number;
         try {
         
             const bracket = await dba.getInstance().finishBracket(id, order_id);
