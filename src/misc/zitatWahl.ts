@@ -1,4 +1,4 @@
-import { ButtonInteraction, Interaction, SelectMenuInteraction, User } from 'discord.js';
+import { ButtonInteraction, Interaction, Message, SelectMenuInteraction, User } from 'discord.js';
 import dba from "./databaseAdapter";
 
 export default class ZitatWahl{
@@ -14,6 +14,16 @@ export default class ZitatWahl{
         try{
             await dba.getInstance().voteZitatFromBracket(this.bracket_id, this.order_id, this.user.id, this.zitat_id); 
             this.interaction.reply({content: `Du hast für erfolgreich abgestimmt! Vielen Dank (Ergebnisse gibt es erst nach dem Abschluss jedes Brackets)`, ephemeral: true});
+            let embed = this.interaction.message.embeds[0];
+            let bracket = await dba.getInstance().getBracket(this.bracket_id, this.order_id);
+            if(bracket == null){
+                return
+            }
+            let nVoters = bracket.voters.length;
+            let titleSplit = embed.title!.split('|');
+            let oldTitle = titleSplit.length !== 1 ? titleSplit.slice(1).join("").trim() : embed.title;
+            embed.title = `(${nVoters}) | ${oldTitle}`;
+            await (this.interaction.message as Message).edit({embeds: [embed]});
         }catch(e:any){
                 this.interaction.reply({content: `Es ist ein Fehler aufgetreten! ${e.message || ''}`, ephemeral: true});
         }
