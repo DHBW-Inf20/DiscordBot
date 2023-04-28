@@ -1,4 +1,4 @@
-import { Base, BaseCommandInteraction, Client, MessageActionRow, MessageButton, MessageEmbed, MessageSelectMenu } from 'discord.js';
+import { Base, BaseCommandInteraction, Client, MessageActionRow, MessageButton, MessageEmbed, MessageSelectMenu, MessageSelectOption, MessageSelectOptionData } from 'discord.js';
 import { Command } from "../types/command";
 import dba from '../misc/databaseAdapter';
 import { IBracket, IZitatWahl } from '../misc/databaseAdapter';
@@ -39,23 +39,33 @@ export const NextBracket: Command = {
             lastBracketCreated[1] = bracket.id;
             await interaction.followUp({content: `Das nächste Bracket für das Semester ${semester} wurde gestartet!`, ephemeral: true});
 
-            let embed = generateVotingEmbed(bracket);
-            let select = generateSelect(bracket);
+            let embeds = generateVotingEmbed(bracket);
+            console.log(embeds.map(e => e.description))
+            let select: MessageSelectMenu[] = generateSelects(bracket);
             let buttonRow = generateButtonRow(bracket);
 
-            if(buttonRow.components.length == 0){
-            if(select.options.length == 0){
-                await channel?.send({embeds: [embed]});
+        for(let i = 0; i < embeds.length; i++){
+            embeds[i].setFooter({text:`Seite ${i+1}/${embeds.length}`});
+        }
+
+        for(let i = 0; i < select.length; i++){
+
+
+        if(buttonRow.components.length == 0){
+            if(select.length == 0){
+                await channel?.send({embeds: [embeds[i]]});
             }else{
-                await channel?.send({embeds: [embed], components: [{type: "ACTION_ROW", components: [select]}]});
+                await channel?.send({ embeds: [embeds[i]], components: [{type: "ACTION_ROW", components: [select[i]]}]});
             }
         }else{
-            if(select.options.length == 0){
-                await channel?.send({embeds: [embed], components: [{type: "ACTION_ROW", components: buttonRow.components}]});
+            if(select.length == 0){
+                await channel?.send({embeds: [embeds[i]], components: [{type: "ACTION_ROW", components: buttonRow.components}]});
             }else{
-                await channel?.send({embeds: [embed], components: [{type: "ACTION_ROW", components: [select]}, {type: "ACTION_ROW", components: buttonRow.components}]});
+                await channel?.send({embeds: [embeds[i]], components: [{type: "ACTION_ROW", components: [select[i]]}, {type: "ACTION_ROW", components: buttonRow.components}]});
             }
         }
+            }   
+
 
             
 
@@ -69,21 +79,33 @@ export const NextBracket: Command = {
     }
 };
 
-function generateSelect(bracket: IBracket){
-    let select = new MessageSelectMenu();
-    select.customId = `zitatWahl-${bracket.order_id}-${bracket.id}`;
-    select.placeholder = "Wähle dein Lieblingszitat aus!";
-    select.options = bracket.zitate.map((zitat, index) => {
+function generateSelects(bracket: IBracket){
+    let returns: MessageSelectMenu[] = [];
+    let options: MessageSelectOptionData[] = bracket.zitate.map((zitat, index) => {
         return {
             label: limit(`${index + 1}. ${zitat.zitat.author}`, 100),
             description: limit(sanitizeMentions(zitat.zitat.zitat), 100),
             value: `${zitat.id}`,
-            emoji: null,
             default: false,
         }
     });
-    return select;
 
+    if(options.length > 25){
+        let select = new MessageSelectMenu();
+        select.customId = `zitatWahl-${bracket.order_id}-${bracket.id}-0`;
+        select.placeholder = "Wähle dein Lieblingszitat aus!";
+        let options1: MessageSelectOptionData[] = options.slice(0, 25);
+        select.addOptions(options1);
+        returns.push(select);
+    }
+    let select = new MessageSelectMenu();
+    select.customId = `zitatWahl-${bracket.order_id}-${bracket.id}-1`;
+    select.placeholder = "Wähle dein Lieblingszitat aus!";
+    let options2: MessageSelectOptionData[] = options.slice(25, options.length);
+    select.addOptions(options2);
+    returns.push(select);
+    
+    return returns;
 }
 
 function generateButtonRow(bracket: IBracket){
@@ -106,15 +128,19 @@ function generateButtonRow(bracket: IBracket){
 }
 
 function generateVotingEmbed(bracket: IBracket){
-    let embed = new MessageEmbed();
+    let embeds: MessageEmbed[] = [];
     if(bracket.zitate.length == 0){
+        let embed = new MessageEmbed();
         embed.setTitle("Keine Zitate für diese Woche!");
         embed.setDescription("Es sind keine Zitate mehr übrig! Das Bracket ist beendet!");
-        return embed;
+        return [embed];
     }
-    embed.setTitle(`${bracket.name} (${bracket.order_id};${bracket.id})`)
-    embed.setDescription(`<@&1101120187291410483> Wähle dein Lieblingszitat aus! (Eine Stimme pro Person, Anonym, **Stimme kann geändert werden bis zum Schließen des Brackets**)`);
-    embed.fields = bracket.zitate.map((zitat, index) => {
+    let testEmbed = new MessageEmbed();
+    testEmbed.setTitle(`${bracket.name} (${bracket.order_id};${bracket.id})`)
+    testEmbed.setDescription(`<@&1101120187291410483> Wähle dein Lieblingszitat aus! (Eine Stimme pro Person, Anonym, **Stimme kann geändert werden bis zum Schließen des Brackets**)`);
+    let ind = 0;
+    let splitIndecies: number[] = [];
+    let fields = bracket.zitate.map((zitat, index) => {
         const name = limit(`${index + 1}. ${zitat.zitat.author}`, 256);
         let prefix = "";
         if(zitat.zitat.image != null){
@@ -123,14 +149,39 @@ function generateVotingEmbed(bracket: IBracket){
         let contextLink = zitat.zitat.contextLink;
         const linkText = contextLink == null ? " [Kein Kontext vorhanden]" : ` [Kontext](${contextLink})`;
         const value = limit(prefix + sanitizeMentions(zitat.zitat.zitat), 1024-linkText.length) + linkText;
+
+        ind++;
+        if(ind >= 25){
+            splitIndecies.push(index);
+            ind = 0;
+        }
+
         return {
             name: name,
             value: value,
             inline: false,
         }
     });
-    embed.color = 0xff1133;
-    return embed;
+
+    console.log(splitIndecies)
+    let lastIndex = 0;
+    splitIndecies.forEach((index) => {
+        let embed = new MessageEmbed();
+        embed.setTitle(`${bracket.name} (${bracket.order_id};${bracket.id})`)
+        embed.setDescription(`<@&1101120187291410483> Wähle dein Lieblingszitat aus! (Eine Stimme pro Person, Anonym, **Stimme kann geändert werden bis zum Schließen des Brackets**)`);
+        embed.color = 0xff1133;
+        embed.addFields(fields.slice(lastIndex, index));
+        lastIndex = index;
+        embeds.push(embed);
+    });
+        let embed = new MessageEmbed();
+        embed.setTitle(`${bracket.name} (${bracket.order_id};${bracket.id})`)
+        embed.setDescription(`<@&1101120187291410483> Wähle dein Lieblingszitat aus! (Eine Stimme pro Person, Anonym, **Stimme kann geändert werden bis zum Schließen des Brackets**)`);
+        embed.color = 0xff1133;
+        embed.addFields(fields.slice(lastIndex, fields.length));
+        embeds.push(embed);
+
+    return embeds;
 }
 
 function limit(input: string, length: number){
