@@ -47,7 +47,9 @@ export const NextBracket: Command = {
         for(let i = 0; i < embeds.length; i++){
             embeds[i].setFooter({text:`Seite ${i+1}/${embeds.length}`});
         }
-
+        console.log("selects: ", select.length);
+        console.log("buttons: ", buttonRow.components.length);
+        console.log("embeds: ", embeds.length)
         for(let i = 0; i < select.length; i++){
 
 
@@ -90,20 +92,20 @@ function generateSelects(bracket: IBracket){
         }
     });
 
+    let select = new MessageSelectMenu();
+    select.customId = `zitatWahl-${bracket.order_id}-${bracket.id}-0`;
+    select.placeholder = "Wähle dein Lieblingszitat aus!";
+    let options1: MessageSelectOptionData[] = options.slice(0, 25);
+    select.addOptions(options1);
+    returns.push(select);
     if(options.length > 25){
         let select = new MessageSelectMenu();
-        select.customId = `zitatWahl-${bracket.order_id}-${bracket.id}-0`;
+        select.customId = `zitatWahl-${bracket.order_id}-${bracket.id}-1`;
         select.placeholder = "Wähle dein Lieblingszitat aus!";
-        let options1: MessageSelectOptionData[] = options.slice(0, 25);
-        select.addOptions(options1);
+        let options2: MessageSelectOptionData[] = options.slice(25, options.length);
+        select.addOptions(options2);
         returns.push(select);
     }
-    let select = new MessageSelectMenu();
-    select.customId = `zitatWahl-${bracket.order_id}-${bracket.id}-1`;
-    select.placeholder = "Wähle dein Lieblingszitat aus!";
-    let options2: MessageSelectOptionData[] = options.slice(25, options.length);
-    select.addOptions(options2);
-    returns.push(select);
     
     return returns;
 }
