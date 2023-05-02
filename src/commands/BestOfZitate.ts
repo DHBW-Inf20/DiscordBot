@@ -193,7 +193,7 @@ function limit(input: string, length: number){
 
 export const EndBracket: Command = {
     name: "endbracket",
-    description: "Startet das nächste Auswahlverfahren für das beste Zitat",
+    description: "Endet das Auswahlverfahren für ein Bracket.",
     type: "CHAT_INPUT",
     options: [
         {
@@ -246,8 +246,8 @@ async function sendResults(bracket: IBracket, interaction: BaseCommandInteractio
     embed.setDescription(`Das Bracket ist beendet! Das sind die Ergebnisse:`);
     let barDiagram = generateBarDiagram(bracket.zitate);
     console.log("🚀 ~ file: BestOfZitate.ts:192 ~ sendResults ~ barDiagram:", barDiagram)
+    bracket.zitate = bracket.zitate.slice(0, 10);
     embed.fields = bracket.zitate.map((zitat, index) => {
-        
         console.log("🚀 ~ file: BestOfZitate.ts:192 ~ sendResults ~ zitat:", zitat);
         const name = limit(`${index + 1}. ${zitat.zitat.author}`, 256);
         const bar = barDiagram[index];
