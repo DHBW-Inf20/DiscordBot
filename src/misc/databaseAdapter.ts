@@ -276,6 +276,9 @@ class DatabaseAdapter implements DBA {
                 path: 'zitat',
             },
         }).populate('winner.zitat');
+
+        const maxId = (await this.zitatWahlModel.findOne({ order_id: order_id }).sort({ id: -1 })) || { id: -1 };
+
         await Promise.all(previousBrackets.map(async (bracket) => {
 
             if (bracket.winner == null) {
@@ -286,7 +289,7 @@ class DatabaseAdapter implements DBA {
             }
 
             let zitatWahl = new this.zitatWahlModel({
-                id: nextBracket!.zitate.length,
+                id: nextBracket!.zitate.length + maxId.id + 1,
                 votes: 0,
                 zitat: bracket.winner.zitat,
                 order_id: order_id,
