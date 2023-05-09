@@ -99,7 +99,7 @@ async function initListeners(client: Client): Promise<void> {
         // await dba.getInstance().initLastBracket();
         // await dba.getInstance().initFourthBrackets();
         // await dba.getInstance().initThirdBrackets();
-        // await dba.getInstance().initSecondBrackets();
+        // await dba1run.getInstance().initSecondBrackets();
         // await dba.getInstance().initFirstBrackets();
         // await dba.getInstance().syncZitate();
     ready(client);

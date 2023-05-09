@@ -66,7 +66,8 @@ export const NextBracket: Command = {
                 await channel?.send({embeds: [embeds[i]], components: [{type: "ACTION_ROW", components: [select[i]]}, {type: "ACTION_ROW", components: buttonRow.components}]});
             }
         }
-            }   
+
+        }   
 
 
             
@@ -112,6 +113,10 @@ function generateSelects(bracket: IBracket){
 
 function generateButtonRow(bracket: IBracket){
 
+    var buttonRow = new MessageActionRow();
+    buttonRow.addComponents([]);
+    return buttonRow;
+    
     let buttons = bracket.zitate.map((zitat, index) => {
         if (zitat.zitat.image == null) return null;
         return new MessageButton(
