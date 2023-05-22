@@ -82,7 +82,7 @@ export const NextBracket: Command = {
     }
 };
 
-function generateSelects(bracket: IBracket){
+export function generateSelects(bracket: IBracket){
     let returns: MessageSelectMenu[] = [];
     let options: MessageSelectOptionData[] = bracket.zitate.map((zitat, index) => {
         return {
@@ -111,7 +111,7 @@ function generateSelects(bracket: IBracket){
     return returns;
 }
 
-function generateButtonRow(bracket: IBracket){
+export function generateButtonRow(bracket: IBracket){
 
     var buttonRow = new MessageActionRow();
     buttonRow.addComponents([]);
@@ -134,7 +134,7 @@ function generateButtonRow(bracket: IBracket){
 
 }
 
-function generateVotingEmbed(bracket: IBracket){
+export function generateVotingEmbed(bracket: IBracket){
     let embeds: MessageEmbed[] = [];
     if(bracket.zitate.length == 0){
         let embed = new MessageEmbed();
@@ -191,7 +191,7 @@ function generateVotingEmbed(bracket: IBracket){
     return embeds;
 }
 
-function limit(input: string, length: number){
+export function limit(input: string, length: number){
     if(input.length <= length){
         return input;
     }
@@ -241,12 +241,12 @@ export const EndBracket: Command = {
     }
 };
 
-function sanitizeMentions(text: string){
+export function sanitizeMentions(text: string){
     // remove all @-chars
     return text.replace(/@/g, "");
 }
 
-async function sendResults(bracket: IBracket, interaction: BaseCommandInteraction){
+export async function sendResults(bracket: IBracket, interaction: BaseCommandInteraction){
 
     let embed = new MessageEmbed();
     embed.setTitle(`Bracket ${bracket.name} wurde beendet`)
@@ -283,7 +283,7 @@ async function sendResults(bracket: IBracket, interaction: BaseCommandInteractio
 
 }
 
-function generateBarDiagram(zitate: IZitatWahl[]){
+export function generateBarDiagram(zitate: IZitatWahl[]){
 
     let max = zitate[0].votes;
     let min = zitate[zitate.length-1].votes;
