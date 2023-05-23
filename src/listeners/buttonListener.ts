@@ -35,7 +35,7 @@ export default async function buttonListener(client: Client, interaction: Button
                 const order_id = interaction.customId.split("-")[1];
                 const bracket_id = interaction.customId.split("-")[2];
                 const zitat_id = interaction.customId.split("-")[3];
-                const zw = new ZitatWahl(interaction, parseInt(order_id), parseInt(bracket_id), parseInt(zitat_id));
+                const zw = new ZitatWahl(interaction, parseInt(order_id), parseInt(bracket_id), [parseInt(zitat_id)]);
                 zw.handleImageButton();
             }
     }

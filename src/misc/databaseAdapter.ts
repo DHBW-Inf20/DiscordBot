@@ -217,9 +217,9 @@ class DatabaseAdapter implements DBA {
                     path: 'zitat',
                 },
             }).populate('voters.voter').populate('voters.zitat').populate('winner');
-            
+
             if (bracket === null) return null;
-            monthIds.add(bracket.next_id);	
+            monthIds.add(bracket.next_id);
             console.log("🚀 ~ file: databaseAdapter.ts:224 ~ DatabaseAdapter ~ getNextSemesterBracket ~ bracket:", bracket)
 
 
@@ -230,7 +230,7 @@ class DatabaseAdapter implements DBA {
         }
 
         let semesterIds = new Set<number>();
-        for(let nextId of monthIds){
+        for (let nextId of monthIds) {
             const bracket = await this.aggregateBracket(nextId, 1);
             semesterIds.add(bracket.next_id);
             if (bracket.winner === null && bracket.zitate.length !== 0) {
@@ -238,14 +238,14 @@ class DatabaseAdapter implements DBA {
             }
         }
 
-        for(let nextId of semesterIds){
+        for (let nextId of semesterIds) {
             const bracket = await this.aggregateBracket(nextId, 2);
-                
-                if (bracket === null) return null;
-                if (bracket.winner === null && bracket.zitate.length !== 0) {
-                    return bracket;
-                }
-            
+
+            if (bracket === null) return null;
+            if (bracket.winner === null && bracket.zitate.length !== 0) {
+                return bracket;
+            }
+
         }
         return null;
     }
@@ -259,11 +259,11 @@ class DatabaseAdapter implements DBA {
             populate: {
                 path: 'zitat',
             },
-            }).populate('voters.voter').populate('voters.zitat').populate({path: 'winner', populate: {path: 'zitat'}});
+        }).populate('voters.voter').populate('voters.zitat').populate({ path: 'winner', populate: { path: 'zitat' } });
 
 
-        if(nextBracket === null) throw new Error(`Bracket ${id} in the ${order_id}. Layer does not exist`);
-        if(nextBracket.zitate.length !== 0) return nextBracket;
+        if (nextBracket === null) throw new Error(`Bracket ${id} in the ${order_id}. Layer does not exist`);
+        if (nextBracket.zitate.length !== 0) return nextBracket;
 
         let previousBrackets = await this.bracketModel.find({ next_id: id, order_id: order_id - 1 }).populate({
             path: 'zitate',
@@ -282,10 +282,10 @@ class DatabaseAdapter implements DBA {
         await Promise.all(previousBrackets.map(async (bracket) => {
 
             if (bracket.winner == null) {
-                if(bracket.zitate.length !== 0){
+                if (bracket.zitate.length !== 0) {
                     throw new Error(`Bracket ${bracket.id} in the ${bracket.order_id}. Layer is not finished`);
                 }
-                return;	
+                return;
             }
 
             let zitatWahl = new this.zitatWahlModel({
@@ -310,7 +310,7 @@ class DatabaseAdapter implements DBA {
         let maxId = (await this.zitatWahlModel.findOne({ order_id: 0 }).sort({ id: -1 }))?.id ?? 0;
         console.log("Started syncing Zitate")
         await Promise.all(zitate.map(async (zitat, index) => {
-            if(index % 100 === 0) console.log(`Synced ${index} Zitate`);
+            if (index % 100 === 0) console.log(`Synced ${index} Zitate`);
             let found = (await this.zitatWahlModel.findOne({ zitat: zitat._id, order_id: 0 })) !== null;
             if (found) return;
 
@@ -354,23 +354,11 @@ class DatabaseAdapter implements DBA {
         // aggregate all semester brackets
 
         // all brackets with order_id 2
-        const semesterBrackets = await this.bracketModel.find({ order_id: 2 }).populate({path: 'zitate', populate: {path: 'zitat'}}).populate('voters.voter').populate('voters.zitat').populate({path: 'winner', populate: {path: 'zitat'}});
+        const semesterBrackets = await this.bracketModel.find({ order_id: 2 }).populate({ path: 'zitate', populate: { path: 'zitat' } }).populate('voters.voter').populate('voters.zitat').populate({ path: 'winner', populate: { path: 'zitat' } });
 
-        const winners = semesterBrackets.map(bracket => bracket.winner?.zitat);
+        const winners = semesterBrackets.map(bracket => bracket.winner);
 
-        let winnerZitats = [];
-        for(let winner of winners){
-            if(winner === null) continue;
-            const zitat = new this.zitatWahlModel({
-                id: winnerZitats.length,
-                votes: 0,
-                zitat: winner,
-                order_id: 100,
-            });
-            await zitat.save();
-            winnerZitats.push(winner);
-        }
-
+        const maxId = (await this.zitatWahlModel.findOne({ order_id: 100 }).sort({ id: -1 }))?.id ?? 0;
 
         const bracket = new this.bracketModel({
             id: 0,
@@ -378,64 +366,79 @@ class DatabaseAdapter implements DBA {
             from: new Date(2020, 0, 1),
             to: new Date(2023, 11, 31),
             next_id: 0,
-            zitate: winnerZitats,
+            zitate: [],
             voters: [],
             winner: null,
         });
 
+        for (let winner of winners) {
+            if (winner === null) continue;
+            const zitat = new this.zitatWahlModel({
+                id: bracket.zitate.length + maxId + 1,
+                votes: 0,
+                zitat: winner.zitat,
+                order_id: 100,
+            });
+            await zitat.save();
+            bracket.zitate.push(zitat);
+        }
+
+
+
         await bracket.save();
         const newBracket = await this.bracketModel.findOne({ order_id: 100 }).sort({ id: -1 }).populate({ path: 'zitate', populate: { path: 'zitat' } }).populate('voters.voter').populate('voters.zitat').populate({ path: 'winner', populate: { path: 'zitat' } });
-        return newBracket;    
-    
+        return newBracket;
 
-        
+
+
     }
-    
-    async getCurrentFinalBracket(){
-        
-        const bracket = await this.bracketModel.findOne({ order_id: 100 }).sort({ id: -1 }).populate({path: 'zitate', populate: {path: 'zitat'}}).populate('voters.voter').populate('voters.zitat').populate({path: 'winner', populate: {path: 'zitat'}});
+
+    async getCurrentFinalBracket() {
+
+        const bracket = await this.bracketModel.findOne({ order_id: 100 }).sort({ id: -1 }).populate({ path: 'zitate', populate: { path: 'zitat' } }).populate('voters.voter').populate('voters.zitat').populate({ path: 'winner', populate: { path: 'zitat' } });
         console.log(bracket?.zitate);
 
 
-        if(bracket === null) {
+        if (bracket === null) {
             return await this.initFinalBracket();
         }
+        return bracket;
 
-        const maxVotes = bracket.zitate.map(zitat => zitat.votes).sort((a, b) => b - a)[0];
-        if(maxVotes === 0){
-            return bracket;
-        }
+        // const maxVotes = bracket.zitate.map(zitat => zitat.votes).sort((a, b) => b - a)[0];
+        // if(maxVotes === 0){
+        //     return bracket;
+        // }
 
-        if(await this.isFinalUnambiguous()){
-            return bracket;
-        }
+        // if(await this.isFinalUnambiguous()){
+        //     return bracket;
+        // }
 
-        const nextBracket = await this.aggregateFinalBracket();
-        return nextBracket;
+        // const nextBracket = await this.aggregateFinalBracket();
+        // return nextBracket;
 
-        
+
 
     }
 
-    async isFinalUnambiguous(){
+    async isFinalUnambiguous() {
 
         const bracket = await this.bracketModel.findOne({ order_id: 100 }).sort({ id: -1 });
-        if(bracket === null) {
+        if (bracket === null) {
             return false;
         }
         // See if there are multiple zitate with the same votes (if its the top votes)
         const orderedVotes = bracket.zitate.map(zitat => zitat.votes).sort((a, b) => b - a);
         const topVotes = orderedVotes[0];
         const secondVotes = orderedVotes[1];
-        if(topVotes === secondVotes){
+        if (topVotes === secondVotes) {
             return false;
         }
         return true;
     }
 
-    async aggregateFinalBracket(){
+    async aggregateFinalBracket() {
 
-        const bracket = await this.bracketModel.findOne({ order_id: 100 }).sort({ id: -1 }).populate({path: 'zitate', populate: {path: 'zitat'}}).populate('voters.voter').populate('voters.zitat').populate({path: 'winner', populate: {path: 'zitat'}});
+        const bracket = await this.bracketModel.findOne({ order_id: 100 }).sort({ id: -1 }).populate({ path: 'zitate', populate: { path: 'zitat' } }).populate('voters.voter').populate('voters.zitat').populate({ path: 'winner', populate: { path: 'zitat' } });
         if (bracket === null) {
             return;
         }
@@ -443,12 +446,12 @@ class DatabaseAdapter implements DBA {
         const sortedZitate = bracket.zitate.sort((a, b) => b.votes - a.votes);
         // all the zitate with the highest voting
         const topZitate = sortedZitate.filter(zitat => zitat.votes === sortedZitate[0].votes);
-        if(topZitate.length === 1){
+        if (topZitate.length === 1) {
             throw Error("Final Bracket is already unambiguous there seems to be an stupid error Rapha");
         }
-        
+
         let winnerZitats = [];
-        for(let winner of topZitate){
+        for (let winner of topZitate) {
             const zitat = new this.zitatWahlModel({
                 id: winnerZitats.length,
                 votes: 0,
@@ -456,10 +459,11 @@ class DatabaseAdapter implements DBA {
                 order_id: 100,
             });
             await zitat.save();
+            // TODO: FIX
             winnerZitats.push(winner);
         }
 
-            
+
 
 
 
@@ -480,7 +484,78 @@ class DatabaseAdapter implements DBA {
 
     }
 
+    async clearAllVotes(id: number, order_id: number, voterId: string) {
+        const bracket = await this.getBracket(id, order_id);
+        if (bracket === null) {
+            throw Error("Bracket not found");
+        }
+        if (bracket.winner) {
+            throw Error("Bracket already finished");
+        }
+        for (let i = 0; i < 3; i++) {
+            console.log(voterId +`${i != 0 ? i : ""}`);
+            const voterIndex = bracket.voters.findIndex(voter => voter.voter.discordId === voterId +
+                `${i != 0 ? i : ""}`);
+            if (voterIndex === -1) throw Error("Voter not found");
+            const oldZitatWahl = await this.zitatWahlModel.findOne({ id: bracket.voters[voterIndex].zitat.id, order_id: order_id });
+            if (oldZitatWahl === null) throw Error("old Zitat not found");
+            oldZitatWahl.votes--;
+            await oldZitatWahl.save();
+            bracket.voters.splice(voterIndex, 1);
+            await bracket.save();
+        }
 
+    }
+
+    async voteFinalZitatFromBracket(id: number, order_id: number, voterId: string, zitatIds: number[]) {
+
+        const bracket = await this.getBracket(id, order_id);
+        if (bracket === null) {
+            throw Error("Bracket not found");
+        }
+        if (bracket.winner) {
+            throw Error("Bracket already finished");
+
+        }
+
+        // Add new vote
+        if (bracket.voters.find(voter => voter.voter.discordId === voterId)) {
+            await this.clearAllVotes(id, order_id, voterId);
+        }
+        let voter: (mongoose.Document<unknown, any, IUser> & Omit<IUser & {
+            _id: mongoose.Types.ObjectId;
+        }, never>) | null = await this.userModel.findOne({ discordId: voterId });
+        if (voter === null) throw Error("Du bist noch nicht verifiziert, verifiziere dich mit /verify");
+        const initVoterId = voter.discordId;
+        for (let i = 0; i < 3; i++) {
+            const zitatWahl = await this.zitatWahlModel.findOne({ id: zitatIds[i], order_id: order_id });
+            if (zitatWahl === null) throw Error("Zitat not found");
+            zitatWahl.votes++;
+            await zitatWahl.save();
+            bracket.voters.push({ voter: voter, zitat: zitatWahl });
+            await bracket.save();
+            // clone the voter with a different id
+            const cloneExists: (mongoose.Document<unknown, any, IUser> & Omit<IUser & {
+                _id: mongoose.Types.ObjectId;
+            }, never>) | null = await this.userModel.findOne({ discordId: initVoterId + `${i + 1}` });
+            if (cloneExists) {
+                voter = cloneExists;
+                continue;
+            } else {
+                const voterClone: (mongoose.Document<unknown, any, IUser> & Omit<IUser & {
+                    _id: mongoose.Types.ObjectId;
+                }, never>) | null = new this.userModel({
+                    dhusername: voter.dhusername,
+                    discordId: initVoterId + `${i + 1}`,
+                    roles: voter.roles,
+                    course: voter.course,
+                } as IUser);
+                await voterClone.save();
+                voter = voterClone;
+            }
+        }
+        return;
+    }
     async voteZitatFromBracket(id: number, order_id: number, voterId: string, zitatId: number) {
 
         const bracket = await this.getBracket(id, order_id);

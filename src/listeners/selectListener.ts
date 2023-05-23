@@ -51,11 +51,27 @@ export default async function selectListener(client: Client, interaction: Select
 
             return;
         case "zitatWahl":
+
             console.log(nextId)
             const order_id = +nextId[0];
             const bracket_id = +nextId[1];
-            let zw = new ZitatWahl(interaction, order_id, bracket_id, +interaction.values[0]);
+            let zw = new ZitatWahl(interaction, order_id, bracket_id, [+interaction.values[0]]);
             await zw.handleSelect();
+            return;
+        case "zitatWahlFinal":
+            console.log(nextId)
+            const _order_id = +nextId[0];
+            const _bracket_id = +nextId[1];
+            let ids = [];
+            if(interaction.values.length == 1){
+                ids = [+interaction.values[0], +interaction.values[0], +interaction.values[0]];
+            }else if(interaction.values.length == 2){
+                ids = [+interaction.values[0], +interaction.values[1], +interaction.values[1]];
+            }else{
+                ids = [+interaction.values[0], +interaction.values[1], +interaction.values[2]];
+            }
+            let _zw = new ZitatWahl(interaction, _order_id, _bracket_id, ids);
+            await _zw.handleSelect();
             return;
         default:
             return;

@@ -17,3 +17,4 @@ import { FinalZitate } from "./commands/ZitatFinal";
 
 // Register Commands of the bot
 export const Commands: (Command | ContextMenuCommand)[] = [Stundenplan, Kantine, Zitat, Verify, Caesar, LiveTicker, Ask, Wetter, GrillWetter, RemindMe, Session, SetPrompt, AddPrompt, ListPrompts, ShowPrompt, Umfrage, NextBracket, EndBracket, FinalZitate];
+
