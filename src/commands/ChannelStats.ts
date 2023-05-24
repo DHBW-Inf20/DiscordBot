@@ -40,7 +40,7 @@ export const ChannelStats: Command = {
                 const messageAuthor = message.author.username;
                 const messageSize = message.content.length;
                 messageArray.push({ timestamp: messageDate, author: messageAuthor, size: messageSize });
-                lastTimeStamp = message.createdAt;
+                lastTimeStamp = message.id;
 
             });
 
