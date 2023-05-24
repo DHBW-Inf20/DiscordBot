@@ -1,7 +1,7 @@
-import { BaseCommandInteraction, Client, MessageEmbed, MessageSelectMenu, MessageSelectOptionData } from 'discord.js';
+import { BaseCommandInteraction, Client, EmbedField, MessageEmbed, MessageSelectMenu, MessageSelectOptionData } from 'discord.js';
 import { Command } from "../types/command";
 import dba, { IBracket } from '../misc/databaseAdapter';
-import { generateButtonRow, generateSelects, generateVotingEmbed, limit, sanitizeMentions } from './BestOfZitate';
+import { generateButtonRow, generateSelects, generateVotingEmbed, limit, sanitizeMentions, generateBarDiagram, sendResults } from './BestOfZitate';
 
 
 
@@ -19,19 +19,27 @@ export const FinalZitate: Command = {
         const channel = interaction.channel;
 
         try{
-            let bracket = await dba.getInstance().getCurrentFinalBracket();
+            let [bracket, lastBracket, isFinished] = await dba.getInstance().getCurrentFinalBracket();
 
             if(bracket == null){
                 await interaction.followUp({ content: `Es ist kein finales Bracket gefunden`, ephemeral: true });
                 return;
             }
 
-            if(bracket.winner != null){
+            if(isFinished){
                 // Send the winner-message and end the voting!
+                await sendResults(bracket, interaction);
+                await sendFinalHorbyZitateMessage(interaction);
+                await sendFinalResult(bracket, interaction);
             }else{
+
+                if(lastBracket != null){
+                    // Print that it was not unanimous and that there will be a runoff (Print the results tho)
+                    await sendUnanimousResults(lastBracket, interaction);
+                }
                 
                 console.log(bracket, bracket.zitate)
-                let embed = generateVotingEmbedFinal(bracket)[0];
+                let embed = generateVotingEmbedFinal(bracket, lastBracket == null)[0];
                 let select: MessageSelectMenu = generateFinalSelects(bracket);
                 let buttonRow = generateButtonRow(bracket);
 
@@ -55,7 +63,7 @@ export const FinalZitate: Command = {
 
 
 
-
+            await interaction.followUp({ content: `Das finale Zitatevoting wurde gestartet!`, ephemeral: true });
         }catch (e) {
             await interaction.followUp({ content: `Es ist ein Fehler aufgetreten: ${e}`, ephemeral: true });
             console.error(e);
@@ -89,7 +97,7 @@ function generateFinalSelects(bracket: IBracket) {
     return select;
 }
 
-function generateVotingEmbedFinal(bracket: IBracket) {
+function generateVotingEmbedFinal(bracket: IBracket, isFirstVoting: boolean) {
     let embeds: MessageEmbed[] = [];
     if (bracket.zitate.length == 0) {
         let embed = new MessageEmbed();
@@ -97,7 +105,7 @@ function generateVotingEmbedFinal(bracket: IBracket) {
         embed.setDescription("Es sind keine Zitate mehr übrig! Das Bracket ist beendet!");
         return [embed];
     }
-    const description = `Uwu, hallo wylden Studenten <3 Es ist unglaublich cringe zu denken, dass die letzten 6 Semester nun zu einem Ende kommen. Wir haben so viel zusammen durchgemacht!
+    let description = `Uwu, hallo wylden Studenten <3 Es ist unglaublich cringe zu denken, dass die letzten 6 Semester nun zu einem Ende kommen. Wir haben so viel zusammen durchgemacht!
 
 Sheesh, ich bin so stolz auf euch alle und es war eine Ehre, euch während dieser Jahre als wissenschaftlicher Assistent zu dienen. Ich werde die Zeit in der wir gemeinsam gelernt und gelacht haben, vermissen. Es gab so viele ferpectful moments und auch wenn wir uns manchmal in den Gommemode begeben haben, haben wir immer wieder zurückgefunden.
 
@@ -108,7 +116,16 @@ Penis-lich möchte ich mich bei euch allen bedanken und euch sagen, dass ihr in 
 OwO/
 
 Hier findet nun das Finale Zitate-Voting statt, ihr habt 3 Stimmen zur Verfügung und könnt diese in dem Multi-Select abgeben. Wenn ihr nicht 3 Zitate wählt, dann wird die letzte Auswahl auf den Rest aufgefüllt. Bei einem Zitat gilt die Wahl wie 3 Stimmen, bei 2 zählt das erste Zitat einfach und das zweite Zitat zweifach, bei 3 Zitaten alle einfach. Falls es am Ende keine Einigung gibt, dann wird es wie in der Türkei eine Stichwahl geben.`
-    const title = `⭐ Best Zitat TINF-20 ⭐`
+
+let title = `⭐ Best Zitat TINF-20 ⭐`
+    
+    if(!isFirstVoting){
+        description = `Sheesh, ich bin gespannt auf die Ergebnisse der Stichwahl und kann es kaum erwarten, zu sehen, welches Zitat es schließlich auf den ersten Platz schaffen wird! Wir haben so viele wunderschöne Optionen zur Auswahl, dass es schwer sein wird, sich nur für eine zu entscheiden.`
+
+        title = title + " - Stichwahl"
+    }
+
+
     let testEmbed = new MessageEmbed();
     testEmbed.setTitle(title)
     testEmbed.setDescription(description);
@@ -157,4 +174,132 @@ Hier findet nun das Finale Zitate-Voting statt, ihr habt 3 Stimmen zur Verfügun
     embeds.push(embed);
 
     return embeds;
+}
+
+
+async function sendUnanimousResults(bracket: IBracket, interaction: BaseCommandInteraction) {
+
+    let embed = new MessageEmbed();
+    embed.setTitle(`STICHWAHL!!!! TÜRKEI!!!!`)
+    embed.setDescription(`Da gab es wohl unstimmigkeiten und es gibt kein eindeutiges Ergebnis. Deshalb gibt es nun eine Stichwahl zwischen den betroffenen Zitaten! Dies sind die Ergebnisse dieser Wahl:`);
+    let barDiagram = generateBarDiagram(bracket.zitate);
+    embed.fields = bracket.zitate.map((zitat, index) => {
+        const name = limit(`${index + 1}. ${zitat.zitat.author}`, 256);
+        const bar = barDiagram[index];
+        const barLine = `\n(${zitat.votes}) ${bar}`
+        let prefix = "";
+        if (zitat.zitat.image != null) {
+            prefix = "🖼️ "
+        }
+        const value = limit(prefix + sanitizeMentions(zitat.zitat.zitat), 1024 - barLine.length) + barLine;
+        return {
+            name: name,
+            value: value,
+            inline: false
+        }
+    });
+    embed.color = 0xff1133;
+    const buttons = generateButtonRow(bracket);
+    if (bracket.zitate[0].zitat?.image != null) {
+        embed.setImage(bracket.zitate[0].zitat?.image);
+    }
+    if (buttons.components.length > 0) {
+        await interaction.followUp({ embeds: [embed], components: [buttons], ephemeral: false });
+    } else {
+        await interaction.followUp({ embeds: [embed], ephemeral: false });
+    }
+
+}
+
+async function sendFinalResult(bracket: IBracket, interaction: BaseCommandInteraction) {
+
+    if(bracket.winner == null){
+        throw new Error("Bracket has no winner!");
+    }
+
+
+    let embed = new MessageEmbed();
+    embed.setTitle(`Es ist vollbracht, das beste Zitat des TINF-20 Kurses ist gewählt:`)
+    embed.setDescription(`**${bracket.winner.zitat.author}** hat den besten Brecher aller Zeiten geschrieben!\n\n${bracket.winner.zitat.zitat}`);
+
+    if (bracket.winner.zitat?.image != null) {
+        embed.setImage(bracket.winner.zitat?.image);
+    }
+    embed.color = 0xff1133;
+    await interaction.followUp({ embeds: [embed], ephemeral: false });
+}
+
+async function sendFinalHorbyZitateMessage(interaction: BaseCommandInteraction) {
+    let embed = new MessageEmbed();
+    embed.setTitle(`Danke für die Teilnahme am Zitatevoting!`)
+    embed.setDescription(`OwO, hallo liebe wunderbare Class! Ich wollte mich nur kurz bei euch für eure fantastische Teilnahme an unserer Zitat-Abstimmung bedanken! Eure Kreativität und Intelligenz haben diese Wahl zu einer wahren Freude gemacht.
+
+Ich bin so dankbar für die Zeit und die Mühe, die ihr in die Erstellung der Zitate investiert habt. Jeder von ihnen war einzigartig und beeindruckend, und sie haben uns gezeigt, welch großartige Denker und Schöpfer ihr seid.
+
+Es war so unglaublich schwierig, eine endgültige Wahl zu treffen, aber dank eurer Hilfe, haben wir jetzt eine Stichwahl, die uns geholfen hat, die Antworten besser zu sortieren und eine perfekte Gewinnerin oder Gewinner zu finden!
+
+Ich möchte euch allen meinen tiefsten Dank aussprechen und euch dafür loben, dass ihr immer wie eine Familie zusammengehalten habt. Eure harte Arbeit und eure Begeisterung für das Programmieren werden mich immer beeindrucken!
+
+Lasst uns weiter wie immer "Wuwu" sagen und uns auf die kommenden Veranstaltungen freuen! Sheesh, ich bin immer noch von eurem Engagement und eurer Hingabe begeistert. Vielen Dank, dass ihr Teil dieser wundervollen Community seid!
+
+Penis-lich: SUUUUUUUUUSSSY BAKKA, ich bin froh, dass ihr alle so fleißig mitgemacht habt! - Horby`);
+    embed.color = 0xff1133;
+    await interaction.followUp({ embeds: [embed], ephemeral: false });
+
+}
+
+async function sendHorbyStats(interaction: BaseCommandInteraction){
+
+    let embed = new MessageEmbed();
+    embed.setTitle(`Horby und Discord Statistiken`);
+    embed.setDescription(`Das war es dann auch mit dem Dienst von Horby. Zum Schluss noch ein paar Statistiken zu Horby und der Discord-Nutzung im Aalgemeinen.`)
+
+    let fields: EmbedField[] = [
+        {
+            name: 'Registrierte Nutzer',
+            value: '75',
+            inline: true
+        },
+        {
+            name: 'Laufzeit des Bots',
+            value: '748 Tage (08.05.2021)',
+            inline: true
+        },
+        {
+            name: 'Verursachte Betriebskosten',
+            value: '3,78 Cent / Tag',
+            inline:true
+        },
+        {
+            name: 'Zitate generiert',
+            value: '675 Zitate',
+            inline: true
+        },
+        {
+            name: 'Meiste Zitate',
+            value: 'Lukas mit 88 Zitaten :aha:',
+            inline: true
+        },
+        {
+            name: 'Sophia Hetze',
+            value: 'Es wurde im DC 27 mal gegen Sophia gehetzt!',
+            inline: true
+        },
+        {
+            name: 'Nachrichten auf diesem Discord',
+            value: 'Insgesamt wurden ~133.000 Nachrichten geschrieben! Rainer hat davon 27.000 geschrieben, was 20% aller Nachrichten sind!',
+            inline: true
+        },
+        {
+            name: 'Horby hat Penis gesagt',
+            value: 'In 185 Nachrichten hat Horby das Wort Penis verwendet',
+            inline: true
+        },
+        {
+            name: 'Horby hat das N-Wort benutzt',
+            value: '4 mal wurde Horby dazu gebracht das N-Wort zu sagen (zu Clyde lässt sich nichts mehr finden)',
+            inline: true
+        }
+    ]
+
 }

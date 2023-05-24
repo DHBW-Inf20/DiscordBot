@@ -347,8 +347,9 @@ class DatabaseAdapter implements DBA {
 
     }
 
+    
 
-    async initFinalBracket() {
+    async initFinalBracket(): Promise<IBracket> {
 
 
         // aggregate all semester brackets
@@ -387,34 +388,36 @@ class DatabaseAdapter implements DBA {
 
         await bracket.save();
         const newBracket = await this.bracketModel.findOne({ order_id: 100 }).sort({ id: -1 }).populate({ path: 'zitate', populate: { path: 'zitat' } }).populate('voters.voter').populate('voters.zitat').populate({ path: 'winner', populate: { path: 'zitat' } });
-        return newBracket;
+        return newBracket as IBracket;
 
 
 
     }
 
-    async getCurrentFinalBracket() {
+    async getCurrentFinalBracket() : Promise<[IBracket, IBracket | null, boolean]> {
 
         const bracket = await this.bracketModel.findOne({ order_id: 100 }).sort({ id: -1 }).populate({ path: 'zitate', populate: { path: 'zitat' } }).populate('voters.voter').populate('voters.zitat').populate({ path: 'winner', populate: { path: 'zitat' } });
         console.log(bracket?.zitate);
 
 
         if (bracket === null) {
-            return await this.initFinalBracket();
+            return [await this.initFinalBracket(), null, false];
         }
-        return bracket;
 
-        // const maxVotes = bracket.zitate.map(zitat => zitat.votes).sort((a, b) => b - a)[0];
-        // if(maxVotes === 0){
-        //     return bracket;
-        // }
 
-        // if(await this.isFinalUnambiguous()){
-        //     return bracket;
-        // }
+        const maxVotes = bracket.zitate.map(zitat => zitat.votes).sort((a, b) => b - a)[0];
+        if(maxVotes === 0){
+            return [bracket, null, false];
+        }
 
-        // const nextBracket = await this.aggregateFinalBracket();
-        // return nextBracket;
+        if(await this.isFinalUnambiguous()){
+            await this.finishBracket(bracket.id, bracket.order_id);
+            const finishedBracket = await this.bracketModel.findOne({ order_id: 100 }).sort({ id: -1 }).populate({ path: 'zitate', populate: { path: 'zitat' } }).populate('voters.voter').populate('voters.zitat').populate({ path: 'winner', populate: { path: 'zitat' } }) as IBracket;
+            return [finishedBracket, finishedBracket, false];
+        }
+
+        const nextBracket = await this.aggregateFinalBracket();
+        return [nextBracket, bracket, false];
 
 
 
@@ -422,7 +425,7 @@ class DatabaseAdapter implements DBA {
 
     async isFinalUnambiguous() {
 
-        const bracket = await this.bracketModel.findOne({ order_id: 100 }).sort({ id: -1 });
+        const bracket = await this.bracketModel.findOne({ order_id: 100 }).sort({ id: -1 }).populate({ path: 'zitate', populate: { path: 'zitat' } }).populate('voters.voter').populate('voters.zitat').populate({ path: 'winner', populate: { path: 'zitat' } });
         if (bracket === null) {
             return false;
         }
@@ -436,11 +439,11 @@ class DatabaseAdapter implements DBA {
         return true;
     }
 
-    async aggregateFinalBracket() {
+    async aggregateFinalBracket(): Promise<IBracket> {
 
         const bracket = await this.bracketModel.findOne({ order_id: 100 }).sort({ id: -1 }).populate({ path: 'zitate', populate: { path: 'zitat' } }).populate('voters.voter').populate('voters.zitat').populate({ path: 'winner', populate: { path: 'zitat' } });
         if (bracket === null) {
-            return;
+            throw Error("Bracket not found");
         }
 
         const sortedZitate = bracket.zitate.sort((a, b) => b.votes - a.votes);
@@ -450,36 +453,32 @@ class DatabaseAdapter implements DBA {
             throw Error("Final Bracket is already unambiguous there seems to be an stupid error Rapha");
         }
 
-        let winnerZitats = [];
-        for (let winner of topZitate) {
-            const zitat = new this.zitatWahlModel({
-                id: winnerZitats.length,
-                votes: 0,
-                zitat: winner,
-                order_id: 100,
-            });
-            await zitat.save();
-            // TODO: FIX
-            winnerZitats.push(winner);
-        }
-
-
-
-
-
-
         const newBracket = new this.bracketModel({
             id: bracket.id + 1,
             order_id: 100,
             from: new Date(2020, 0, 1),
             to: new Date(2023, 11, 31),
             next_id: 0,
-            zitate: winnerZitats,
+            zitate: [],
             voters: [],
             winner: null,
         });
 
         await newBracket.save();
+
+        const maxId = (await this.zitatWahlModel.findOne({ order_id: 100 }).sort({ id: -1 }))?.id ?? 0;
+
+        for (let winner of topZitate) {
+            const zitat = new this.zitatWahlModel({
+                id: newBracket.zitate.length + maxId + 1,
+                votes: 0,
+                zitat: winner,
+                order_id: 100,
+            });
+            await zitat.save();
+            newBracket.zitate.push(winner);
+        }
+        
         return newBracket;
 
     }
