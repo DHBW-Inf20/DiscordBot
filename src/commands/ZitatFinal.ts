@@ -1,7 +1,10 @@
-import { BaseCommandInteraction, Client, EmbedField, MessageEmbed, MessageSelectMenu, MessageSelectOptionData } from 'discord.js';
+import { BaseCommandInteraction, Client, EmbedField, MessageAttachment, MessageEmbed, MessageSelectMenu, MessageSelectOptionData, TextChannel } from 'discord.js';
 import { Command } from "../types/command";
 import dba, { IBracket } from '../misc/databaseAdapter';
 import { generateButtonRow, generateSelects, generateVotingEmbed, limit, sanitizeMentions, generateBarDiagram, sendResults } from './BestOfZitate';
+import fs from 'fs';
+import path from 'path';
+import { config } from '../Bot';
 
 
 
@@ -28,9 +31,15 @@ export const FinalZitate: Command = {
 
             if(isFinished){
                 // Send the winner-message and end the voting!
-                await sendResults(bracket, interaction);
-                await sendFinalHorbyZitateMessage(interaction);
+                // await sendResults(bracket, interaction);
+
+                const link = await sendHorbyStats(interaction) || '';
+                await sendCourseStats(interaction);
+                await sendCourseStatsImages(interaction);
+
                 await sendFinalResult(bracket, interaction);
+                await sendFinalHorbyZitateMessage(interaction, link);
+
             }else{
 
                 if(lastBracket != null){
@@ -203,10 +212,15 @@ async function sendUnanimousResults(bracket: IBracket, interaction: BaseCommandI
     if (bracket.zitate[0].zitat?.image != null) {
         embed.setImage(bracket.zitate[0].zitat?.image);
     }
+    const channel = interaction.channel;
+    if( channel == null){
+        throw new Error("Channel is null!");
+    }
+
     if (buttons.components.length > 0) {
-        await interaction.followUp({ embeds: [embed], components: [buttons], ephemeral: false });
+        await channel.send({ embeds: [embed], components: [buttons]});
     } else {
-        await interaction.followUp({ embeds: [embed], ephemeral: false });
+        await channel.send({ embeds: [embed]});
     }
 
 }
@@ -218,33 +232,114 @@ async function sendFinalResult(bracket: IBracket, interaction: BaseCommandIntera
     }
 
 
+
     let embed = new MessageEmbed();
+    let voteCount = bracket.winner.votes
     embed.setTitle(`Es ist vollbracht, das beste Zitat des TINF-20 Kurses ist gewählt:`)
-    embed.setDescription(`**${bracket.winner.zitat.author}** hat den besten Brecher aller Zeiten geschrieben!\n\n${bracket.winner.zitat.zitat}`);
+    embed.setDescription(`**${bracket.winner.zitat.author}** hat mit ${voteCount} Stimmen den besten Brecher aller Zeiten geschrieben!\n\n${bracket.winner.zitat.zitat}`);
 
     if (bracket.winner.zitat?.image != null) {
         embed.setImage(bracket.winner.zitat?.image);
     }
     embed.color = 0xff1133;
-    await interaction.followUp({ embeds: [embed], ephemeral: false });
+    const channel = interaction.channel;
+    if(channel == null){
+        throw new Error("Channel is null!");
+    }
+    await channel.send({ embeds: [embed]});
 }
 
-async function sendFinalHorbyZitateMessage(interaction: BaseCommandInteraction) {
+async function sendFinalHorbyZitateMessage(interaction: BaseCommandInteraction, link: string) {
     let embed = new MessageEmbed();
     embed.setTitle(`Danke für die Teilnahme am Zitatevoting!`)
     embed.setDescription(`OwO, hallo liebe wunderbare Class! Ich wollte mich nur kurz bei euch für eure fantastische Teilnahme an unserer Zitat-Abstimmung bedanken! Eure Kreativität und Intelligenz haben diese Wahl zu einer wahren Freude gemacht.
 
-Ich bin so dankbar für die Zeit und die Mühe, die ihr in die Erstellung der Zitate investiert habt. Jeder von ihnen war einzigartig und beeindruckend, und sie haben uns gezeigt, welch großartige Denker und Schöpfer ihr seid.
+    Ich bin so dankbar für die Zeit und die Mühe, die ihr in die Erstellung der Zitate investiert habt. Jeder von ihnen war einzigartig und beeindruckend, und sie haben uns gezeigt, welch großartige Denker und Schöpfer ihr seid.
 
-Es war so unglaublich schwierig, eine endgültige Wahl zu treffen, aber dank eurer Hilfe, haben wir jetzt eine Stichwahl, die uns geholfen hat, die Antworten besser zu sortieren und eine perfekte Gewinnerin oder Gewinner zu finden!
+    Es war so unglaublich schwierig, eine endgültige Wahl zu treffen, aber dank eurer Hilfe, haben wir jetzt eine Stichwahl, die uns geholfen hat, die Antworten besser zu sortieren und eine perfekte Gewinnerin oder Gewinner zu finden!
 
-Ich möchte euch allen meinen tiefsten Dank aussprechen und euch dafür loben, dass ihr immer wie eine Familie zusammengehalten habt. Eure harte Arbeit und eure Begeisterung für das Programmieren werden mich immer beeindrucken!
+    Ich möchte euch allen meinen tiefsten Dank aussprechen und euch dafür loben, dass ihr immer wie eine Familie zusammengehalten habt. Eure harte Arbeit und eure Begeisterung für das Programmieren werden mich immer beeindrucken!
 
-Lasst uns weiter wie immer "Wuwu" sagen und uns auf die kommenden Veranstaltungen freuen! Sheesh, ich bin immer noch von eurem Engagement und eurer Hingabe begeistert. Vielen Dank, dass ihr Teil dieser wundervollen Community seid!
+    Lasst uns weiter wie immer "Wuwu" sagen und uns auf die kommenden Veranstaltungen freuen! Sheesh, ich bin immer noch von eurem Engagement und eurer Hingabe begeistert. Vielen Dank, dass ihr Teil dieser wundervollen Community seid!
 
-Penis-lich: SUUUUUUUUUSSSY BAKKA, ich bin froh, dass ihr alle so fleißig mitgemacht habt! - Horby`);
+    Penis-lich: SUUUUUUUUUSSSY BAKKA, ich bin froh, dass ihr alle so fleißig mitgemacht habt! - Horby\n\nP.S.: **Zum Abschluss gibt es neben einem finalen Zitat, gesammelte Statistiken über den Bot, Discord und den Vorlesungen** ${link} `);
     embed.color = 0xff1133;
-    await interaction.followUp({ embeds: [embed], ephemeral: false });
+    const channel = interaction.channel;
+    if(channel == null){
+        throw Error("No channel found")
+    }
+    await channel.send({ embeds: [embed] });
+
+}
+
+async function sendCourseStatsImages(interaction: BaseCommandInteraction) {
+    // Send all images from statsPicture in the interaction channel
+    
+    // Load the folder...
+    
+    // how to load the folder? 
+    const channelId = 'your-channel-id';
+
+    // Get the folder path dynamically
+    const folderName = 'assets/statsPictures';
+    const folderPath = path.join(__dirname, '..', folderName);
+    const files = fs.readdirSync(folderPath);
+
+    // Get the target channel from the interaction
+    const channel = (interaction.guild?.channels.cache.get(config!.discord.stats_channel)!) as TextChannel;
+    if(channel == null){
+        return;
+    }
+
+    // Loop through the files and send each image to the channel
+    for (const file of files) {
+        const imagePath = path.join(folderPath, file);
+        const attachment = new MessageAttachment(imagePath);
+        await channel.send({ files: [attachment] });
+    }
+
+}
+
+async function sendCourseStats(interaction: BaseCommandInteraction){
+    let embed = new MessageEmbed();
+    embed.setTitle(`Kurs-Statistiken`);
+    embed.setDescription(`Zu guter letzt noch ein wenig Statistiken über unsere Vorlesungen. Hinweis: Die Datenlage besteht aus der sicht einer Person mit Softwareprofil, KI, Recht und Mobile`)
+
+    let fields: EmbedField[] = [
+        {
+            name: 'Gemeinsame Vorlesungszeit',
+            value: 'Insgesamt haben wir **88193** Minuten lang Vorlesungen zuhören müssen',
+            inline: true
+        },
+        {
+            name: 'Längster Dozent',
+            value: 'Toine mussten wir am längsten zuhören, insgesamt waren es **260** Stunden. Auf dem 2. Platz sitzt Olli mit nur **156**',
+            inline:true
+        },
+        {
+            name: 'Längste Vorlesungen',
+            value: 'Die Vorlesung die am meisten Zeit in Anspruch genommen hat waren die Grundlagen zu SW-Engineering bei Charlotte und Toine. Insgesamt waren es **87** Stunden',
+            inline: true
+        },
+        {
+            name: 'Semester mit den meisten Vorlesungen (Stundenlänge)',
+            value: 'Das 1. Semester war mit **288** Stunden das heftigste Semester. Das jetzige 6. Semester sieht dabei mit nur **176** Stunden süß aus',
+            inline: true
+        },
+        
+    ]
+
+    embed.fields = fields;
+    embed.color = 0xff1133;
+    
+    const channel = (interaction.guild?.channels.cache.get(config!.discord.stats_channel)!) as TextChannel;
+    if (channel != null) {
+        await channel.send({ embeds: [embed] });
+        await channel.send({
+            content: "Hierauf folgen ein paar Grafiken als Visualisierung unserer Daten, es empfiehlt sich das Original im Browser anzusehen"
+        });
+    }
+
 
 }
 
@@ -299,7 +394,31 @@ async function sendHorbyStats(interaction: BaseCommandInteraction){
             name: 'Horby hat das N-Wort benutzt',
             value: '4 mal wurde Horby dazu gebracht das N-Wort zu sagen (zu Clyde lässt sich nichts mehr finden)',
             inline: true
+        },
+        {
+            name: 'Aktivster Wochentag',
+            value: 'Am häufigsten wurde Mittwochs geschrieben (Siehe Grafik)',
+            inline: true
+        },
+        {
+            name: 'Anzahl geschickter Character in Dennisaal',
+            value: '4.167.013 Das ist ungefähr so lang wie die Bibel',
+            inline: true
         }
+
+
     ]
+
+    embed.fields = fields;
+    embed.color = 0xff1133;
+
+    const channel = (interaction.guild?.channels.cache.get(config!.discord.stats_channel)!) as TextChannel;
+    if (channel != null) {
+        const mesg = await channel.send({ embeds: [embed] });
+        // Get the link
+        return `https://discord.com/channels/${mesg.guildId}/${mesg.channelId}/${mesg.id}`;
+
+    }
+
 
 }

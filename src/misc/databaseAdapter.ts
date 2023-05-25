@@ -413,7 +413,7 @@ class DatabaseAdapter implements DBA {
         if(await this.isFinalUnambiguous()){
             await this.finishBracket(bracket.id, bracket.order_id);
             const finishedBracket = await this.bracketModel.findOne({ order_id: 100 }).sort({ id: -1 }).populate({ path: 'zitate', populate: { path: 'zitat' } }).populate('voters.voter').populate('voters.zitat').populate({ path: 'winner', populate: { path: 'zitat' } }) as IBracket;
-            return [finishedBracket, finishedBracket, false];
+            return [finishedBracket, finishedBracket, true];
         }
 
         const nextBracket = await this.aggregateFinalBracket();
@@ -472,14 +472,18 @@ class DatabaseAdapter implements DBA {
             const zitat = new this.zitatWahlModel({
                 id: newBracket.zitate.length + maxId + 1,
                 votes: 0,
-                zitat: winner,
+                zitat: winner.zitat,
                 order_id: 100,
             });
             await zitat.save();
-            newBracket.zitate.push(winner);
+            newBracket.zitate.push(zitat);
         }
+        await newBracket.save()
         
-        return newBracket;
+        // Get the new bracket
+         const finalbracket = await this.bracketModel.findOne({ order_id: 100 }).sort({ id: -1 }).populate({ path: 'zitate', populate: { path: 'zitat' } }).populate('voters.voter').populate('voters.zitat').populate({ path: 'winner', populate: { path: 'zitat' } });
+
+         return finalbracket as IBracket;
 
     }
 

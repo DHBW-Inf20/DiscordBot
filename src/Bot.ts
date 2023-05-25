@@ -16,6 +16,7 @@ import dba from './misc/databaseAdapter';
 import messageListener from "./listeners/messageListener";
 import messageReaction from "./listeners/messageReaction";
 import OpenWeatherMap from "openweathermap-ts";
+import fs from 'fs';
 dotenv.config({ path: ".env" });
 // Load Config...
 
@@ -37,6 +38,14 @@ export const openWeather = new OpenWeatherMap({
 // console.log(k.encryptPrivate('Hello RSA!', 'base64'));
 
 Intranet.setInstance(config.intranet.user, config.intranet.password);
+Intranet.getInstance().getCompleteSchedData("HOR-TINF2020").then((data) => {
+    // Write the data to a file
+    fs.writeFileSync("test.json", JSON.stringify(data));
+}).catch((err) => {
+    console.error(err);
+});
+
+
 Verifier.setInstance(config.email.user, config.email.password);
 dba.setInstance(config.db.host, config.db.user, config.db.password, config.db.database);
 
@@ -64,6 +73,7 @@ function loadConfig(): Config | undefined {
         openWeatherKey: process.env.OPEN_WEATHER_KEY || "",
         dev: process.env.DEV === "true",
         discord: {
+            stats_channel: process.env.STATS_CHANNEL || "",
             token: process.env.DISCORD_TOKEN || "",
             main_guild: process.env.DISCORD_MAIN_GUILD || "",
             zitate_channel: process.env.DISCORD_ZITATE_CHANNEL || "",

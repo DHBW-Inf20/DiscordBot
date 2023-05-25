@@ -20,7 +20,7 @@
     "postinstall": "npm run build",
     "prestart": "npm run build",
     "build": "tsc",
-    "postbuild": "copyfiles -u 1 src/assets/*.* dist/"
+    "postbuild": "copyfiles -u 1 src/assets/**/*.* dist/"
   },
   "devDependencies": {
     "@types/express": "^4.17.13",

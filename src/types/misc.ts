@@ -9,6 +9,7 @@ export interface Config {
         zitate_channel: string;
         verification_channel: string;
         roles_channel: string;
+        stats_channel: string;
     },
     dualis: {
         user: string;

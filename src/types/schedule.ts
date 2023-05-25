@@ -10,7 +10,9 @@ export type wochentag = "montag" | "dienstag" | "mittwoch" | "donnerstag" | "fre
 export interface Schedule{
     moduleName: string;
     from: string;
+    timestamp_from?: Date;
     to: string;
+    timestamp_to?: Date;
     room: string;
     person?:string;
     course?:string;

@@ -124,6 +124,15 @@ class IntranetFacade implements HorbIntranetFacade {
             spans.push(parseInt(cell.attributes.colspan));
         }
 
+        // Time of first week in the format Mo 08.05.23
+        let firstWeekDayText = table.querySelector(".week_header")?.text
+        if (!firstWeekDayText) throw new Error("Could not find firstWeekDayText");
+        firstWeekDayText = firstWeekDayText.split(" ")[1];
+        let firstWeekDay = new Date();
+        firstWeekDay.setFullYear(parseInt(firstWeekDayText.split(".")[2]));
+        firstWeekDay.setMonth(parseInt(firstWeekDayText.split(".")[1]) - 1);
+        firstWeekDay.setDate(parseInt(firstWeekDayText.split(".")[0]));
+
         // appointments are all the divs with information about the lecture. Itself doesnt contain information about the weekday.
         let appointments: HTMLElement[] = table.querySelectorAll(".week_block");
         for (let appointment of appointments) {
@@ -134,6 +143,7 @@ class IntranetFacade implements HorbIntranetFacade {
                 type = 'exam';
             }   
             let from = time?.split("-")[0].trim();
+
             let to = time?.split("-")[1].trim();
             let name = appointment.querySelector(".name")?.text;
             let person = appointment.querySelector(".person")?.text;
@@ -183,6 +193,22 @@ class IntranetFacade implements HorbIntranetFacade {
                 temp = temp.previousElementSibling;
             } 
 
+            let appointmentDay = table.querySelectorAll(".week_header")[i]?.text
+            if (!appointmentDay) throw new Error("Could not find firstWeekDayText");
+            appointmentDay = appointmentDay.split(" ")[1];
+            let firstWeekDay = new Date();
+            firstWeekDay.setFullYear(parseInt(appointmentDay.split(".")[2]));
+            firstWeekDay.setMonth(parseInt(appointmentDay.split(".")[1]) - 1);
+            firstWeekDay.setDate(parseInt(appointmentDay.split(".")[0]));
+
+            let fromTimestamp = new Date(firstWeekDay);
+            fromTimestamp.setHours(parseInt(from?.split(":")[0] || "0"));
+            fromTimestamp.setMinutes(parseInt(from?.split(":")[1] || "0"));
+
+            let toTimestamp = new Date(firstWeekDay);
+            toTimestamp.setHours(parseInt(to?.split(":")[0] || "0"));
+            toTimestamp.setMinutes(parseInt(to?.split(":")[1] || "0"));
+
             let day = ["montag", "dienstag", "mittwoch", "donnerstag", "freitag"][i] as 'montag' | 'dienstag' | 'mittwoch' | 'donnerstag' | 'freitag';
             if (!data[day]) data[day] = [];
 
@@ -190,7 +216,9 @@ class IntranetFacade implements HorbIntranetFacade {
                 {
                     moduleName: name || "",
                     from: from || "",
+                    timestamp_from: fromTimestamp,
                     to: to || "",
+                    timestamp_to: toTimestamp,
                     room: room || "",
                     person: person || "",
                     course: course || "",
@@ -200,6 +228,24 @@ class IntranetFacade implements HorbIntranetFacade {
 
 
         return { meta: { kw, year: date.getFullYear(), spans }, schedule: data };
+    }
+
+    async getCompleteSchedData(kurs: string){
+
+        // Calculate how many weeks in the past January first 2021 was
+        const janFirst = new Date(2021, 0, 1);
+        const today = new Date();
+        const week = 1000 * 60 * 60 * 24 * 7;
+        const weeksSinceJanFirst = Math.floor((today.getTime() - janFirst.getTime()) / week);
+        let allAppointments: Schedule[] = [];
+        for(let weekOffset = weeksSinceJanFirst; weekOffset >= 0; weekOffset--){
+            let data = await this.getStundenplan(kurs, -weekOffset);
+            let sched = Object.values(data.schedule).flat();
+            allAppointments = allAppointments.concat(sched);
+        }
+
+        return allAppointments;
+
     }
 
     
