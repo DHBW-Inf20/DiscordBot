@@ -298,6 +298,8 @@ async function sendCourseStatsImages(interaction: BaseCommandInteraction) {
         await channel.send({ files: [attachment] });
     }
 
+    await channel.send(`Die Datensammlung und Grafikerstellung ist gestern Nacht geschehen, daher kann es sein das Fehler drin sind, aber ich denke die Daten sind trotzdem ganz interessant zu sehen. Kann auch gerne die Original-Daten zur Verfügung stellen, falls jemand damit noch was machen will.`)
+
 }
 
 async function sendCourseStats(interaction: BaseCommandInteraction){
