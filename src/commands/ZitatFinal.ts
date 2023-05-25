@@ -309,22 +309,22 @@ async function sendCourseStats(interaction: BaseCommandInteraction){
         {
             name: 'Gemeinsame Vorlesungszeit',
             value: 'Insgesamt haben wir **88193** Minuten lang Vorlesungen zuhören müssen',
-            inline: true
+            inline: false
         },
         {
             name: 'Längster Dozent',
             value: 'Toine mussten wir am längsten zuhören, insgesamt waren es **260** Stunden. Auf dem 2. Platz sitzt Olli mit nur **156**',
-            inline:true
+            inline: false
         },
         {
             name: 'Längste Vorlesungen',
             value: 'Die Vorlesung die am meisten Zeit in Anspruch genommen hat waren die Grundlagen zu SW-Engineering bei Charlotte und Toine. Insgesamt waren es **87** Stunden',
-            inline: true
+            inline: false
         },
         {
             name: 'Semester mit den meisten Vorlesungen (Stundenlänge)',
             value: 'Das 1. Semester war mit **288** Stunden das heftigste Semester. Das jetzige 6. Semester sieht dabei mit nur **176** Stunden süß aus',
-            inline: true
+            inline: false
         },
         
     ]
@@ -353,57 +353,57 @@ async function sendHorbyStats(interaction: BaseCommandInteraction){
         {
             name: 'Registrierte Nutzer',
             value: '75',
-            inline: true
+            inline: false
         },
         {
             name: 'Laufzeit des Bots',
             value: '748 Tage (08.05.2021)',
-            inline: true
+            inline: false
         },
         {
             name: 'Verursachte Betriebskosten',
             value: '3,78 Cent / Tag',
-            inline:true
+            inline: false
         },
         {
             name: 'Zitate generiert',
             value: '675 Zitate',
-            inline: true
+            inline: false
         },
         {
             name: 'Meiste Zitate',
             value: 'Lukas mit 88 Zitaten :aha:',
-            inline: true
+            inline: false
         },
         {
             name: 'Sophia Hetze',
             value: 'Es wurde im DC 27 mal gegen Sophia gehetzt!',
-            inline: true
+            inline: false
         },
         {
             name: 'Nachrichten auf diesem Discord',
             value: 'Insgesamt wurden ~133.000 Nachrichten geschrieben! Rainer hat davon 27.000 geschrieben, was 20% aller Nachrichten sind!',
-            inline: true
+            inline: false
         },
         {
             name: 'Horby hat Penis gesagt',
             value: 'In 185 Nachrichten hat Horby das Wort Penis verwendet',
-            inline: true
+            inline: false
         },
         {
             name: 'Horby hat das N-Wort benutzt',
             value: '4 mal wurde Horby dazu gebracht das N-Wort zu sagen (zu Clyde lässt sich nichts mehr finden)',
-            inline: true
+            inline: false
         },
         {
             name: 'Aktivster Wochentag',
             value: 'Am häufigsten wurde Mittwochs geschrieben (Siehe Grafik)',
-            inline: true
+            inline: false
         },
         {
             name: 'Anzahl geschickter Character in Dennisaal',
             value: '4.167.013 Das ist ungefähr so lang wie die Bibel',
-            inline: true
+            inline: false
         }
 
 
