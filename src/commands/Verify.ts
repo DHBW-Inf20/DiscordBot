@@ -25,7 +25,7 @@ export const Verify: Command = {
             required: true,
         }
     ],
-    description: "Verifiziert deinen Discord-Account mit deiner Hochschulmail (Beta)",
+    description: "Verifiziert deinen Discord-Account mit deiner Hochschulmail",
     run: async (client: Client, interaction: BaseCommandInteraction) => {
         // Open the file neske.txt
         let user = interaction.user;

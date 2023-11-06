@@ -1,5 +1,4 @@
 import { Client, ButtonInteraction, SelectMenuInteraction, Message } from "discord.js";
-import {APIMessage} from 'discord-api-types/v9'
 import ZitatWahl from "../misc/zitatWahl";
 export const umfrageMap = new Map<string, Map<string, Set<string>>>();
 

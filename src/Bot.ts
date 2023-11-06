@@ -17,6 +17,7 @@ import messageListener from "./listeners/messageListener";
 import messageReaction from "./listeners/messageReaction";
 import OpenWeatherMap from "openweathermap-ts";
 import fs from 'fs';
+
 dotenv.config({ path: ".env" });
 // Load Config...
 
@@ -33,30 +34,23 @@ export const openWeather = new OpenWeatherMap({
     units: 'metric'
 });
 
-
-// use PKCS#1 padding (RSA_PKCS1_PADDING)
-// console.log(k.encryptPrivate('Hello RSA!', 'base64'));
-
-Intranet.setInstance(config.intranet.user, config.intranet.password);
-Intranet.getInstance().getCompleteSchedData("HOR-TINF2020").then((data) => {
-    // Write the data to a file
-    fs.writeFileSync("test.json", JSON.stringify(data));
-}).catch((err) => {
-    console.error(err);
+openWeather.getByGeoCoordinates({ latitude: 48.442078, longitude: 8.6848512, queryType:"weather"}).catch((_) => {
+    console.warn("Weather API-Key not set or invalid. Everything weather related will not work.")
 });
 
+
+Intranet.setInstance(config.intranet.user, config.intranet.password);
 
 Verifier.setInstance(config.email.user, config.email.password);
 dba.setInstance(config.db.host, config.db.user, config.db.password, config.db.database);
 
 
-let d = new Date();
-d.setTime(d.getTime() + 2 * 60 * 60 * 1000);
-console.log(d.toLocaleString() + " - Starting Bot...");
 export const kantinenInterface = new Kantine(12);
 export const zitateMap = {} as { [id: string]: ZitatHandler };
 export const verifyMap = {} as { [id: string]: VerificationHandler };
+
 console.log("Bot is starting...");
+
 export const client = new Client({
     partials: ["MESSAGE", "CHANNEL", "REACTION", "GUILD_MEMBER"],
     intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.GUILD_MEMBERS, Intents.FLAGS.GUILD_MESSAGE_REACTIONS, Intents.FLAGS.DIRECT_MESSAGE_REACTIONS]
@@ -73,16 +67,10 @@ function loadConfig(): Config | undefined {
         openWeatherKey: process.env.OPEN_WEATHER_KEY || "",
         dev: process.env.DEV === "true",
         discord: {
-            stats_channel: process.env.STATS_CHANNEL || "",
             token: process.env.DISCORD_TOKEN || "",
             main_guild: process.env.DISCORD_MAIN_GUILD || "",
-            zitate_channel: process.env.DISCORD_ZITATE_CHANNEL || "",
             verification_channel: process.env.DISCORD_VERIFY_CHANNEL || "",
             roles_channel: process.env.DISCORD_ROLES_CHANNEL || ""
-        },
-        dualis: { 
-            user: process.env.DUALIS_USER || "",
-            password: process.env.DUALIS_PASSWORD || ""
         },
         email:{
             user: process.env.EMAIL_USER || "",
@@ -106,12 +94,7 @@ function loadConfig(): Config | undefined {
 }
 
 async function initListeners(client: Client): Promise<void> {
-        // await dba.getInstance().initLastBracket();
-        // await dba.getInstance().initFourthBrackets();
-        // await dba.getInstance().initThirdBrackets();
-        // await dba1run.getInstance().initSecondBrackets();
-        // await dba.getInstance().initFirstBrackets();
-        // await dba.getInstance().syncZitate();
+
     ready(client);
     interactionCreate(client);
     messageListener(client);

@@ -6,14 +6,8 @@ export interface Config {
     discord: {
         token: string;
         main_guild: string;
-        zitate_channel: string;
         verification_channel: string;
         roles_channel: string;
-        stats_channel: string;
-    },
-    dualis: {
-        user: string;
-        password: string;
     },
     email: {
         user: string;

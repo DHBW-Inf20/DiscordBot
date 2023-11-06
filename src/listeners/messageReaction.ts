@@ -32,9 +32,7 @@ export default (client: Client): void => {
             }
             if((reaction.count || 0) >= 4){
                 // Check if it already exists
-                console.log(`Reaction with star reached over 4!`)
                 if(await dba.getInstance().zitatExists(reaction.message.id)) {
-                    console.log(`Reaction with star reached over 4 and already exists!`)
                     return;
                 }
 
