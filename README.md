@@ -30,6 +30,14 @@ DB_USER=<mongodb username>
 DB_PASSWORD=<mongodb password>
 DB_NAME=<mongodb database name>
 
+# Nedded to send emails for verification
+EMAIL_USER=<email server user>
+EMAIL_PASSWORD=<email server password>
+EMAIL_HOST=<email server host>
+EMAIL_PORT=<email server port>
+EMAIL_SECURE=<use secure connection (true/false)>
+EMAIL_FROM=<email sender address>
+
 SUPPORT_USER_ID=<Discord user id> (The user id of the user that should be notified if theres something wrong with the bot)
 
 

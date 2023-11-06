@@ -12,6 +12,11 @@ export interface Config {
     email: {
         user: string;
         password: string;
+        host: string;
+        port: string;
+        secure: boolean;
+        from: string;
+        
     },
     intranet: {
         user: string;

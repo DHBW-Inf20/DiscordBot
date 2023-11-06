@@ -74,7 +74,11 @@ function loadConfig(): Config | undefined {
         },
         email:{
             user: process.env.EMAIL_USER || "",
-            password: process.env.EMAIL_PASSWORD || ""
+            password: process.env.EMAIL_PASSWORD || "",
+            host: process.env.EMAIL_HOST || "",
+            port: process.env.EMAIL_PORT || "",
+            secure: process.env.EMAIL_SECURE === "true",
+            from: process.env.EMAIL_FROM || ""
         },
         intranet: {
             user: process.env.INTRANET_USER || "",
