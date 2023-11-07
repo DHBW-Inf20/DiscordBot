@@ -30,7 +30,7 @@ DB_USER=<mongodb username>
 DB_PASSWORD=<mongodb password>
 DB_NAME=<mongodb database name>
 
-# Nedded to send emails for verification
+# Needed to send emails for verification
 EMAIL_USER=<email server user>
 EMAIL_PASSWORD=<email server password>
 EMAIL_HOST=<email server host>
